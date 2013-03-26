@@ -2,7 +2,8 @@
 <html>
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>RMAI - RhizoMatica Administration Interface</title>
+		
+		<title>RMAI - Rhizomatica Administration Interface</title>
 		<style type="text/css" title="currentStyle">
 			@import "css/page.css";
 			@import "css/table.css";
@@ -15,7 +16,7 @@
 					"sPaginationType": "full_numbers",
 					"bProcessing": true,
 					"bServerSide": true,
-					"sAjaxSource": "cdr_processing.php"
+					"sAjaxSource": "rates_processing.php"
 				} );
 			} );
 		</script>
@@ -27,30 +28,21 @@
 			</div>
 			<ul style="margin-left: -40px">
 				<li><a href="users.html">Users</a></li>
-				<li><a href="cdr.html" class="menu_selected">CDRs</a></li>
-				<li><a href="rates.html">Rates</a></li>
+				<li><a href="cdr.html">CDRs</a></li>
+				<li><a href="rates.html" class="menu_selected">Rates</a></li>
 			</ul>
 			
 			<br/><br/>
 
 
-			<h1>CDR</h1>
+			<h1>Rates</h1>
 			<div id="dynamic" style="margin-left: 20px;">
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
 	<thead>
 		<tr>
-			<th width="2%">AcctID</th>
-			<th width="13%">Calldate</th>
-			<th width="17%">dcontext</th>
-			<th>Channel</th>
-			<th width="20%">DSTchannel</th>
-			<th>LastApp</th>
-			<th width="3%">LastData</th>
-			<th>Duration</th>
-			<th width="5%">BillSec</th>
-			<th width="7%">Disposition</th>
-			<th>Amaflags</th>
-			<th>AccountCode</th>
+			<th width="20%">Destination</th>
+			<th width="60%">AreaCode</th>
+			<th>Price(USD)</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -60,18 +52,9 @@
 	</tbody>
 	<tfoot>
 		<tr>
-			<th>AcctID</th>
-			<th>Calldate</th>
-			<th>Dcontext</th>
-			<th>Channel</th>
-			<th>DSTChannel</th>
-                        <th>LastApp</th>
-                        <th>LastData</th>
-                        <th>Duration</th>
-                        <th>BillSec</th>
-                        <th>Disposition</th>
-                        <th>Amaflags</th>
-                        <th>AccountCode</th>
+			<th>Destination</th>
+			<th>AreaCode</th>
+			<th>Price(USD)</th>
 		</tr>
 	</tfoot>
 </table>
