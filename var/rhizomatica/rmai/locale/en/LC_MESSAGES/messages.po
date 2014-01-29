@@ -1,0 +1,310 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: RMAI 1.0\n"
+"Report-Msgid-Bugs-To: tele@rhizomatica.org \n"
+"Last-Translator: tele <tele@rhizomatica.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Loading data from server"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Go Back"
+msgstr ""
+
+##################
+#      MENU      #
+##################
+msgid "Logout"
+msgstr ""
+
+msgid "Platform"
+msgstr ""
+
+msgid "VOIP Account"
+msgstr ""
+
+msgid "Site"
+msgstr ""
+
+msgid "System Stats"
+msgstr ""
+
+msgid "Subscribers"
+msgstr ""
+
+msgid "Provisioning"
+msgstr ""
+
+msgid "Credits"
+msgstr ""
+
+msgid "Statistics"
+msgstr ""
+
+msgid "Costs"
+msgstr ""
+
+msgid "Calls"
+msgstr ""
+
+msgid "Add Credit"
+msgstr ""
+
+msgid "History"
+msgstr ""
+
+msgid "CDRs"
+msgstr ""
+
+msgid "Rates"
+msgstr ""
+
+# Site page
+msgid "Site name"
+msgstr ""
+
+msgid "Network name"
+msgstr ""
+
+msgid "Prefix"
+msgstr ""
+
+# Subscribers page
+msgid "Subscribers Phones"
+msgstr ""
+
+msgid "Activation date"
+msgstr ""
+
+msgid "Authorized"
+msgstr ""
+
+msgid "Number"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Balance"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Edit Subscriber"
+msgstr ""
+
+msgid "Subscriber Name"
+msgstr ""
+
+msgid "Subscriber number"
+msgstr ""
+
+msgid "Check for yes uncheck for no"
+msgstr ""
+
+msgid "successfully modified"
+msgstr ""
+
+msgid "ERROR SAVING SUBSCRIBER!"
+msgstr ""
+
+msgid "ERROR GETTING SUBSCRIBER INFO!"
+msgstr ""
+
+msgid "Delete Subscriber"
+msgstr ""
+
+msgid "Confirm deletion of"
+msgstr ""
+
+msgid "Subscriber successfully deleted!"
+msgstr ""
+
+msgid "ERROR DELETING SUBSCRIBER!"
+msgstr ""
+
+msgid "Provision a new subscriber"
+msgstr ""
+
+msgid "Initial Balance"
+msgstr ""
+
+msgid "Amount to add"
+msgstr ""
+
+msgid "Name is empty"
+msgstr ""
+
+msgid "Subscriber number is invalid"
+msgstr ""
+
+msgid "Initial balance is empty"
+msgstr ""
+
+msgid "Successfully provisioned with an initial balance of"
+msgstr ""
+
+msgid "ERROR PROVISIONING SUBSCRIBER!"
+msgstr ""
+
+# CDR page
+msgid "Calls Details Records"
+msgstr ""
+
+msgid "Call Date"
+msgstr ""
+
+msgid "Caller Number"
+msgstr ""
+
+msgid "Called Number"
+msgstr ""
+
+msgid "Context"
+msgstr ""
+
+msgid "Duration"
+msgstr ""
+
+msgid "Hangup Cause"
+msgstr ""
+
+msgid "Destination"
+msgstr ""
+
+msgid "Cost"
+msgstr ""
+
+# Rates page
+msgid "Area Code"
+msgstr ""
+
+# Credit page
+msgid "Credit History"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Invoice Number"
+msgstr ""
+
+msgid "Previous Balance"
+msgstr ""
+
+msgid "Amount Added"
+msgstr ""
+
+msgid "Balance after Recharge"
+msgstr ""
+
+msgid "Repeat Subscriber Number"
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "is empty"
+msgstr ""
+
+msgid "Subscriber number do not match"
+msgstr ""
+
+msgid "Invalid amount"
+msgstr ""
+
+msgid "ERROR UPDATING BALANCE!"
+msgstr ""
+
+msgid "Credit of"
+msgstr ""
+
+msgid "pesos successfully added to subscriber"
+msgstr ""
+
+# Voip Account balance
+msgid "Loading VOIP Account Balance.. please wait"
+msgstr ""
+
+msgid "Error loading VOIP Account Balance.. please try again later"
+msgstr ""
+
+msgid "VOIP Account Balance:"
+msgstr ""
+
+# Calls stats graph
+msgid "Last 7 Days"
+msgstr ""
+
+msgid "Last 4 Weeks"
+msgstr ""
+
+msgid "Total Calls"
+msgstr ""
+
+msgid "Day"
+msgstr ""
+
+msgid "Total Calls per Week"
+msgstr ""
+
+msgid "Week year"
+msgstr ""
+
+msgid "Total Monthly Calls"
+msgstr ""
+
+msgid "Month"
+msgstr ""
+
+msgid "Total Calls Minutes"
+msgstr ""
+
+msgid "Minutes"
+msgstr ""
+
+msgid "Total Minutes per Week"
+msgstr ""
+
+msgid "Total Monthly Minutes"
+msgstr ""
+
+msgid "Daily Total Calls Cost"
+msgstr ""
+
+msgid "Weekly Total Cost Usage"
+msgstr ""
+
+msgid "Monthly Total Cost Usage"
+msgstr ""
+
+msgid "Total pesos amount in credits per day"
+msgstr ""
+
+msgid "Total pesos amount in credits per week"
+msgstr ""
+
+msgid "Total pesos amount in credits per month"
+msgstr ""
+
+

@@ -1,0 +1,308 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: RMAI 1.0\n"
+"Report-Msgid-Bugs-To: tele@rhizomatica.org \n"
+"Last-Translator: tele <tele@rhizomatica.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Loading data from server"
+msgstr "Cargar datos desde un servidor"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Delete"
+msgstr "Borrar"
+
+msgid "Add"
+msgstr "Añadir"
+
+msgid "Go Back"
+msgstr "Retroceder"
+
+##################
+#      MENU      #
+##################
+msgid "Logout"
+msgstr "Cierre de Sesión"
+
+msgid "Platform"
+msgstr "Plataforma"
+
+msgid "VOIP Account"
+msgstr "VOIP Cuenta"
+
+msgid "System Stats"
+msgstr "Estadísticas del Sistema"
+
+msgid "Site"
+msgstr "Sitio"
+
+msgid "Subscribers"
+msgstr "Abonados"
+
+msgid "Provisioning"
+msgstr "Aprovisionamento"
+
+msgid "Statistics"
+msgstr "Estadísticas"
+
+msgid "Costs"
+msgstr "Costos"
+
+msgid "Calls"
+msgstr "Llamadas"
+
+msgid "Credits"
+msgstr "Créditos"
+
+msgid "Add Credit"
+msgstr "Añadir Crédito"
+
+msgid "History"
+msgstr "Historia"
+
+msgid "CDRs"
+msgstr "CDRs"
+
+msgid "Rates"
+msgstr "Tasas"
+
+# Site page
+msgid "Site name"
+msgstr "Nombre del sitio"
+
+msgid "Network name"
+msgstr "Nombre de la red"
+
+msgid "Prefix"
+msgstr "Prefijo"
+
+# Subscribers page
+msgid "Subscribers Phones"
+msgstr "Abonados al Servicio Telefónico"
+
+msgid "Activation date"
+msgstr "Fecha de Activación"
+
+msgid "Authorized"
+msgstr "Autorizato"
+
+msgid "Number"
+msgstr "Número Telefónico"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Balance"
+msgstr "Resto"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Edit Subscriber"
+msgstr "Edit Abonado"
+
+msgid "Subscriber Name"
+msgstr "Nombre del abonado"
+
+msgid "Subscriber number"
+msgstr "Teléfono de abonado"
+
+msgid "Check for yes uncheck for no"
+msgstr "Comprobar si desmarques sin"
+
+msgid "successfully modified"
+msgstr "modificado con éxito"
+
+msgid "ERROR SAVING SUBSCRIBER!"
+msgstr "AHORRO DE ERROR DE ABONADO!"
+
+msgid "ERROR GETTING SUBSCRIBER INFO!"
+msgstr "ERROR AL OBTENER INFORMACIÓN DE ABONADO!"
+
+msgid "Delete Subscriber"
+msgstr "Cerrar Abonado"
+
+msgid "Confirm deletion of"
+msgstr "Confirmar la eliminación del"
+
+msgid "Subscriber successfully deleted!"
+msgstr "Abonado eliminado correctamente!"
+
+msgid "ERROR DELETING SUBSCRIBER!"
+msgstr "ABONADO BORRADO DE ERROR!"
+
+msgid "Provision a new subscriber"
+msgstr "Provisión de un nuevo abonado"
+
+msgid "Initial Balance"
+msgstr "Saldo inicial"
+
+msgid "Amount to add"
+msgstr "Cantidad a añadir"
+
+msgid "Name is empty"
+msgstr "Nombre está vacío"
+
+msgid "Subscriber number is invalid"
+msgstr "Número de abonado es válido"
+
+msgid "Initial balance is empty"
+msgstr "Saldo inicial está vacía"
+
+msgid "Successfully provisioned with an initial balance of"
+msgstr "Con éxito aprovisionado con un saldo inicial de"
+
+msgid "ERROR PROVISIONING SUBSCRIBER!"
+msgstr "ABONADO PROVISIÓN DE ERRORES"
+
+# CDR page
+msgid "Calls Details Records"
+msgstr "Registros de Detalles de Llamadas"
+
+msgid "Call Date"
+msgstr "Fecha Llamar"
+
+msgid "Caller Number"
+msgstr "Número de Llamadas"
+
+msgid "Called Number"
+msgstr "Número Llamado"
+
+msgid "Context"
+msgstr "Contexto"
+
+msgid "Duration"
+msgstr "Duración"
+
+msgid "Hangup Cause"
+msgstr "Causa Colgar"
+
+msgid "Destination"
+msgstr "Destino"
+
+msgid "Cost"
+msgstr "Costo"
+
+# Rates page
+msgid "Area Code"
+msgstr "Código de Área"
+
+# Credit page
+msgid "Credit History"
+msgstr "Historia de Crédito"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "Invoice Number"
+msgstr "Número de Factura"
+
+msgid "Previous Balance"
+msgstr "Saldo Anterior"
+
+msgid "Amount Added"
+msgstr "Cantidad que se Suma"
+
+msgid "Balance after Recharge"
+msgstr "Saldo tras la Recarga"
+
+msgid "Repeat Subscriber Number"
+msgstr "Número de Abonado Repita"
+
+msgid "Amount"
+msgstr "Cantidad"
+
+msgid "is empty"
+msgstr "está vacío"
+
+msgid "Subscriber number do not match"
+msgstr "Número de abonado no coinciden"
+
+msgid "Invalid amount"
+msgstr "Cantidad no Válida"
+
+msgid "ERROR UPDATING BALANCE!"
+msgstr "ERROR AL ACTUALIZAR SALDO!"
+
+msgid "Credit of"
+msgstr "Crédito de"
+
+msgid "pesos successfully added to subscriber"
+msgstr "pesos añadido correctamente a abonado"
+
+# Voip Account balance
+msgid "Loading VOIP Account Balance.. please wait"
+msgstr "Cargando VOIP Saldo de la cuenta .. por favor espere"
+
+msgid "Error loading VOIP Account Balance.. please try again later"
+msgstr "Error al cargar la cuenta de balance VOIP .. por favor intente de nuevo más tarde"
+
+msgid "VOIP Account Balance:"
+msgstr "VOIP Saldo de la cuenta:"
+
+# Statistics calls / credits graph
+msgid "Last 7 Days"
+msgstr "Últimos 7 Días"
+
+msgid "Last 4 Weeks"
+msgstr "Últimas 4 Semanas"
+
+msgid "Total Calls"
+msgstr "Total de Llamadas"
+
+msgid "Day"
+msgstr "Día"
+
+msgid "Total Calls per Week"
+msgstr "Total de llamadas por Semana"
+
+msgid "Week year"
+msgstr "Año semana"
+
+msgid "Total Monthly Calls"
+msgstr "Total de llamadas mensuales"
+
+msgid "Month"
+msgstr "Mes"
+
+msgid "Total Calls Minutes"
+msgstr "Total de llamadas Minutos"
+
+msgid "Minutes"
+msgstr "Minutos"
+
+msgid "Total Minutes per Week"
+msgstr "Total de llamadas Minutos por Semana"
+
+msgid "Total Monthly Minutes"
+msgstr "Minutos totales mensuales"
+
+msgid "Daily Total Calls Cost"
+msgstr "Total Diario Llamadas costo"
+
+msgid "Weekly Total Cost Usage"
+msgstr "Costo total del uso semanal"
+
+msgid "Monthly Total Cost Usage"
+msgstr "Uso costo total mensual"
+
+msgid "Total pesos amount in credits per day"
+msgstr "Pesos totales cantidad de créditos por día"
+
+msgid "Total pesos amount in credits per week"
+msgstr "Pesos totales cantidad de créditos por semana"
+
+msgid "Total pesos amount in credits per month"
+msgstr "Pesos totales importe en créditos al mes"
