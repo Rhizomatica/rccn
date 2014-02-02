@@ -1,1 +1,1 @@
-__all__ = [ 'subscriber', 'numbering', 'billing', 'credit', 'configuration', 'statistics', 'sms' ]
+__all__ = [ 'subscriber', 'numbering', 'billing', 'credit', 'configuration', 'statistics', 'sms', 'subscription' ]

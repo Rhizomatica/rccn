@@ -37,6 +37,7 @@ class SubscriberRESTService:
 			data = json.dumps(sub.get_all(), cls=PGEncoder)
 		except SubscriberException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
    
 	# get subscriber
@@ -52,6 +53,7 @@ class SubscriberRESTService:
 		except SubscriberException as e:
 			print e
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
  
 	# add new subscriber
@@ -65,21 +67,25 @@ class SubscriberRESTService:
 		except SubscriberException as e:
 			print e
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	# edit subscriber
 	@route('/<msisdn>', Http.PUT)
-	def put(self,request,msisdn='',name='',balance='',authorized=''):
-		api_log.info('%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s"' % (request.getHost().host,self.path,msisdn,name,balance,authorized))
+	def put(self,request,msisdn='',name='',balance='',authorized='',subscription_status=''):
+		api_log.info('%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" subscription_status:"%s"' % (request.getHost().host,self.path,msisdn,name,balance,authorized,subscription_status))
 		try:
 			sub = Subscriber()
 			if  authorized != '':
 				sub.authorized(msisdn,authorized)
+			if subscription_status != '':
+				sub.subscription(msisdn,subscription_status)
 			if msisdn != '' and name != '' or balance != '':
 				sub.edit(msisdn,name,balance)
 			data = {'status': 'success', 'error': ''}
 		except SubscriberException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	# delete subscriber
@@ -92,6 +98,7 @@ class SubscriberRESTService:
 			data = {'status': 'success', 'error': ''}
 		except SubscriberException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 		
 
@@ -108,6 +115,7 @@ class CreditRESTService:
                 except CreditException as e:
                         print e
                         data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
                 return data
 
 class SMSRESTService:
@@ -122,6 +130,7 @@ class SMSRESTService:
                         data = {'status': 'success', 'error': ''}
                 except SMSException as e:
                         data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
                 return data
 
         @route('/send', Http.POST)
@@ -133,6 +142,7 @@ class SMSRESTService:
                         data = {'status': 'success', 'error': ''}
                 except SMSException as e:
                         data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
                 return data
 
 
@@ -148,6 +158,7 @@ class StatisticsRESTService:
 			data = stats.get_total_calls()
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 
@@ -159,6 +170,7 @@ class StatisticsRESTService:
 			data = stats.get_total_minutes()
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	@route('/calls/average_call_duration')
@@ -169,6 +181,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_average_call_duration(), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 
@@ -180,6 +193,7 @@ class StatisticsRESTService:
 			data = stats.get_total_calls_by_context(context)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 
@@ -191,6 +205,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_calls_stats(period), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	
@@ -202,6 +217,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_calls_minutes_stats(period), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	
@@ -213,6 +229,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_calls_context_stats(period), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 
@@ -225,6 +242,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_total_spent(), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	
@@ -236,6 +254,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_average_call_cost(), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	@route('/costs/total_spent_credits')
@@ -246,6 +265,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_total_spent_credits(), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	@route('/costs/top_destinations')
@@ -256,6 +276,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_top_destinations(), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	
@@ -267,6 +288,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_costs_stats(period), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 	@route('/costs/credits_stats',Http.POST)
@@ -277,6 +299,7 @@ class StatisticsRESTService:
 			data = json.dumps(stats.get_credits_stats(period), cls=PGEncoder)
 		except StatisticException as e:
 			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
 		return data
 
 class ConfigurationRESTService:
@@ -290,6 +313,7 @@ class ConfigurationRESTService:
                         data = json.dumps(config.get_site(), cls=PGEncoder)
                 except ConfigurationException as e:
                         data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
                 return data
 
         @route('/config', Http.GET)
@@ -300,6 +324,7 @@ class ConfigurationRESTService:
                         data = json.dumps(config.get_site_config(), cls=PGEncoder)
                 except ConfigurationException as e:
                         data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
                 return data
 
 

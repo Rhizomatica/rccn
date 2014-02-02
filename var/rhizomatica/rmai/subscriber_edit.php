@@ -43,14 +43,18 @@ function print_form($post_data,$errors) {
 				</label>
 				<input type="text" name="callerid" id="callerid" value="<?=$callerid?>"/>
 				
+				<label><?= _("Subscription Paid") ?>
+				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
+				</label>
+				<? $checked = ($sub->subscription_status == 0) ? '' : 'checked=checked'; ?>
+				<input type="checkbox" name="subscription_status" id="subscription_status" value="1" <?=$checked?>/>
+				
 				<label><?= _("Authorized") ?>
 				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
 				</label>
 				<? $checked = ($sub->authorized == 0) ? '' : 'checked=checked'; ?>
-				<input type="checkbox" name="authorized" id="authorized" value="1" <?=$checked?>/>
-				
+				<input type="checkbox" name="authorized" id="authorized" value="1" <?=$checked?>/><br/>
 
-				
 
 				<button type="submit" name="edit_subscriber"><?= _("Save") ?></button>
 				<div class="spacer"></div>
@@ -87,6 +91,12 @@ function print_form($post_data,$errors) {
 						} else {
 							$sub->set("",$callerid,$firstname,0,"","");
 						}
+						if ($_POST['subscription_status'] == 1) {
+							$sub->subscription_status = 1;
+						} else {
+							$sub->subscription_status = 0;
+						}
+
 						$sub->edit();					
 						echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
 						echo "<span style='font-size: 20px;'>"._("Subscriber number").": <b>$callerid</b> "._("successfully modified")."<br/><br/>";

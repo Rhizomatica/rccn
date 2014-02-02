@@ -16,13 +16,14 @@ class Subscriber
 	public $balance = "";
 	public $activation_date = "";
 
-	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="") {
+	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="") {
 		$this->id = $id;
 		$this->msisdn = $msisdn;
 		$this->name = $name;
 		$this->authorized = $authorized;
 		$this->balance = $balance;
 		$this->activation_date = $activation_date;
+		$this->subscription_status = $subscription_status;
 	}
 
 	public function get($msisdn) {
@@ -43,7 +44,8 @@ class Subscriber
 			$this->name = $data[2];
 			$this->authorized = $data[3];
 			$this->balance = $data[4];
-			$this->activation_date = $data[5];
+			$this->subscription_status = $data[5];
+			$this->activation_date = $data[7];
 		}
 	}
 
@@ -83,7 +85,7 @@ class Subscriber
 	}
 
 	public function edit() {
-		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "authorized" => $this->authorized);
+		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "authorized" => $this->authorized, "subscription_status" => $this->subscription_status);
 		try {
 			$response = \Httpful\Request::put($this->path."/".$this->msisdn)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {

@@ -159,7 +159,7 @@ class Subscriber:
 		# provision the subscriber in the database
 		try:
 			cur = db_conn.cursor()
-			cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance) VALUES(%(msisdn)s,%(name)s,1,%(balance)s)', {'msisdn': subscriber_number, 'name': name, 'balance': Decimal(str(balance))})
+			cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', {'msisdn': subscriber_number, 'name': name, 'balance': Decimal(str(balance))})
 			db_conn.commit()
                 except psycopg2.DatabaseError, e:
                         raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
@@ -226,9 +226,24 @@ class Subscriber:
 				db_conn.commit()
 			else:
 				raise SubscriberException('PG_HLR Subscriber not found')
-		except psycopg2.DatabaseError, e:
+		except psycopg2.DatabaseError as e:
 			raise SubscriberException('PG_HLR error changing auth status: %s' % e)
 			
+
+	def subscription(self, msisdn, status):
+		# status 0 - subscription not paid
+		# status 1 - subscription paid
+		try:
+			cur = db_conn.cursor()
+			cur.execute('UPDATE subscribers SET subscription_status=%(status)s WHERE msisdn=%(msisdn)s', {'status': status, 'msisdn': msisdn})
+			if cur.rowcount > 0:
+				db_conn.commit()
+			else:
+				raise SubscriberException('PG_HLR Subscriber not found')
+		except psycopg2.DatabaseError as e:
+			raise SubscriberException('PG_HLR error changing subscriber subscription status: %s' % e)
+
+
 
 	def edit(self,msisdn,name,balance):
 		# edit subscriber data in the SQ_HLR

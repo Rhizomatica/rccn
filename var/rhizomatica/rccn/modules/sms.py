@@ -95,6 +95,12 @@ class SMS:
                 except IOError:
                         raise SMSException('Error connecting to Kannel to send SMS: %s' % e)
 
+	def send_immediate(num,text):
+		appstring = "OpenBSC"
+		appport = 4242
+		vty = obscvty.VTYInteract(appstring, "127.0.0.1", appport)
+		cmd = 'subscriber extension %s sms sender extension 10000 send %s' % (num,text)
+		vty.command(cmd)
 
 
 	

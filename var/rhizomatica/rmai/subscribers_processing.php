@@ -1,5 +1,6 @@
 <?php
     require_once('modules/subscriber.php');
+    require_once('modules/configuration.php');
     require_once('include/database.php');
 
     /*
@@ -15,7 +16,7 @@
     /* Array of database columns which should be read and sent back to DataTables. Use a space where
      * you want to insert a non-database field (for example a counter or static image)
      */
-    $aColumns = array( 'created', 'authorized', 'msisdn', 'name', 'balance' );
+    $aColumns = array( 'created', 'subscription_date', 'subscription_status', 'authorized', 'msisdn', 'name', 'balance' );
      
     /* Indexed column (used for fast and accurate table cardinality) */
     $sIndexColumn = "id";
@@ -51,7 +52,9 @@
     }
     catch (SubscriberException $e) { }
 
-
+    $site = new Configuration();
+    $info = $site->getSite();
+    $internalprefix = $info->postcode.$info->pbxcode;
  
      
     /*
@@ -87,7 +90,6 @@
         }
     }
      
-    $internalprefix = "688201";
      
     /*
      * Filtering
@@ -194,6 +196,12 @@
 	    else if ( $aColumns[$i] == "created" ) {
 		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
 	    }
+	    else if ( $aColumns[$i] == "subscription_date") {
+		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
+	    }
+	    else if ( $aColumns[$i] == "subscription_status") {
+		$row[] =  ($aRow[$aColumns[$i]] == 0) ? "<font color='red'>NO_PAGADAS</font>" : "<font color='green'>PAGADO</font>";
+            }
             else if ( $aColumns[$i] != ' ' )
             {
                 /* General output */

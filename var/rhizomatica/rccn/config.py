@@ -34,6 +34,10 @@ formatter_api = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s %(
 alog.setFormatter(formatter)
 logging.basicConfig()
 
+slog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/subscription.log', 'a', 104857600, 5)
+formatter_slog = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s %(message)s')
+slog.setFormatter(formatter)
+logging.basicConfig()
 
 # initialize logger RCCN
 log = logging.getLogger('RCCN')
@@ -49,6 +53,12 @@ bill_log.setLevel(logging.DEBUG)
 api_log = logging.getLogger('RCCN_API')
 api_log.addHandler(alog)
 api_log.setLevel(logging.DEBUG)
+
+# initialize logger RSC
+subscription_log = logging.getLogger('RCCN_RSC')
+subscription_log.addHandler(slog)
+subscription_log.setLevel(logging.DEBUG)
+
 
 # Extensions
 class ExtensionException(Exception):
@@ -67,7 +77,8 @@ for f in files:
 db_conn = None
 config = {}
 try:
-	db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu',host='localhost')
+	#db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu',host='localhost')
+	db_conn = psycopg2.connect(database='rhizomatica', user='postgres', password='rhizo',host='localhost')
 	cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 	cur.execute('SELECT * from sites WHERE local = 1')
 	site_conf = cur.fetchone()
@@ -107,3 +118,7 @@ StatisticException = statistics.StatisticException
 from modules import sms
 SMS = sms.SMS
 SMSException = sms.SMSException
+
+from modules import subscription
+Subscription = subscription.Subscription
+SubscriptionException = subscription.SubscriptionException

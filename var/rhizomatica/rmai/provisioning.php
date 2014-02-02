@@ -1,5 +1,6 @@
 <?php 
 require_once('modules/subscriber.php');
+require_once('modules/configuration.php');
 require_once('include/menu.php'); 
 require_once('include/header.php');
 
@@ -74,8 +75,11 @@ function print_form($post_data,$errors) {
                                         $callerid = $_POST['callerid'];
                                         $amount = $_POST['amount'];
 
+					// get internal prefix
+					$site = new Configuration();
+					$info = $site->getSite();
+					$internalprefix = $info->postcode.$info->pbxcode;
 
-					$internalprefix = "688201";
 					$new_num = "$internalprefix$callerid";
 				
 					echo "<center>";

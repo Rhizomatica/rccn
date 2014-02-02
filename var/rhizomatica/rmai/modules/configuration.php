@@ -1,6 +1,6 @@
 <?php
 
-require("httpful.phar");
+require_once("httpful.phar");
 
 class ConfigurationException extends Exception { }
 

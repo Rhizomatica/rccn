@@ -119,6 +119,15 @@ msgstr ""
 msgid "Subscriber number"
 msgstr ""
 
+msgid "Subscription date"
+msgstr ""
+
+msgid "Subscription Status"
+msgstr ""
+
+msgid "Subscription Paid"
+msgstr ""
+
 msgid "Check for yes uncheck for no"
 msgstr ""
 

@@ -46,11 +46,12 @@ width:200px;
 }
 #stylized input{
 float:left;
+display: block;
 font-size:12px;
 padding:4px 2px;
 border:solid 1px #aacfe4;
 width:200px;
-margin:2px 0 20px 10px;
+margin:5px 0 20px 10px;
 }
 
 #stylized button{

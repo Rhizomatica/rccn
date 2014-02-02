@@ -21,16 +21,16 @@
                                         "aaSorting": [[ 0, "desc" ]],
                                         "aoColumnDefs": [
                                            {
-                                                "aTargets": [5],
+                                                "aTargets": [7],
                                                 "mData": null,
                                                 "mRender": function (data, type, full) {
-                                                    sub = full[2].match(/\d\d\d\d\d\d\d\d\d\d\d/);
+                                                    sub = full[4].match(/\d\d\d\d\d\d\d\d\d\d\d/);
                                                     return '<a href="subscriber_edit.php?id='+sub+'" class="pop"><img src="img/edit.png" alt="Edit" valign="middle" /></a> | <a href="subscriber_delete.php?id='+sub+'" class="pop"><img src="img/delete.png" alt="Delete" valign="middle" /></a>';
                                                 }
                                             }
                                         ],
                                         "aoColumns": [
-                                                {},{"sClass": "center"},{},{},{}
+                                                {},{},{"sClass": "center"},{"sClass": "center"},{},{},{}
                                         ],
                                         "fnDrawCallback": function () {
                                                 $(".pop").fancybox({
@@ -56,9 +56,11 @@
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
 	<thead>
 		<tr>
-			<th align='left' width='20%'><?= _("Activation date") ?></th>
-			<th width="7%"><?= _("Authorized") ?></th>
-			<th align='left' width='15%'><?= _("Number") ?></th>
+			<th align='left' width='12%'><?= _("Activation date") ?></th>
+                        <th align='left' width='14%'><?= _('Subscription date') ?></th>
+                        <th width='12%'><?= _("Subscription Status") ?></th>
+			<th width="7%"> <?= _("Authorized") ?></th>
+			<th align='left' width='12%'><?= _("Number") ?></th>
 			<th align='left'><?= _("Name") ?></th>
 			<th align='left'><?= _("Balance") ?></th>
 			<th align='left'><?= _("Actions") ?></th>
@@ -71,9 +73,11 @@
 	</tbody>
 	<tfoot>
 		<tr>
-                        <th align='left' width='20%'><?= _("Activation date") ?></th>
+                        <th align='left' width='12%'><?= _("Activation date") ?></th>
+                        <th align='left' width='14%'><?= _('Subscription date') ?></th>
+                        <th width='12%'><?= _("Subscription Status") ?></th>
                         <th width="7%"><?= _("Authorized") ?></th>
-                        <th align='left' width='15%'><?= _("Number") ?></th>
+                        <th align='left' width='12%'><?= _("Number") ?></th>
                         <th align='left'><?= _("Name") ?></th>
                         <th align='left'><?= _("Balance") ?></th>
                         <th align='left'><?= _("Actions") ?></th>

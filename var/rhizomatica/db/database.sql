@@ -28,10 +28,10 @@ create table subscribers (
 	name		varchar,
 	authorized	smallint not null default 0,
 	balance		decimal not null default 0.00,
+	subscription_status	smallint not null default 0,
 	created		timestamp default current_timestamp
 );
 CREATE UNIQUE INDEX msisdn_index ON subscribers(msisdn);
-
 
 --INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test1','68820110010',1,4.0);
 --INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test2','68820123991',1,0.0);

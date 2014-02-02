@@ -119,6 +119,15 @@ msgstr "Nombre del abonado"
 msgid "Subscriber number"
 msgstr "Teléfono de abonado"
 
+msgid "Subscription date"
+msgstr "Fecha de Suscripción"
+
+msgid "Subscription Status"
+msgstr "Estado Suscripción"
+
+msgid "Subscription Paid"
+msgstr "Suscripción de Pago"
+
 msgid "Check for yes uncheck for no"
 msgstr "Comprobar si desmarques sin"
 
