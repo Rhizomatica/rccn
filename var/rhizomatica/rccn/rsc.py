@@ -23,9 +23,9 @@
 import sys
 from config import *
 
-notice_msg = 'Notice to pay the subscription fee of 30 pesos'
-reminder_msg = 'Your service will be deactivated if you don\'t pay the subscription'
-deactivate_msg = 'Your service have been deactivated until the subscription fee is paid'
+notice_msg = 'Favor de pagar su cooperacion mensual de 30 pesos. Gracias.'
+reminder_msg = 'Recuerda: su servicio sera desactivado si no paga su cuota antes del 7 de cada mes. Gracias.'
+deactivate_msg = 'Su servicio ha sido desactivado hasta que haga su cooperacion mensual.'
 
 if len(sys.argv) > 2:
 	print 'RCCN Subscription Checker\n'
