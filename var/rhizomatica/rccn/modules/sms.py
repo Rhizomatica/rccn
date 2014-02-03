@@ -24,7 +24,7 @@ import sys
 sys.path.append("..")
 from config import *
 
-import urllib
+import urllib, obscvty
 from subscriber import Subscriber, SubscriberException 
 from numbering import Numbering, NumberingException
 
@@ -95,7 +95,7 @@ class SMS:
                 except IOError:
                         raise SMSException('Error connecting to Kannel to send SMS: %s' % e)
 
-	def send_immediate(num,text):
+	def send_immediate(self,num,text):
 		appstring = "OpenBSC"
 		appport = 4242
 		vty = obscvty.VTYInteract(appstring, "127.0.0.1", appport)

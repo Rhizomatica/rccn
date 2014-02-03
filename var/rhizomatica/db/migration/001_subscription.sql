@@ -28,7 +28,7 @@ END;
 $$;
 
 CREATE TRIGGER check_subscription_change
-    AFTER UPDATE ON subscribers
+    BEFORE UPDATE ON subscribers
     FOR EACH ROW
     WHEN (OLD.subscription_status != NEW.subscription_status)
     EXECUTE PROCEDURE update_subscription_change_date();
