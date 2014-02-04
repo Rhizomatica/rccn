@@ -21,7 +21,7 @@ DF=$(df -m|grep sda1 |awk '{print $2":"$3}')
 #DI=$(cat /proc/partitions|grep sda1| awk '{print $5":"$6":"$7":"$8":"$9":"$10":"$11":"$12":"$13":"$14":"$15}'
 rrdtool update $RHIZO_DIR/disk.rrd N:$DF
 
-ethstats=`cat /proc/net/dev | grep eth0 | cut -d: -f2 | awk '{print $1":"$2":"$3":"$4":"$6":"$9":"$10":"$11":"$12":"$13":"$14":"$15 }'`
+ethstats=`cat /proc/net/dev | grep eth0 | cut -d: -f2 | awk '{print $1":"$2":"$3":"$4":"$6":"$9":"$10":"$11":"$12":"$13":"$14 }'`
 rrdtool update $RHIZO_DIR/eth0.rrd N:$ethstats
 
 $RHIZO_DIR/../bin/platform_graph_rrd.sh > /dev/null
