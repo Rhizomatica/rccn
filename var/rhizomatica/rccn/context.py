@@ -125,7 +125,7 @@ class Context:
 		# check subscriber balance
 		# check if limit of call duration has to be applied
 		log.info('Send call to LCR')
-		self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@10.66.0.10:5050')
+		self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@'+config['local_ip']+':5050')
 
 	def inbound(self):
 	        self.session.setVariable('context', 'INBOUND')
@@ -142,7 +142,7 @@ class Context:
 			try:
 				if self.subscriber.is_authorized(subscriber_number,1) and len(subscriber_number) == 11:
 					log.info('Send call to internal subscriber %s' % subscriber_number)
-        		                self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+subscriber_number+'@10.66.0.10:5050')
+        		                self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+subscriber_number+'@'+config['local_ip']+':5050')
 				else:
 					log.info('Subscriber %s doesn\'t exists or is not authorized' % subscriber_number)
 			except SubscriberException as e:
@@ -155,9 +155,7 @@ class Context:
 				self.session.answer()
 			log.debug('Playback welcome message')
 			log.debug('Collect DTMF to call internal number')
-			#self.session.execute('playback','001_bienvenidos.gsm')
 			dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm", "007_el_numero_no_es_corecto.gsm", "\\d+")
-			#digits = self.session.getDigits(4,"",15000)
 			log.debug('Collecting digits: %s' % dest_num)
 			try:
 				if self.subscriber.is_authorized(dest_num,1) and (len(dest_num) == 11 or len(dest_num) == 5):
@@ -176,7 +174,7 @@ class Context:
 					self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
         	                        self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
 	
-					self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+dest_num+'@10.66.0.10:5050')
+					self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+dest_num+'@'+config['local_ip']+':5050')
 				else:
 					log.info('Subscriber %s doesn\'t exists' % dest_num)
 					self.session.execute('playback','007_el_numero_no_es_corecto.gsm')

@@ -32,7 +32,7 @@ class Configuration:
 	def get_site(self):
 		try:
 			cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-			cur.execute('SELECT * from sites WHERE local = 1')
+			cur.execute('SELECT * from site')
 			site_conf = cur.fetchone()
 			if site_conf != None:
 				return site_conf

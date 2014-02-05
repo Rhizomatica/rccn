@@ -77,14 +77,14 @@ for f in files:
 db_conn = None
 config = {}
 try:
-	#db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu',host='localhost')
-	db_conn = psycopg2.connect(database='rhizomatica', user='postgres', password='rhizo',host='localhost')
+	db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu',host='localhost')
 	cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-	cur.execute('SELECT * from sites WHERE local = 1')
+	cur.execute('SELECT * from site')
 	site_conf = cur.fetchone()
 	
 	config['site_name'] = site_conf['site_name']
 	config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
+	config['local_ip'] = site_conf['ip_address']
 	
 except psycopg2.DatabaseError, e:
 	log.error('Database connection error %s' % e)

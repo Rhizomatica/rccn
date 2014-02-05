@@ -48,17 +48,15 @@ create table credit_history (
 	created	timestamp 	default current_timestamp
 );
 
-create table sites (
-	id			serial primary key,
+create table site (
 	site_name		varchar not null,
 	postcode		varchar not null,
 	pbxcode 		varchar not null,
 	network_name		varchar not null,
-	local			smallint not null
+	ip_address		varchar not null
 );
 
-insert into sites(site_name,postcode,pbxcode,network_name,local) values('Talea','68820','1','Talea Red Cellular',1);
-insert into sites(site_name,postcode,pbxcode,network_name,local) values('Yaviche','68826','1','Yaviche Red Cellular',0);
+--insert into site(site_name,postcode,pbxcode,network_name,ip_address) values('Talea','68820','1','Talea Red Cellular','10.66.0.10');
 
 
 
