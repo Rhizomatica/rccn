@@ -28,9 +28,6 @@ class NumberingException(Exception):
 
 class Numbering:
 	
-	def __init__(self):
-		return
-	
 	def is_number_did(self, destination_number):
 		try:
 			cur = db_conn.cursor()
@@ -57,24 +54,31 @@ class Numbering:
 				destn = dest[0]
 				# check if number is local to the site
 				if destn[:6] == config['internal_prefix']:
-					return 0
-				else:
-					return 1
+					return True
 			else:
-				return 2
+				return False
 		except psycopg2.DatabaseError as e:
 			raise NumberingException('Database error checking if number is local:' % e )
 
 
-	#def is_number_site(self, destination_number):
-	#	try:
-	#		destprefix = destination_number[:6]
-	#		cur = db_conn.cursor()
-	#		cur.execute('SELECT postcode||pbxcode FROM sites WHERE postcode||pbxcode = %(prefix)s' % {'prefix': destprefix})
-	#		dest = cur.fetchone()
-	#		if dest != None:
-	#			return True
-			
+	def is_number_internal(self, destination_number):
+		siteprefix = destination_number[:6]
+		riak_client = riak.RiakClient()
+		sites = client.bucket('sites')
+		if sites.get(siteprefix).exists == True:
+			return True
+		else:
+			return False
+
+	def get_site_ip(self, destination_number):
+		siteprefix = destination_number[:6]
+		riak_client = riak.RiakClient()
+		site = client.bucket('sites')
+		site_data = site.get(siteprefix)
+		if site_data['ip_address'] != None:
+			return site_data['ip_address']
+		else
+			raise NumberingException('RK_DB Error no IP found for site %s' % site)
 
 	def get_callerid(self):
 		try:

@@ -36,7 +36,6 @@ class Context:
 	def outbound(self):
 		self.session.setVariable('context', 'OUTBOUND')
 		subscriber_number = self.session.getVariable('caller_id_number')
-		destination_number = self.session.getVariable('destination_number')
 		# check subscriber balance
 		log.debug('Check subscriber %s balance' % subscriber_number)
 		try:
@@ -52,7 +51,7 @@ class Context:
 			log.debug('Get call rate')
 			self.session.setVariable('billing', '1')
 
-			rate = self.billing.get_rate(destination_number)
+			rate = self.billing.get_rate(self.destination_number)
 			total_call_duration = self.billing.get_call_duration(current_subscriber_balance,rate[3])
 
 			log.info('Total duration for the call before balance end is set to %d sec' % total_call_duration)
@@ -98,7 +97,7 @@ class Context:
 			# hardcoded did for now
 			self.session.setVariable('effective_caller_id_number', '525541703851')
 			self.session.setVariable('effective_caller_id_name', '525541703851')
-			self.session.execute('bridge', "{absolute_codec_string='G729',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(destination_number))
+			self.session.execute('bridge', "{absolute_codec_string='G729',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
 		else:
 			log.debug('Subscriber doesn\'t have enough balance to make a call')
 			# play announcement not enough credit and hangup call
@@ -107,37 +106,38 @@ class Context:
         	        self.session.hangup()
 
 	def local(self):
-		self.session.setVariable('context', 'LOCAL')
-		destination_number = self.session.getVariable('destination_number')
-
+		# check if calling number is internal
+		calling_number = self.session.getVariable('caller_id_number')
+		if self.numbering.is_number_internal(calling_number) == True:
+			self.session.setVariable('context', 'INTERNAL')
+		else:
+			self.session.setVariable('context', 'LOCAL')
+		
 		# check if the call duration has to be limited
 		try:
 			limit = self.configuration.get_local_calls_limit()
 			if limit != False:
-				print limit
 				if limit[0] == 1:
 					log.info('Limit call duration to: %s seconds' % limit[1])
 					self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
 		except ConfigurationException as e:
 			log.error(e)
-					
-				
-		# check subscriber balance
-		# check if limit of call duration has to be applied
+						
+		# check subscriber balance if charge local call is configured
+
 		log.info('Send call to LCR')
 		self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@'+config['local_ip']+':5050')
 
 	def inbound(self):
 	        self.session.setVariable('context', 'INBOUND')
-		destination_number = self.session.getVariable('destination_number')
 		# check if DID is assigned to a subscriber
 		try:
 			log.info('Check if DID is assigned to a subscriber for direct calling')
-			subscriber_number = self.numbering.get_did_subscriber(destination_number)
+			subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
 		except NumberingException as e:
 			log.error(e)
 
-		if subscriber_number != '':
+		if subscriber_number != None:
 			log.info('DID assigned to: %s' % subscriber_number) 
 			try:
 				if self.subscriber.is_authorized(subscriber_number,1) and len(subscriber_number) == 11:
@@ -187,4 +187,10 @@ class Context:
 				self.session.hangup()
 
 	def internal(self):
-		return
+		self.session.setVariable('context', 'INTERNAL')
+		try:
+			site_ip = self.numbering.get_site_ip(self.destination_number)
+			log.info('Send call to site IP: %s' % site_ip)
+			self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+self.destination_number+'@'+site_ip+':5060')
+		except NumberingException as e:
+			log.error(e)

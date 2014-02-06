@@ -34,7 +34,7 @@ class Dialplan:
 		self.subscriber = Subscriber()
 		self.numbering = Numbering()
 		self.billing = Billing()
-		self.configuration = Configuration()		
+		self.configuration = Configuration()
 
 		modules = [self.subscriber,self.numbering,self.billing, self.configuration]
 
@@ -84,32 +84,17 @@ class Dialplan:
 		# check if destination number is an international call. prefix with + or 00
 		if (self.destination_number[0] == '+' or (re.search(r'^00',self.destination_number) != None)) and processed == 0:
 			log.debug('Called number is an international call or national')
-			# national or international call
-			# lookup if it's trying to call another site number
-			#if (self.numbering.is_number_site(self.destination_number)):
-			#	log.debug('Called number is a local number send call to LOCAL context')
-				# yes send call to the right context
-			#	processed = 1
-			#	self.auth_context('local')
-			#else:
-				# external call send number outside
 			processed = 1
 			log.debug('Called number is an external number send call to OUTBOUND context')
 			self.auth_context('outbound')
 
 		if processed == 0:
-			log.info('Check if called number is local')
 			try:
-				num_res = self.numbering.is_number_local(self.destination_number)
-				if num_res == 0 and len(self.destination_number) == 11:
+				log.info('Check if called number is local')
+				if self.numbering.is_number_local(self.destination_number) and len(self.destination_number) == 11:
 					log.info('Called number is a local number send call to LOCAL context')
-					# yes send call locally
 					processed = 1
 					self.auth_context('local')
-                                elif num_res == 1:
-                                        # number is internal
-                                        processed = 1
-                                        self.auth_context('internal')
 				else:
                                         # check if called number is an extension
                                         log.debug('Check if called number is an extension')
@@ -124,19 +109,15 @@ class Dialplan:
                                                 except ExtensionException as e:
                                                         log.error(e)
 					else:
-					# check if it's calling a local full number for another site
-					# get postcode, send enum request where to send the call
-					#log.debug('Check if called number is a full number for another site')
-					#if self.numbering.is_number_internal(self.destination_number) == False and len(self.destination_number) == 11:
-					#	log.info('Called number is a full number for another site send call to INTERNAL context')
-					#	processed = 1
-					#	self.auth_context('internal')
-					#else:
-						# the number called must be wrong play announcement wrong number
-						# it's calling an outside number
-						# set the caller id (db get) send call to the SIP trunk
-						log.info('Wrong number, play announcement of invalid number format')
-						processed = 1
-						self.play_announcement('007_el_numero_no_es_corecto.gsm')
+						log.debug('Check if called number is a full number for another site')
+						if (self.numbering.is_number_internal(self.destination_number) == True and len(self.destination_number) == 11:
+							log.info('Called number is a full number for another site send call to INTERNAL context')
+							processed = 1
+							self.auth_context('internal')
+						else:
+							# the number called must be wrong play announcement wrong number
+							log.info('Wrong number, play announcement of invalid number format')
+							processed = 1
+							self.play_announcement('007_el_numero_no_es_corecto.gsm')
 			except NumberingException as e:
 				log.error(e)

@@ -3,6 +3,7 @@ import psycopg2
 import psycopg2.extras
 import sqlite3
 import json
+import riak
 from logging import handlers as loghandlers
 from decimal import Decimal
 from datetime import date
