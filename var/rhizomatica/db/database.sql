@@ -77,7 +77,8 @@ create table dids (
 	id			serial primary key,
 	provider_id		int not null,
 	subscriber_number	varchar,
-	phonenumber		varchar not null
+	phonenumber		varchar not null,
+	callerid		varchar
 );
 
 --insert into dids(provider_id,phonenumber) values(1,'5547382004');

@@ -84,7 +84,7 @@ class Numbering:
 		try:
 	                cur = db_conn.cursor()
 			# to still be decided the logic of dids
-        	        cur.execute('select phonenumber from dids,providers where providers.id = dids.provider_id and providers.active = 1 order by dids.id asc limit 1')
+        	        cur.execute('select callerid from dids,providers where providers.id = dids.provider_id and providers.active = 1 order by dids.id asc limit 1')
                 	callerid = cur.fetchone()
 	                if callerid != None:
         	                return callerid[0]

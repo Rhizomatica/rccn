@@ -71,7 +71,7 @@ class Context:
 				log.error(e)
 
 			if caller_id != None:
-				#log.debug('Set caller id to %s' % caller_id)
+				log.info('Set caller id to %s' % caller_id)
 				self.session.setVariable('effective_caller_id_number', '%s' % caller_id)
 				self.session.setVariable('effective_caller_id_name', '%s' % caller_id)
 			else:
@@ -89,14 +89,8 @@ class Context:
 				self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
 				self.session.hangup()
 				
-			#if re.search(r'^0052',destination_number) != None:
-			#	log.info('Number is local strip 0052')
-			#	destination_number = destination_number[5:]
-
-			#destination_number = '0459514404014'
-			# hardcoded did for now
-			self.session.setVariable('effective_caller_id_number', '525541703851')
-			self.session.setVariable('effective_caller_id_name', '525541703851')
+			#self.session.setVariable('effective_caller_id_number', '525541703851')
+			#self.session.setVariable('effective_caller_id_name', '525541703851')
 			self.session.execute('bridge', "{absolute_codec_string='G729',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
 		else:
 			log.debug('Subscriber doesn\'t have enough balance to make a call')
