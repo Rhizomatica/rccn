@@ -28,17 +28,17 @@ smlog.setFormatter(formatter)
 
 blog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/billing.log', 'a', 104857600, 5)
 blog.setFormatter(formatter)
-logging.basicConfig()
 
-alog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/api.log', 'a', 104857600, 5)
-formatter_api = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s %(message)s')
+alog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rapi.log', 'a', 104857600, 5)
 alog.setFormatter(formatter)
-logging.basicConfig()
 
 slog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/subscription.log', 'a', 104857600, 5)
-formatter_slog = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s %(message)s')
 slog.setFormatter(formatter)
+
+smslog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/sms.log', 'a', 104857600, 5)
+smslog.setFormatter(formatter)
 logging.basicConfig()
+
 
 # initialize logger RCCN
 log = logging.getLogger('RCCN')
@@ -60,6 +60,10 @@ subscription_log = logging.getLogger('RCCN_RSC')
 subscription_log.addHandler(slog)
 subscription_log.setLevel(logging.DEBUG)
 
+# initialize logger SMS
+sms_log = logging.getLogger('RCCN_SMS')
+sms_log.addHandler(smslog)
+sms_log.setLevel(logging.DEBUG)
 
 # Extensions
 class ExtensionException(Exception):

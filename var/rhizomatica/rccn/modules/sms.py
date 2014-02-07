@@ -42,20 +42,20 @@ class SMS:
 		self.coding = 0
 
 	def receive(self, source, destination, text):
-		log.info('Received SMS: %s %s %s' % (source, destination, text))
+		sms_log.info('Received SMS: %s %s %s' % (source, destination, text))
 		# SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
 		# check if destination number is local
 		try:
 			numbering = Numbering()
 			if numbering.is_number_local(destination) == True:
-				log.info('SMS_LOCAL check if subscriber is authorized')
+				sms_log.info('SMS_LOCAL check if subscriber is authorized')
 				# check if subscriber is authorized
 				try:
 					sub = Subscriber()
 					if sub.is_authorized(source) and sub.is_authorized(destination):
-						log.info('Forward SMS back to BSC')
-						# number is local send SMs back to SMSc
+						sms_log.info('Forward SMS back to BSC')
+						# number is local send SMS back to SMSc
 						self.send(source,destination,text)
 					else:
 						
@@ -66,34 +66,34 @@ class SMS:
 		
 				# dest number is not local, check if dest number is a shortcode
 				if destination in extensions_list:
-					log.info('Destination number is a shortcode, execute shortcode handler')
+					sms_log.info('Destination number is a shortcode, execute shortcode handler')
 					shortcode = importlib.import_module('extensions.ext_'+destination, 'extensions')
 					try:
-						log.debug('Exec shortcode handler')
+						sms_log.debug('Exec shortcode handler')
 						extension.handler('',source, destination, text)
 					except ExtensionException as e:
 						log.error(e)
 				else:
 					# check if sms is for another location
-					if (self.numbering.is_number_internal(destination) == True and len(destination) == 11:
-						log.info('SMS is for another site')
+					if (numbering.is_number_internal(destination) == True and len(destination) == 11:
+						sms_log.info('SMS is for another site')
 						try:
-							site_ip = self.numbering.get_site_ip(destination)
-							log.info('Send SMS to site IP: %s' % site_ip)
+							site_ip = numbering.get_site_ip(destination)
+							sms_log.info('Send SMS to site IP: %s' % site_ip)
 							self.send(source,destination,text,site_ip)
 						except NumberingException as e:
-							log.error(e)
+							sms_log.error(e)
 					else:
 						# dest number is for an external number send sms to sms provider
 						return
 		except NumberingException as e:
-			log.error(e)
+			sms_log.error(e)
 	
 	def send(self, source, destination, text, server='localhost'):
 		enc_text = urllib.quote(text)
 		if server != 'localhost':
 			try:
-				log.info('Send SMS: %s %s %s' % (source, destination, text))
+				sms_log.info('Send SMS: %s %s %s' % (source, destination, text))
         	                res = urllib.urlopen(
                 	                "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%d&to=%s&from=%s&text=%s"\
                         	        % (server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
@@ -102,7 +102,7 @@ class SMS:
                 	        raise SMSException('Error connecting to Kannel to send SMS: %s' % e)
 		else:
 			try:
-				log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
+				sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
         	                res = urllib.urlopen(
 				values = {'source': source, 'destination': destination, 'text': text }
 				res = urllib.urlopen('http://%s:8085/sms' % server,values).read()
