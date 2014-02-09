@@ -67,11 +67,11 @@ function print_menu($select) {
         echo "<li><a href='rates.php' $sel >"._("Rates")."</a></li>";
 
 
-	/*$sel =  ($select == 'send_sms') ? 'class="menu_selected"' : '';
-        echo "<li><a href='send_sms.php' $sel>Send SMS</a>";
+	$sel =  ($select == 'send_sms') ? 'class="menu_selected"' : '';
+        echo "<li><a href='send_sms.php' $sel>"._("Send SMS")."</a>";
 	echo "<ul>";
 	echo "</li>";
-        echo '</ul>';*/
+        echo '</ul>';
 
 	echo "</nav>";
 }
