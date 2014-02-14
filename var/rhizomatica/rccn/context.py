@@ -27,6 +27,7 @@ class Context:
 	def __init__(self,session, modules):
 		self.session = session
 		self.destination_number = self.session.getVariable('destination_number')
+		self.calling_number = self.session.getVariable('calling_id_number')
 
 		self.subscriber = modules[0]
 		self.numbering = modules[1]
@@ -118,9 +119,14 @@ class Context:
 			log.error(e)
 						
 		# check subscriber balance if charge local call is configured
-
 		log.info('Send call to LCR')
 		self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@'+config['local_ip']+':5050')
+		# in case of no answer send call to voicemail
+		log.info('No answer, send call to voicemail')
+		self.session.execute('set','default_language=en')
+		self.session.execute('answer')
+		self.session.execute('sleep','1000')
+		self.session.execute('bridge', "loopback/app=voicemail:default ${domain_name} "+str(self.calling_number))
 
 	def inbound(self):
 	        self.session.setVariable('context', 'INBOUND')
