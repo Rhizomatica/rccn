@@ -22,6 +22,14 @@ create table cdr (
     cost      		      decimal
 );
 
+create table sms (
+	id			serial primary key,
+	source_addr		varchar not null,
+	destination_addr 	varchar not null,
+	context			varchar,
+	send_stamp		timestamp default current_timestamp
+)
+
 create table subscribers (
 	id		serial primary key,
 	msisdn 		varchar,
@@ -32,6 +40,23 @@ create table subscribers (
 	created		timestamp default current_timestamp
 );
 CREATE UNIQUE INDEX msisdn_index ON subscribers(msisdn);
+
+CREATE FUNCTION update_subscription_change_date()
+  RETURNS TRIGGER
+  LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.subscription_date := now();
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER check_subscription_change
+    BEFORE UPDATE ON subscribers
+    FOR EACH ROW
+    WHEN (OLD.subscription_status != NEW.subscription_status)
+    EXECUTE PROCEDURE update_subscription_change_date();
+
 
 --INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test1','68820110010',1,4.0);
 --INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test2','68820123991',1,0.0);
@@ -105,7 +130,6 @@ create table configuration (
 	charge_inbound_rate		decimal,
 	charge_inbound_rate_type	varchar
 );
-
 
 
 create table users (

@@ -40,6 +40,7 @@ class SMS:
 		self.password = 'kannel'
 		self.charset = 'utf-8'
 		self.coding = 0
+		self.context = ''
 
 	def receive(self, source, destination, text, charset, coding):
 		self.charset = charset
@@ -48,7 +49,6 @@ class SMS:
 		sms_log.info('Received SMS: %s %s %s' % (source, destination, text))
 		# SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
-		# check if destination number is local
 		try:
 			numbering = Numbering()
 			if numbering.is_number_local(destination) == True:
@@ -59,10 +59,23 @@ class SMS:
 					if sub.is_authorized(source,0) and sub.is_authorized(destination,0):
 						sms_log.info('Forward SMS back to BSC')
 						# number is local send SMS back to SMSc
+						self.context = 'SMS_LOCAL'
 						self.send(source,destination,text)
 					else:
-						
-						return
+						if numbering.is_number_internal(source) == True:
+							sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
+							self.context = 'SMS_INTERNAL'
+							self.send(source,destination,text)
+						else:
+							if sub.is_authorized(destination,0):
+        	                                                sms_log.info('SMS_INBOUND Forward SMS back to BSC')
+                	                                        # number is local send SMS back to SMSc
+								self.context = 'SMS_INBOUND'
+                                	                        self.send(source,destination,text)
+                                        	        else:
+								sms_log.error('Shouldn\'t be get here')
+	                                                        return
+
 				except SubscriberException as e:
 					raise SMSException('Receive SMS error: %s' % e)
 			else:
@@ -83,6 +96,7 @@ class SMS:
 						try:
 							site_ip = numbering.get_site_ip(destination)
 							sms_log.info('Send SMS to site IP: %s' % site_ip)
+							self.context = 'SMS_INTERNAL'
 							self.send(source,destination,text,site_ip)
 						except NumberingException as e:
 							raise SMSException('Receive SMS error: %s' % e)
@@ -101,6 +115,9 @@ class SMS:
                 	                "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                         	        % (server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
 	                        ).read()
+				# save sms
+				sms_log.info('Save SMS in the history')
+				self.save(source,destination,self.context)
         	        except IOError:
                 	        raise SMSException('Error connecting to Kannel to send SMS: %s' % e)
 		else:
@@ -108,9 +125,23 @@ class SMS:
 				sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
 				values = {'source': source, 'destination': destination, 'text': text }
 				res = urllib.urlopen('http://%s:8085/sms' % (server,values)).read()
+				sms_log.info('Save SMS in the history')
+				self.save(source,destination,self.context)
 			except IOError:
 				raise SMSException('Error sending SMS to site %s' % server)
+
 				
+	def save(self,source,destination,context):
+		# insert SMS in the history
+		try:
+			cur = db_conn.cursor()
+			cur.execute('INSERT INTO sms(source_addr,destination_addr,context) VALUES(%s,%s,%s)', (source,destination,context))
+		except psycopg2.DatabaseError as e:
+			db_conn.rollback()
+			raise SMSException('PG_HLR error saving SMS in the history: %s' % e)
+		finally:
+			db_conn.commit()
+
 
 	def send_immediate(self,num,text):
 		appstring = "OpenBSC"
