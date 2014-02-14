@@ -92,9 +92,17 @@ class Dialplan:
 			try:
 				log.info('Check if called number is local')
 				if self.numbering.is_number_local(self.destination_number) and len(self.destination_number) == 11:
-					log.info('Called number is a local number send call to LOCAL context')
+					log.info('Called number is a local number')
 					processed = 1
-					self.auth_context('local')
+					# check if calling number is another site
+					if self.numbering.is_number_internal(self.calling_number) and len(self.calling_number) == 11:
+						# check if dest number is authorized to receive call
+						if subscriber.is_authorized(self.calling_number,0):
+							log.info('Internal call send number to LOCAL context')
+							self.context.local()
+					else:
+						log.info('Send call to LOCAL context')
+						self.auth_context('local')
 				else:
                                         # check if called number is an extension
                                         log.debug('Check if called number is an extension')
