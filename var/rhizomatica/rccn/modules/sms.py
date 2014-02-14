@@ -41,7 +41,10 @@ class SMS:
 		self.charset = 'utf-8'
 		self.coding = 0
 
-	def receive(self, source, destination, text):
+	def receive(self, source, destination, text, charset, coding):
+		self.charset = charset
+		self.coding = coding
+
 		sms_log.info('Received SMS: %s %s %s' % (source, destination, text))
 		# SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
@@ -90,12 +93,12 @@ class SMS:
 			raise SMSException('Receive SMS Error: %s' % e)
 	
 	def send(self, source, destination, text, server=config['local_ip']):
-		enc_text = urllib.urlencode({'text': unicode(text).encode('utf-8') })
+		enc_text = urllib.urlencode({'text': text })
 		if server == config['local_ip']:
 			try:
 				sms_log.info('Send SMS: %s %s %s' % (source, destination, text))
         	                res = urllib.urlopen(
-                	                "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%d&to=%s&from=%s&%s"\
+                	                "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                         	        % (server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
 	                        ).read()
         	        except IOError:

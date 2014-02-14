@@ -122,11 +122,11 @@ class SMSRESTService:
         path = '/sms'
 
         @route('/', Http.POST)
-        def receive(self, request, source, destination, text):
+        def receive(self, request, source, destination, coding, charset, text):
                 api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s" text:"%s"' % (request.getHost().host,self.path,source,destination,text))
                 try:
                         sms = SMS()
-                        sms.receive(source,destination,text)
+                        sms.receive(source,destination,text, coding, charset)
                         data = {'status': 'success', 'error': ''}
                 except SMSException as e:
                         data = {'status': 'failed', 'error': str(e)}
