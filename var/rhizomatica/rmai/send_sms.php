@@ -37,7 +37,7 @@ function print_form($post_data,$errors) {
 				<label>Bulk send
 				<span class="small">Send SMS to all subscribers</span>
 				</label>
-				<input type="checkbox" name="bulk_send" id="bulk_send" value="1"/>
+				<input type="checkbox" name="bulk_send" id="bulk_send" value="1"/><br/>
 
 				<button type="submit" name="send_sms">Send SMS</button>
 				<div class="spacer"></div>

@@ -38,12 +38,11 @@ class SMS:
 	def __init__(self):
 		self.server = 'localhost'
 		self.port = 14002
-		self.username = 'kannel'
-		self.password = 'kannel'
+		self.username = 'rhizomatica'
+		self.password = 'Nan3RZhekZy0'
 		self.charset = 'UTF-8'
 		self.coding = 2 
-		self.context = ''
-
+		self.context = 'SMS_LOCAL'
 		self.save_sms = 1
 
 	def receive(self, source, destination, text, charset, coding):
@@ -115,6 +114,7 @@ class SMS:
 							raise SMSException('Receive SMS error: %s' % e)
 					else:
 						# dest number is for an external number send sms to sms provider
+						self.context = 'SMS_OUTBOUND'
 						sms_log.info('SMS is for an external number send SMS to SMS provider')
 
 		except NumberingException as e:
