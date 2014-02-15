@@ -64,7 +64,7 @@ class Numbering:
 	def is_number_internal(self, destination_number):
 		siteprefix = destination_number[:6]
 		riak_client = riak.RiakClient(protocol='http', host=config['local_ip'], http_port=8098)
-		sites = client.bucket('sites')
+		sites = riak_client.bucket('sites')
 		if sites.get(siteprefix).exists == True:
 			return True
 		else:
@@ -73,7 +73,7 @@ class Numbering:
 	def get_site_ip(self, destination_number):
 		siteprefix = destination_number[:6]
 		riak_client = riak.RiakClient(protocol='http', host=config['local_ip'], http_port=8098)
-		site = client.bucket('sites')
+		site = riak_client.bucket('sites')
 		site_data = site.get(siteprefix)
 		if site_data.data['ip_address'] != None:
 			return site_data.data['ip_address']

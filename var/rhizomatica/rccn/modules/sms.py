@@ -1,3 +1,5 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
 ############################################################################
 # 
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
@@ -38,8 +40,8 @@ class SMS:
 		self.port = 14002
 		self.username = 'kannel'
 		self.password = 'kannel'
-		self.charset = 'utf-8'
-		self.coding = 0
+		self.charset = 'UTF-8'
+		self.coding = 2 
 		self.context = ''
 
 	def receive(self, source, destination, text, charset, coding):
@@ -51,30 +53,38 @@ class SMS:
 
 		try:
 			numbering = Numbering()
-			if numbering.is_number_local(destination) == True:
+			if numbering.is_number_local(destination):
 				sms_log.info('SMS_LOCAL check if subscriber is authorized')
-				# check if subscriber is authorized
+				# get auth info
+				source_authorized = sub.is_authorized(source,0)
+				destination_authorized = sub.is_authorized(destination,0)
 				try:
 					sub = Subscriber()
-					if sub.is_authorized(source,0) and sub.is_authorized(destination,0):
+					if source_authorized and destination_authorized:
 						sms_log.info('Forward SMS back to BSC')
 						# number is local send SMS back to SMSc
 						self.context = 'SMS_LOCAL'
 						self.send(source,destination,text)
 					else:
-						if numbering.is_number_internal(source) == True:
+						if not numbering.is_number_local(source):
 							sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
 							self.context = 'SMS_INTERNAL'
 							self.send(source,destination,text)
 						else:
-							if sub.is_authorized(destination,0):
+							if destination_authorized and not numbering.is_number_local(source):
         	                                                sms_log.info('SMS_INBOUND Forward SMS back to BSC')
                 	                                        # number is local send SMS back to SMSc
 								self.context = 'SMS_INBOUND'
                                 	                        self.send(source,destination,text)
                                         	        else:
-								sms_log.error('Shouldn\'t be get here')
-	                                                        return
+							        self.charset = 'UTF-8'
+							        self.coding = 2
+								if not source_authorized:
+									sms_log.info('Sender unauthorized send notification message')
+									self.send('10000',source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
+								else:
+									sms_log.info('Destination unauthorized inform sender with a notification message')
+									self.send('10000',source,'Este usuario no se ha registrado. Él no va a recibir su mensaje.')
 
 				except SubscriberException as e:
 					raise SMSException('Receive SMS error: %s' % e)
@@ -91,7 +101,7 @@ class SMS:
 						raise SMSException('Reiceve SMS error: %s' % e)
 				else:
 					# check if sms is for another location
-					if numbering.is_number_internal(destination) == True and len(destination) == 11:
+					if numbering.is_number_internal(destination) and len(destination) == 11:
 						sms_log.info('SMS is for another site')
 						try:
 							site_ip = numbering.get_site_ip(destination)
@@ -102,7 +112,8 @@ class SMS:
 							raise SMSException('Receive SMS error: %s' % e)
 					else:
 						# dest number is for an external number send sms to sms provider
-						return
+						sms_log.info('SMS is for an external number send SMS to SMS provider')
+
 		except NumberingException as e:
 			raise SMSException('Receive SMS Error: %s' % e)
 	
@@ -115,7 +126,6 @@ class SMS:
                 	                "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                         	        % (server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
 	                        ).read()
-				# save sms
 				sms_log.info('Save SMS in the history')
 				self.save(source,destination,self.context)
         	        except IOError:
@@ -123,8 +133,9 @@ class SMS:
 		else:
 			try:
 				sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
-				values = {'source': source, 'destination': destination, 'text': text }
-				res = urllib.urlopen('http://%s:8085/sms' % (server,values)).read()
+				values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text }
+				data = urllib.urlencode(values)
+				res = urllib.urlopen('http://%s:8085/sms' % server,data).read()
 				sms_log.info('Save SMS in the history')
 				self.save(source,destination,self.context)
 			except IOError:
@@ -140,6 +151,7 @@ class SMS:
 			db_conn.rollback()
 			raise SMSException('PG_HLR error saving SMS in the history: %s' % e)
 		finally:
+			cur.close()
 			db_conn.commit()
 
 
@@ -154,15 +166,7 @@ class SMS:
 	
 if __name__ == '__main__':
 	sms = SMS()
-	#sub.set_balance('68820110010',3.86)
 	try:
-		#sub.add('37511','Antanz',4.00)
-		#sub.edit('68820137511','Antanz_edit',3.86)
-		sms.send('666','68820138310','prot')
-		#credit.add('INV00','68820137514', 1.00)
-		#a = sub.get('68820137511')
-		#print a
-		#sub.delete('68820137511')
+		sms.send('611','68820138310','prot')
 	except SMSException as e:
 		print "Error: %s" % e
-

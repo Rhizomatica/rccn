@@ -97,9 +97,18 @@ class Dialplan:
 					# check if calling number is another site
 					if self.numbering.is_number_internal(self.calling_number) and len(self.calling_number) == 11:
 						# check if dest number is authorized to receive call
-						if subscriber.is_authorized(self.calling_number,0):
-							log.info('Internal call send number to LOCAL context')
-							self.context.local()
+						if self.subscriber.is_authorized(self.calling_number,0):
+							if self.subscriber.is_authorized(self.destination_number,0):
+								log.info('Internal call send number to LOCAL context')
+								self.context.local()
+							else:
+								log.info('Destination subscriber is unauthorized to receive calls')
+								self.play_announcement('002_saldo_insuficiente.gsm')
+						else:
+			                                log.info('Subscriber is not registered or authorized to call')
+                        			        # subscriber not authorized to call
+			                                self.play_announcement('002_saldo_insuficiente.gsm')
+							
 					else:
 						log.info('Send call to LOCAL context')
 						self.auth_context('local')
@@ -118,7 +127,7 @@ class Dialplan:
                                                         log.error(e)
 					else:
 						log.debug('Check if called number is a full number for another site')
-						if (self.numbering.is_number_internal(self.destination_number) == True and len(self.destination_number) == 11:
+						if self.numbering.is_number_internal(self.destination_number) and len(self.destination_number) == 11:
 							log.info('Called number is a full number for another site send call to INTERNAL context')
 							processed = 1
 							self.auth_context('internal')
@@ -129,3 +138,4 @@ class Dialplan:
 							self.play_announcement('007_el_numero_no_es_corecto.gsm')
 			except NumberingException as e:
 				log.error(e)
+
