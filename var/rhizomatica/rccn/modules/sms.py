@@ -56,10 +56,10 @@ class SMS:
 			if numbering.is_number_local(destination):
 				sms_log.info('SMS_LOCAL check if subscriber is authorized')
 				# get auth info
+				sub = Subscriber()
 				source_authorized = sub.is_authorized(source,0)
 				destination_authorized = sub.is_authorized(destination,0)
 				try:
-					sub = Subscriber()
 					if source_authorized and destination_authorized:
 						sms_log.info('Forward SMS back to BSC')
 						# number is local send SMS back to SMSc

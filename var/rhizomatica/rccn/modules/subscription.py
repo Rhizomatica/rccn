@@ -115,5 +115,5 @@ class Subscription:
 		
 		for mysub in subscribers_list:
 			self.logger.debug("Send sms to %s %s" % (mysub[0],msg))
-			sms.send_immeditate(mysub[1],msg)
+			sms.send_immediate(mysub[1],msg)
 	
