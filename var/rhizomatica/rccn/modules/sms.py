@@ -44,6 +44,8 @@ class SMS:
 		self.coding = 2 
 		self.context = ''
 
+		self.save_sms = 1
+
 	def receive(self, source, destination, text, charset, coding):
 		self.charset = charset
 		self.coding = coding
@@ -79,6 +81,7 @@ class SMS:
                                         	        else:
 							        self.charset = 'UTF-8'
 							        self.coding = 2
+								self.save_sms = 0
 								if not source_authorized:
 									sms_log.info('Sender unauthorized send notification message')
 									self.send('10000',source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
@@ -126,8 +129,9 @@ class SMS:
                 	                "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                         	        % (server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
 	                        ).read()
-				sms_log.info('Save SMS in the history')
-				self.save(source,destination,self.context)
+				if self.save_sms:
+					sms_log.info('Save SMS in the history')
+					self.save(source,destination,self.context)
         	        except IOError:
                 	        raise SMSException('Error connecting to Kannel to send SMS: %s' % e)
 		else:
@@ -136,8 +140,9 @@ class SMS:
 				values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text }
 				data = urllib.urlencode(values)
 				res = urllib.urlopen('http://%s:8085/sms' % server,data).read()
-				sms_log.info('Save SMS in the history')
-				self.save(source,destination,self.context)
+				if self.save_sms:
+					sms_log.info('Save SMS in the history')
+					self.save(source,destination,self.context)
 			except IOError:
 				raise SMSException('Error sending SMS to site %s' % server)
 
