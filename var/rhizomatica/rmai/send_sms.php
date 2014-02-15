@@ -67,9 +67,9 @@ function print_form($post_data,$errors) {
 				} elseif (isset($_POST['send_sms']) && $error_txt == "") {
 					try {
 						$sms = new SMS();
-						$sms->send('10000',$_POST['number'],$_POST['message'];
+						$sms->send('10000',$_POST['number'],$_POST['message']);
 						echo "<img src='img/true.png' width='150' height='150' /><br/><br/>";
-						echo "<span style='font-size: 20px;'>MESSAGE SENT!</span><br/><br/><br/><br/>";
+						echo "<span style='font-size: 20px;'>"._("MESSAGE SENT!")."</span><br/><br/><br/><br/>";
 						echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
 					} catch (SMSException $e) {
                                                 echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
