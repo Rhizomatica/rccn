@@ -53,7 +53,28 @@ class SMS:
 		# SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
 		try:
+
+			# auth checks
+			# get auth info
 			numbering = Numbering()
+			sub = Subscriber()
+			try:
+				source_authorized = sub.is_authorized(source,0)
+			except SubscriberException as e:
+				source_authorized = False
+			try:
+				destination_authorized = sub.is_authorized(destination,0)
+			except SubscriberException as e:
+				destination_authorized = False
+
+			sms_log.info('Source_authorized: %s Destination_authorized: %s' % (str(source_authorized),str(destination_authorized)))
+
+			if not source_authorized and not numbering.is_number_internal(source):
+				sms_log.info('Sender unauthorized send notification message')
+				self.context = 'SMS_UNAUTH'
+				self.send('10000',source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
+				return
+
 			if numbering.is_number_local(destination):
 				sms_log.info('SMS_LOCAL check if subscriber is authorized')
 				# get auth info
@@ -67,12 +88,12 @@ class SMS:
 						self.context = 'SMS_LOCAL'
 						self.send(source,destination,text)
 					else:
-						if not numbering.is_number_local(source):
+						if not numbering.is_number_local(source) and source_authorized:
 							sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
 							self.context = 'SMS_INTERNAL'
 							self.send(source,destination,text)
 						else:
-							if destination_authorized and not numbering.is_number_local(source):
+							if destination_authorized and not numbering.is_number_local(source) and source_authorized:
         	                                                sms_log.info('SMS_INBOUND Forward SMS back to BSC')
                 	                                        # number is local send SMS back to SMSc
 								self.context = 'SMS_INBOUND'

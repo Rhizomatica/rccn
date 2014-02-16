@@ -63,6 +63,8 @@ class Numbering:
 
 	def is_number_internal(self, destination_number):
 		siteprefix = destination_number[:6]
+		if siteprefix == config['internal_prefix']:
+			return False
 		riak_client = riak.RiakClient(protocol='http', host=config['local_ip'], http_port=8098)
 		sites = riak_client.bucket('sites')
 		if sites.get(siteprefix).exists == True:
