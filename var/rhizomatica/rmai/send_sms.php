@@ -3,12 +3,13 @@
 	require_once('include/header.php');
 	require_once('include/menu.php');
 	require_once('modules/sms.php');
+	require_once('modules/subscriber.php');
 
 ?>
-			<? print_menu('send_sms'); ?>
+			<? print_menu('sms'); ?>
 
 	                </script>
-			<br/><br/>
+			<br/><br/><br/><br/>
 			<center>
 <?
 function print_form($post_data,$errors) {
@@ -21,25 +22,25 @@ function print_form($post_data,$errors) {
 
 			<div id="stylized" class="myform">
 				<form id="form" name="form" method="post" action="send_sms.php">
-				<h1>Send SMS</h1><br/>
+				<h1><?=_("Send SMS") ?></h1><br/>
 
 				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
-				<label>Message
-				<span class="small">Text of the SMS message</span>
+				<label><?=_("Message") ?>
+				<span class="small"><?=_("Text of the SMS message")?></span>
 				</label>
-				<input type="text" name="message" id="message" value="<?=$message?>"/>
+				<textarea style='margin-left: -15px;' rows="6" cols="23" name="message" id="message"><?=$message?></textarea>
 
-				<label>Number
-				<span class="small">Recipient of the SMS message</span>
+				<label><?=_("Number")?>
+				<span class="small"><?=_("Recipient of the SMS message")?></span>
 				</label>
 				<input type="text" name="number" id="number" value="<?=$number?>"/>
 
-				<label>Bulk send
-				<span class="small">Send SMS to all subscribers</span>
+				<label><?=_("Bulk send")?>
+				<span class="small"><?=_("Send SMS to all subscribers")?></span>
 				</label>
 				<input type="checkbox" name="bulk_send" id="bulk_send" value="1"/><br/>
 
-				<button type="submit" name="send_sms">Send SMS</button>
+				<button type="submit" name="send_sms"><?=_("Send SMS")?></button>
 				<div class="spacer"></div>
 				</form>
 			</div>
@@ -55,26 +56,40 @@ function print_form($post_data,$errors) {
 					$bulk_send = $_POST['bulk_send'];
 
 					if ($message == "") {
-						$error_txt .= "SMS text is empty<br/>";
+						$error_txt .= _("SMS text is empty")."<br/>";
 					}
 					if ($number == "" && !isset($bulk_send)) {
-						$error_txt .= "SMS number is empty<br/>";
+						$error_txt .= _("SMS number is empty")."<br/>";
 					}
 				} 
 
 				if (isset($_POST['send_sms']) && $error_txt != "") {
 					print_form(1,$error_txt);
 				} elseif (isset($_POST['send_sms']) && $error_txt == "") {
+					$sub = new Subscriber();
+	
+					$ret = 0;
 					try {
-						$sms = new SMS();
-						$sms->send('10000',$_POST['number'],$_POST['message']);
-						echo "<img src='img/true.png' width='150' height='150' /><br/><br/>";
-						echo "<span style='font-size: 20px;'>"._("MESSAGE SENT!")."</span><br/><br/><br/><br/>";
+						$sub->get($_POST['number']);
+					} catch (SubscriberException $e) {
+						echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
+						echo "<span style='font-size: 20px; color: red;'>"._("ERROR SENDING SMS!")."</br>".$e->getMessage()." </span><br/><br/><br/><br/>";
 						echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
-					} catch (SMSException $e) {
-                                                echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
-                                                echo "<span style='font-size: 20px; color: red;'>"._("ERROR SENDING SMS!")."<br/>".$e->getMessage()." </span><br/><br/><br/><br/>";
-                                                echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+						$ret = 1;
+					}
+
+					if ($ret == 0) {
+						try {
+							$sms = new SMS();
+							$sms->send('10000',$_POST['number'],$_POST['message']);
+							echo "<img src='img/true.png' width='150' height='150' /><br/><br/>";
+							echo "<span style='font-size: 20px;'>"._("MESSAGE SENT!")."</span><br/><br/><br/><br/>";
+							echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+						} catch (SMSException $e) {
+                                        	        echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
+                                                	echo "<span style='font-size: 20px; color: red;'>"._("ERROR SENDING SMS!")."<br/>".$e->getMessage()." </span><br/><br/><br/><br/>";
+	                                                echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+						}
 					}
 				}					
 				else {

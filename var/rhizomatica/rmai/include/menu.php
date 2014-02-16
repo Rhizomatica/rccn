@@ -60,6 +60,13 @@ function print_menu($select) {
 	echo "</ul>";
 	echo "</li>";
 
+	$sel =  ($select == 'sms') ? 'class="menu_selected"' : '';
+        echo "<li><a href='sms.php' $sel>"._("SMSs")."</a>";
+	echo "<ul>";
+	echo "<li><a href='send_sms.php'>"._("Send SMS")."</a></li>";
+	echo "</ul>";
+	echo "</li>";
+
         $sel =  ($select == 'cdr') ? 'class="menu_selected"' : '';
         echo "<li><a href='cdr.php' $sel>"._("CDRs")."</a></li>";
 
@@ -67,11 +74,6 @@ function print_menu($select) {
         echo "<li><a href='rates.php' $sel >"._("Rates")."</a></li>";
 
 
-	$sel =  ($select == 'send_sms') ? 'class="menu_selected"' : '';
-        echo "<li><a href='send_sms.php' $sel>"._("Send SMS")."</a>";
-	echo "<ul>";
-	echo "</li>";
         echo '</ul>';
-
 	echo "</nav>";
 }

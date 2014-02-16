@@ -316,4 +316,33 @@ msgstr ""
 msgid "Total pesos amount in credits per month"
 msgstr ""
 
+# SMS Page
+msgid "Send SMS"
+msgstr ""
 
+msgid "Message"
+msgstr ""
+
+msgid "Text of the SMS message"
+msgstr ""
+
+msgid "Recipient of the SMS message"
+msgstr ""
+
+msgid "Send SMS to all subscribers"
+msgstr ""
+
+msgid "Bulk send"
+msgstr ""
+
+msgid "SMS text is empty"
+msgstr ""
+
+msgid "SMS number is empty"
+msgstr ""
+
+msgid "MESSAGE SENT!"
+msgstr ""
+
+msgid "ERROR SENDING SMS!"
+msgstr ""
