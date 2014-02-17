@@ -97,17 +97,15 @@ class Dialplan:
 					# check if calling number is another site
 					if self.numbering.is_number_internal(self.calling_number) and len(self.calling_number) == 11:
 						# check if dest number is authorized to receive call
-						if self.subscriber.is_authorized(self.calling_number,0):
-							if self.subscriber.is_authorized(self.destination_number,0):
-								log.info('Internal call send number to LOCAL context')
-								self.context.local()
-							else:
-								log.info('Destination subscriber is unauthorized to receive calls')
-								self.play_announcement('002_saldo_insuficiente.gsm')
+						#if self.subscriber.is_authorized(self.calling_number,0):
+						log.info('INTERNAL call from another site')
+						if self.subscriber.is_authorized(self.destination_number,0):
+							log.info('Internal call send number to LOCAL context')
+							self.context.local()
 						else:
-			                                log.info('Subscriber is not registered or authorized to call')
-                        			        # subscriber not authorized to call
-			                                self.play_announcement('002_saldo_insuficiente.gsm')
+							log.info('Destination subscriber is unauthorized to receive calls')
+							#self.play_announcement('002_saldo_insuficiente.gsm')
+							self.session.hangup()
 							
 					else:
 						log.info('Send call to LOCAL context')

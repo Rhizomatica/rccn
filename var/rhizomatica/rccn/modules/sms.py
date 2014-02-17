@@ -88,12 +88,12 @@ class SMS:
 						self.context = 'SMS_LOCAL'
 						self.send(source,destination,text)
 					else:
-						if not numbering.is_number_local(source) and source_authorized:
+						if not numbering.is_number_local(source) and destination_authorized:
 							sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
 							self.context = 'SMS_INTERNAL'
 							self.send(source,destination,text)
 						else:
-							if destination_authorized and not numbering.is_number_local(source) and source_authorized:
+							if destination_authorized and not numbering.is_number_local(source):
         	                                                sms_log.info('SMS_INBOUND Forward SMS back to BSC')
                 	                                        # number is local send SMS back to SMSc
 								self.context = 'SMS_INBOUND'
@@ -102,6 +102,7 @@ class SMS:
 							        self.charset = 'UTF-8'
 							        self.coding = 2
 								self.save_sms = 0
+								self.context = 'SMS_UNAUTH'
 								if not source_authorized:
 									sms_log.info('Sender unauthorized send notification message')
 									self.send('10000',source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
@@ -121,7 +122,7 @@ class SMS:
 						sms_log.debug('Exec shortcode handler')
 						extension.handler('',source, destination, text)
 					except ExtensionException as e:
-						raise SMSException('Reiceve SMS error: %s' % e)
+						raise SMSException('Receive SMS error: %s' % e)
 				else:
 					# check if sms is for another location
 					if numbering.is_number_internal(destination) and len(destination) == 11:
