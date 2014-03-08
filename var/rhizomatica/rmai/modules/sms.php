@@ -22,6 +22,22 @@ class SMS
                         throw new SMSException($data->error);
                 }
 	}
+
+        public function send_broadcast($text) {
+                $data = array("text" => $text);
+                try {
+                        $response = \Httpful\Request::post($this->path."/send_broadcast")->body($data)->sendsJson()->send();
+                } catch (Httpful\Exception\ConnectionErrorException $e) {
+                        throw new SMSException($e->getMessage());
+                }
+
+                $data = $response->body;
+                if ($data->status == 'failed') {
+                        throw new SMSException($data->error);
+                }
+        }
+
+
 }
 
 

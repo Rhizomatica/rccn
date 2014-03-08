@@ -79,16 +79,30 @@ function print_form($post_data,$errors) {
 					}
 
 					if ($ret == 0) {
-						try {
-							$sms = new SMS();
-							$sms->send('10000',$_POST['number'],$_POST['message']);
-							echo "<img src='img/true.png' width='150' height='150' /><br/><br/>";
-							echo "<span style='font-size: 20px;'>"._("MESSAGE SENT!")."</span><br/><br/><br/><br/>";
-							echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
-						} catch (SMSException $e) {
-                                        	        echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
-                                                	echo "<span style='font-size: 20px; color: red;'>"._("ERROR SENDING SMS!")."<br/>".$e->getMessage()." </span><br/><br/><br/><br/>";
-	                                                echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+						if (isset($_POST['bulk_send'])) {
+							try {
+								$sms = new SMS();
+								$sms->send_broadcast($_POST['message']);
+								echo "<img src='img/true.png' width='150' height='150' /><br/><br/>";
+								echo "<span style='font-size: 20px;'>"._("BROADCAST MESSAGE IS BEING SENT!")."</span><br/><br/><br/><br/>";
+								echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+							} catch (SMSException $e) {
+                                        	        	echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
+	                                                	echo "<span style='font-size: 20px; color: red;'>"._("ERROR SENDING MASS SMS!")."<br/>".$e->getMessage()." </span><br/><br/><br/><br/>";
+		                                                echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+							}
+						} else {
+							try {
+								$sms = new SMS();
+								$sms->send('10000',$_POST['number'],$_POST['message']);
+								echo "<img src='img/true.png' width='150' height='150' /><br/><br/>";
+								echo "<span style='font-size: 20px;'>"._("MESSAGE SENT!")."</span><br/><br/><br/><br/>";
+								echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+							} catch (SMSException $e) {
+                                        	        	echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
+	                                                	echo "<span style='font-size: 20px; color: red;'>"._("ERROR SENDING SMS!")."<br/>".$e->getMessage()." </span><br/><br/><br/><br/>";
+		                                                echo "<a href='send_sms.php'><button class='b1'>"._("Go Back")."</button></a>";
+							}
 						}
 					}
 				}					

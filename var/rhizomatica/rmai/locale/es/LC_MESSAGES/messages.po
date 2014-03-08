@@ -346,3 +346,10 @@ msgstr "MENSAJE ENVIADO!"
 
 msgid "ERROR SENDING SMS!"
 msgstr "ERROR AL ENVIAR EL SMS!"
+
+msgid "BROADCAST MESSAGE IS BEING SENT!"
+msgstr "Mensaje de difusión se está enviando"
+
+msgid "ERROR SENDING BROADCAST SMS!"
+msgstr "Error al enviar mensaje de difusión!"
+

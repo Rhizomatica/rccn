@@ -346,3 +346,9 @@ msgstr ""
 
 msgid "ERROR SENDING SMS!"
 msgstr ""
+
+msgid "BROADCAST MESSAGE IS BEING SENT!"
+msgstr ""
+
+msgid "ERROR SENDING BROADCAST SMS!"
+msgstr ""
