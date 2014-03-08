@@ -145,6 +145,19 @@ class SMSRESTService:
 		api_log.info(data)
                 return data
 
+	@route('/send_broadcast', Http.POST)	
+	def send_broadcast(self, request, text):
+		api_log.info('%s - [POST] %s/send_broadcast Data: text:"%s"' %((request.getHost().host,self.path,text))
+		try:
+			sms = SMS()
+			sms.send_broadcast(text)
+			data = {'status': 'success', 'error': ''}
+		except SMSException as e:
+			data = {'status': 'failed', 'error': str(e)}
+		api_log.info(data)
+		return data
+
+
 
 class StatisticsRESTService:
 	path = '/statistics'

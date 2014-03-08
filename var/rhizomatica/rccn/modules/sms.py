@@ -26,7 +26,7 @@ import sys
 sys.path.append("..")
 from config import *
 
-import urllib, obscvty
+import urllib, obscvty, time
 from subscriber import Subscriber, SubscriberException 
 from numbering import Numbering, NumberingException
 from threading import Thread
@@ -194,6 +194,7 @@ class SMS:
 		for mysub in subscribers_list:
 			sms.send_immediate(mysub[1],text)
 			sms_log.debug('Broadcast message sent to %s' % mysub[1])
+			time.sleep(1)
 
 	def send_broadcast(self, text):
 		sms_log.info('Send broadcast SMS to all subscribers. text: %s' % text)
@@ -205,6 +206,6 @@ if __name__ == '__main__':
 	sms = SMS()
 	try:
 		#sms.send('611','68820138310','prot')
-		sms.send_broadcast('antani')
+		#sms.send_broadcast('antani')
 	except SMSException as e:
 		print "Error: %s" % e
