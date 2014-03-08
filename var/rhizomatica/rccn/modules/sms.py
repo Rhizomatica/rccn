@@ -29,6 +29,7 @@ from config import *
 import urllib, obscvty
 from subscriber import Subscriber, SubscriberException 
 from numbering import Numbering, NumberingException
+from threading import Thread
 
 class SMSException(Exception):
         pass
@@ -168,7 +169,6 @@ class SMS:
 			except IOError:
 				raise SMSException('Error sending SMS to site %s' % server)
 
-				
 	def save(self,source,destination,context):
 		# insert SMS in the history
 		try:
@@ -181,7 +181,6 @@ class SMS:
 			cur.close()
 			db_conn.commit()
 
-
 	def send_immediate(self,num,text):
 		appstring = "OpenBSC"
 		appport = 4242
@@ -189,11 +188,23 @@ class SMS:
 		cmd = 'subscriber extension %s sms sender extension 10000 send %s' % (num,text)
 		vty.command(cmd)
 
+	def broadcast_to_all_subscribers(self, text):
+		sub = Subscriber()
+                subscribers_list = sub.get_all()
+		for mysub in subscribers_list:
+			sms.send_immediate(mysub[1],text)
+			sms_log.debug('Broadcast message sent to %s' % mysub[1])
+
+	def send_broadcast(self, text):
+		sms_log.info('Send broadcast SMS to all subscribers. text: %s' % text)
+		t = Thread(target=self.broadcast_to_all_subscribers, args=(text,))
+		t.start()
 
 	
 if __name__ == '__main__':
 	sms = SMS()
 	try:
-		sms.send('611','68820138310','prot')
+		#sms.send('611','68820138310','prot')
+		sms.send_broadcast('antani')
 	except SMSException as e:
 		print "Error: %s" % e
