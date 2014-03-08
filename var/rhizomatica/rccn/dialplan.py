@@ -108,8 +108,12 @@ class Dialplan:
 							self.session.hangup()
 							
 					else:
-						log.info('Send call to LOCAL context')
-						self.auth_context('local')
+						if self.subscriber.is_authorized(self.destination_number,0):	
+							log.info('Send call to LOCAL context')
+							self.auth_context('local')
+						else:
+							log.info('Destination subscriber is unauthorized to receive calls')
+							self.session.hangup()
 				else:
                                         # check if called number is an extension
                                         log.debug('Check if called number is an extension')
