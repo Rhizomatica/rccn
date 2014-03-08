@@ -66,6 +66,7 @@ class Subscription:
 
 	def deactivate_subscriptions(self,msg):
 		try:
+			sms = SMS()
 			cur = db_conn.cursor()
                         cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
                         count = cur.rowcount
