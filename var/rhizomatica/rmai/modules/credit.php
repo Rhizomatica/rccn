@@ -13,14 +13,13 @@ class Credit
 	public $msisdn = "";
 	public $amount = "";
 
-	public function set($receipt_id, $msisdn, $amount) {
-		$this->receipt_id = $receipt_id;
+	public function set($msisdn, $amount) {
 		$this->msisdn = $msisdn;
 		$this->authorized = $credit;
 	}
 
-	public function add($receipt_id,$msisdn,$amount) {
-		$data = array("receipt_id" => $receipt_id, "msisdn" => $msisdn, "amount" => $amount);
+	public function add($msisdn,$amount) {
+		$data = array("msisdn" => $msisdn, "amount" => $amount);
 		try {
 			$response = \Httpful\Request::post($this->path)->body($data)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {

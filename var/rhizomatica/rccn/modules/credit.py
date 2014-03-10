@@ -31,7 +31,7 @@ class CreditException(Exception):
 
 class Credit:
 
-	def add(self, receipt_id, msisdn, credit):
+	def add(self, msisdn, credit):
 		sub = Subscriber()
 		try:
 			mysub = sub.get(msisdn)
@@ -51,7 +51,7 @@ class Credit:
 		# insert transaction into the credit history
 		try:
 			cur = db_conn.cursor()
-			cur.execute('INSERT INTO credit_history(receipt_id,msisdn,previous_balance,current_balance,amount) VALUES(%s,%s,%s,%s,%s)', (receipt_id, msisdn, current_balance, new_balance, credit))
+			cur.execute('INSERT INTO credit_history(msisdn,previous_balance,current_balance,amount) VALUES(%s,%s,%s,%s)', (msisdn, current_balance, new_balance, credit))
 		except psycopg2.DatabaseError as e:
 			db_conn.rollback()
 			raise CreditException('PG_HLR error inserting invoice in the history: %s' % e)
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 	try:
 		#sub.add('37511','Antanz',4.00)
 		#sub.edit('68820137511','Antanz_edit',3.86)
-		credit.add('INV00','68820137514', 1.00)
+		credit.add('68820137514', 1.00)
 		#a = sub.get('68820137511')
 		#print a
 		#sub.delete('68820137511')

@@ -28,7 +28,7 @@ create table sms (
 	destination_addr 	varchar not null,
 	context			varchar,
 	send_stamp		timestamp default current_timestamp
-)
+);
 
 create table subscribers (
 	id		serial primary key,
@@ -40,6 +40,7 @@ create table subscribers (
 	created		timestamp default current_timestamp
 );
 CREATE UNIQUE INDEX msisdn_index ON subscribers(msisdn);
+
 
 CREATE FUNCTION update_subscription_change_date()
   RETURNS TRIGGER
@@ -58,11 +59,6 @@ CREATE TRIGGER check_subscription_change
     EXECUTE PROCEDURE update_subscription_change_date();
 
 
---INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test1','68820110010',1,4.0);
---INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test2','68820123991',1,0.0);
---INSERT INTO subscribers(name,msisdn,authorized,balance) values('Test3','68820131755',1,4.0);
-
-
 create table credit_history (
 	id			serial primary key,
 	receipt_id		varchar not null,
@@ -72,6 +68,23 @@ create table credit_history (
 	amount			decimal not null,
 	created	timestamp 	default current_timestamp
 );
+
+-- function to generate receipt number based on the table sequence
+CREATE OR REPLACE FUNCTION gen_receipt_number() RETURNS TRIGGER AS $$
+DECLARE
+   receipt_num varchar;
+BEGIN
+   SELECT TG_ARGV[0]||lpad( (cast(currval(TG_ARGV[1]) as text)), 10, '0') INTO receipt_num;
+   NEW.receipt_id := receipt_num;
+   RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER t_receipt_number
+   BEFORE INSERT ON credit_history
+   FOR EACH ROW
+   EXECUTE PROCEDURE gen_receipt_number('INV','credit_history_id_seq');
+
 
 create table site (
 	site_name		varchar not null,
@@ -83,8 +96,6 @@ create table site (
 
 --insert into site(site_name,postcode,pbxcode,network_name,ip_address) values('Talea','68820','1','Talea Red Cellular','10.66.0.10');
 
-
-
 create table providers (
 	id			serial primary key,
 	provider_name		varchar not null,
@@ -95,9 +106,6 @@ create table providers (
 	active			smallint not null default 0
 );
 
---insert into providers(provider_name,username,fromuser,password,proxy,active) values('Clearcom','rhizo1','rhizo1','RRn1HyvQa91z','comunidad-clearcom.mx',1)
-
-	
 create table dids (
 	id			serial primary key,
 	provider_id		int not null,

@@ -106,11 +106,11 @@ class CreditRESTService:
 	path = '/credit'
 
 	@route('/', Http.POST)
-	def post(self, request, msisdn, receipt_id, amount):
-		api_log.info('%s - [POST] %s Data: receipt_id:"%s" msisdn:"%s" amount:"%s"' % (request.getHost().host,self.path,receipt_id,msisdn,amount))
+	def post(self, request, msisdn, amount):
+		api_log.info('%s - [POST] %s Data: msisdn:"%s" amount:"%s"' % (request.getHost().host,self.path,msisdn,amount))
                 try:
                 	credit = Credit()
-                        credit.add(receipt_id,msisdn,amount)
+                        credit.add(msisdn,amount)
                         data = {'status': 'success', 'error': ''}
                 except CreditException as e:
                         print e
@@ -147,7 +147,7 @@ class SMSRESTService:
 
 	@route('/send_broadcast', Http.POST)	
 	def send_broadcast(self, request, text):
-		api_log.info('%s - [POST] %s/send_broadcast Data: text:"%s"' %((request.getHost().host,self.path,text))
+		api_log.info('%s - [POST] %s/send_broadcast Data: text:"%s"' % (request.getHost().host,self.path,text))
 		try:
 			sms = SMS()
 			sms.send_broadcast(text)

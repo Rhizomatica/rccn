@@ -13,7 +13,6 @@ require_once('include/header.php');
 
 function print_form($post_data,$errors) {
 
-	$receipt = ($_POST['receipt'] != '') ? $_POST['receipt'] : '';
 	$callerid1 = ($_POST['callerid1'] != '') ? $_POST['callerid1'] : '';
 	$callerid2 = ($_POST['callerid2'] != '') ? $_POST['callerid2'] : '';
 	$amount = ($_POST['amount'] != '') ? $_POST['amount'] : '';
@@ -23,12 +22,6 @@ function print_form($post_data,$errors) {
 			<div id="stylized" class="myform">
 				<form id="form" name="form" method="post" action="credit.php">
 				<h1><?= _("Add Credit") ?></h1><br/>
-
-				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
-				<label><?= _("Invoice Number") ?>
-				<span class="small"><?= _("Invoice Number") ?></span>
-				</label>
-				<input type="text" name="receipt" id="receipt" value="<?=$receipt?>"/>
 
 				<label><?= _("Subscriber number") ?>
 				<span class="small"><?= _("Subscriber number") ?></span>
@@ -59,11 +52,7 @@ function print_form($post_data,$errors) {
 					$callerid1 = $_POST['callerid1'];
 					$callerid2 = $_POST['callerid2'];
 					$amount = $_POST['amount'];
-					$receipt = $_POST['receipt'];
 
-					if ($receipt == "") {
-						$error_txt .= _("Invoice Number")." "._("is empty")."</br>";
-					}
 					if (strcmp($callerid1,$callerid2) != 0 ) {
 						$error_txt .= _("Subscriber number do not match")."<br/>";
 					}
@@ -84,13 +73,12 @@ function print_form($post_data,$errors) {
 					// get some data out based on user input
 					$callerid = $_POST['callerid1'];
 					$amount = $_POST['amount'];
-					$receipt = $_POST['receipt'];
 					echo "<center>";
 					$cred = new Credit();
 					try {
-						$cred->add($receipt,$callerid,$amount);
+						$cred->add($callerid,$amount);
 						echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
-						echo "<span style='font-size: 20px;'>".strtoupper(_("Invoice Number")).": <b>$receipt</b><br/><br/>"._("Credit of")." <b>$amount</b> "._("pesos successfully added to subscriber")." <b>$callerid</b>.</span><br/><br/><br/>";
+						echo "<span style='font-size: 20px;'>"._("Credit of")." <b>$amount</b> "._("pesos successfully added to subscriber")." <b>$callerid</b>.</span><br/><br/><br/>";
 						echo "<a href='credit.php'><button class='b1'>"._("Go Back")."</button></a>";
 					} catch (CreditException $e) {
 						echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";

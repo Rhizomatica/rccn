@@ -206,6 +206,6 @@ if __name__ == '__main__':
 	sms = SMS()
 	try:
 		#sms.send('611','68820138310','prot')
-		#sms.send_broadcast('antani')
+		sms.send_broadcast('antani')
 	except SMSException as e:
 		print "Error: %s" % e
