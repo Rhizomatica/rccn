@@ -22,7 +22,8 @@ function print_form($post_data,$errors) {
 			<div id="stylized" class="myform">
 				<form id="form" name="form" method="post" action="credit.php">
 				<h1><?= _("Add Credit") ?></h1><br/>
-
+				
+				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
 				<label><?= _("Subscriber number") ?>
 				<span class="small"><?= _("Subscriber number") ?></span>
 				</label>

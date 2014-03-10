@@ -20,7 +20,7 @@ require_once('include/menu.php');
                                         "bServerSide": true,
                                         "aaSorting": [[ 1, "desc" ]],
                                         "sAjaxSource": "cdr_processing.php"
-                                } );
+                                } ).columnFilter();
                         } );
                 </script>
 			<? print_menu('cdr'); ?>	

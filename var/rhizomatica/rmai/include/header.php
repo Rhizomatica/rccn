@@ -37,7 +37,8 @@ header('Content-Type: text/html; charset=utf-8');
                 </style>
                 <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
-                <script type="text/javascript" src="js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+		<script type="text/javascript" language="javascript" src="js/jquery.dataTables.columnFilter.js"></script>
+                <script type="text/javascript" language="javascript" src="js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
         </head>
         <body id="dt_example">
                 <div id="container">
