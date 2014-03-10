@@ -112,7 +112,7 @@
                 search_init = '';
             }
 
-            var input = $('<input type="text" class="' + search_init + sCSSClass + '" style="background-color: #333333; color: #ffffff; border: 1px solid #525252;" value="' + '" value="' + inputvalue + '" rel="' + i + '"/>');
+            var input = $('<input type="text" class="' + search_init + sCSSClass + '" style="background-color: #333333; color: #ffffff; border: 1px solid #525252;" value="' + inputvalue + '" rel="' + i + '"/>');
             if (iMaxLenght != undefined && iMaxLenght != -1) {
                 input.attr('maxlength', iMaxLenght);
             }
