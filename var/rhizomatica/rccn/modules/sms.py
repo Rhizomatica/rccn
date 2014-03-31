@@ -192,7 +192,7 @@ class SMS:
 		sub = Subscriber()
                 subscribers_list = sub.get_all()
 		for mysub in subscribers_list:
-			sms.send_immediate(mysub[1],text)
+			self.send('10000',mysub[1],text)
 			sms_log.debug('Broadcast message sent to %s' % mysub[1])
 			time.sleep(1)
 
