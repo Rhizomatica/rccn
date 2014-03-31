@@ -352,3 +352,21 @@ msgstr ""
 
 msgid "ERROR SENDING BROADCAST SMS!"
 msgstr ""
+
+# RESELLERS
+
+msgid "Resellers"
+msgstr ""
+
+msgid "List Resellers"
+msgstr ""
+
+msgid "Configuration"
+msgstr ""
+
+msgid "Resellers invoices"
+msgstr ""
+
+msgid "Transactions"
+msgstr ""
+

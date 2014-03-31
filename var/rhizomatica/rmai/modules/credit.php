@@ -9,14 +9,8 @@ class Credit
 
 	private $path = "http://localhost:8085/credit";
 
-	public $receipt_id = "";
 	public $msisdn = "";
 	public $amount = "";
-
-	public function set($msisdn, $amount) {
-		$this->msisdn = $msisdn;
-		$this->authorized = $credit;
-	}
 
 	public function add($msisdn,$amount) {
 		$data = array("msisdn" => $msisdn, "amount" => $amount);
@@ -31,6 +25,21 @@ class Credit
                         throw new CreditException($data->error);
                 }
 	}
+
+        public function add_to_reseller($msisdn, $amount) {
+                $data = array("msisdn" => $msisdn, "amount" => $amount);
+                try {
+                        $response = \Httpful\Request::post($this->path."/reseller")->body($data)->sendsJson()->send();
+                } catch (Httpful\Exception\ConnectionErrorException $e) {
+                        throw new CreditException($e->getMessage());
+                }
+
+                $data = $response->body;
+                if ($data->status == 'failed') {
+                        throw new CreditException($data->error);
+                }
+        }
+
 }
 
 

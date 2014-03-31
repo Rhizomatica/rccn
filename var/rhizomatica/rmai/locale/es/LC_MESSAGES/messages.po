@@ -353,3 +353,21 @@ msgstr "Mensaje de difusión se está enviando"
 msgid "ERROR SENDING BROADCAST SMS!"
 msgstr "Error al enviar mensaje de difusión!"
 
+# RESELLERS
+
+msgid "Resellers"
+msgstr "Revendedores"
+
+msgid "List Resellers"
+msgstr "Lista de distribuidores"
+
+msgid "Configuration"
+msgstr "Configuración"
+
+msgid "Resellers invoices"
+msgstr "Revendedores facturas"
+
+msgid "Transactions"
+msgstr "Transacciones"
+
+

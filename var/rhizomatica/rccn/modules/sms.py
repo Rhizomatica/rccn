@@ -118,7 +118,7 @@ class SMS:
 				# dest number is not local, check if dest number is a shortcode
 				if destination in extensions_list:
 					sms_log.info('Destination number is a shortcode, execute shortcode handler')
-					shortcode = importlib.import_module('extensions.ext_'+destination, 'extensions')
+					extension = importlib.import_module('extensions.ext_'+destination, 'extensions')
 					try:
 						sms_log.debug('Exec shortcode handler')
 						extension.handler('',source, destination, text)
@@ -156,7 +156,7 @@ class SMS:
 					sms_log.info('Save SMS in the history')
 					self.save(source,destination,self.context)
         	        except IOError:
-                	        raise SMSException('Error connecting to Kannel to send SMS: %s' % e)
+                	        raise SMSException('Error connecting to Kannel to send SMS')
 		else:
 			try:
 				sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))

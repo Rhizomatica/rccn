@@ -212,6 +212,7 @@ nav ul ul {
 }
 
 	nav ul li:hover > ul {
+		z-index: 100;
 		display: block;
 	}
 

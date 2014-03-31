@@ -37,6 +37,10 @@ slog.setFormatter(formatter)
 
 smslog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/sms.log', 'a', 104857600, 5)
 smslog.setFormatter(formatter)
+
+rlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/reseller.log', 'a', 104857600, 5)
+rlog.setFormatter(formatter)
+
 logging.basicConfig()
 
 
@@ -45,7 +49,7 @@ log = logging.getLogger('RCCN')
 log.addHandler(smlog)
 log.setLevel( logging.DEBUG)
 
-# initialize logger Biller
+# initialize logger BILLING
 bill_log= logging.getLogger('RCCN_BILLING')
 bill_log.addHandler(blog)
 bill_log.setLevel(logging.DEBUG)
@@ -64,6 +68,11 @@ subscription_log.setLevel(logging.DEBUG)
 sms_log = logging.getLogger('RCCN_SMS')
 sms_log.addHandler(smslog)
 sms_log.setLevel(logging.DEBUG)
+
+# initialize logger RESELLER
+res_log = logging.getLogger('RCCN_RESELLER')
+res_log.addHandler(rlog)
+res_log.setLevel(logging.DEBUG)
 
 # Extensions
 class ExtensionException(Exception):
@@ -127,3 +136,7 @@ SMSException = sms.SMSException
 from modules import subscription
 Subscription = subscription.Subscription
 SubscriptionException = subscription.SubscriptionException
+
+from modules import reseller
+Reseller = reseller.Reseller
+ResellerException = reseller.ResellerException

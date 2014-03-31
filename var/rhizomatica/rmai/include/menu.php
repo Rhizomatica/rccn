@@ -40,16 +40,17 @@ function print_menu($select) {
 	echo "</ul>";
 	echo "</li>";
 
-        /*$sel =  ($select == 'resellers') ? 'class="menu_selected"' : '';
-        echo "<li><a href='resellers.php' $sel>Resellers</a>";
+        $sel =  ($select == 'resellers') ? 'class="menu_selected"' : '';
+        echo "<li><a href='resellers.php' $sel>"._("Resellers")."</a>";
         echo "<ul>";
-        echo "<li><a href='resellers_provisioning.php'>Provisioning</a></li>";
-        echo "<li><a href='resellers_credit.php'>Add credit</a></li>";
-	echo "<li><a href='resellers_invoices.php'>Resellers invoices</a></li>";
-	echo "<li><a href=''>Subscribers invoices</a></li>";
+        echo "<li><a href='resellers.php'>"._("List Resellers")."</a></li>";
+        echo "<li><a href='resellers_provisioning.php'>"._("Provisioning")."</a></li>";
+        echo "<li><a href='resellers_credit.php'>"._("Add Credit")."</a></li>";
+	echo "<li><a href='resellers_credit_history.php'>"._("Resellers invoices")."</a></li>";
+	echo "<li><a href='resellers_transactions.php'>"._("Transactions")."</a></li>";
+        echo "<li><a href='resellers_configuration.php'>"._("Configuration")."</a></li>";
         echo "</ul>";
-        echo "</li>";*/
-
+        echo "</li>";
 
 
 	$sel =  ($select == 'credits') ? 'class="menu_selected"' : '';

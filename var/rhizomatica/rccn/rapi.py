@@ -65,7 +65,6 @@ class SubscriberRESTService:
 			sub.add(msisdn,name,balance)
 			data = {'status': 'success', 'error': ''}
 		except SubscriberException as e:
-			print e
 			data = {'status': 'failed', 'error': str(e)}
 		api_log.info(data)
 		return data
@@ -102,6 +101,91 @@ class SubscriberRESTService:
 		return data
 		
 
+class ResellerRESTService:
+        path = '/reseller'
+
+        # get all resellers
+        @route('/')
+        def getAll(self,request):
+                api_log.info('%s - [GET] %s' % (request.getHost().host,self.path))
+                try:
+                        reseller = Subscriber()
+                        data = json.dumps(reseller.get_all(), cls=PGEncoder)
+                except ResellerException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+        # get reseller
+        @route('/<msisdn>')
+        def get(self, request, msisdn):
+                api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path ,msisdn))
+                try:
+                        reseller = Reseller()
+			if msisdn == 'messages':
+                                data = json.dumps(reseller.get_messages(), cls=PGEncoder)
+			else:
+	                        data = json.dumps(reseller.get(msisdn), cls=PGEncoder)
+                except ResellerException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+        # add new reseller
+        @route('/',Http.POST)
+        def post(self,request,msisdn,pin,balance):
+                api_log.info('%s - [POST] %s Data: msisdn:"%s" pin:"%s" balance:"%s"' % (request.getHost().host,self.path,msisdn,pin,balance))
+                try:
+                        reseller = Reseller()
+                        reseller.add(msisdn,pin,balance)
+                        data = {'status': 'success', 'error': ''}
+                except ResellerException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+        # edit reseller
+        @route('/', Http.PUT)
+        def put(self,request,msisdn='',pin='',balance=''):
+                api_log.info('%s - [PUT] %s Data: msisdn:"%s" pin:"%s" balance:"%s"' % (request.getHost().host,self.path,msisdn,pin,balance))
+                try:
+                        reseller = Reseller()
+                        if msisdn != '' and pin != '' or balance != '':
+                                reseller.edit(msisdn,pin,balance)
+                        data = {'status': 'success', 'error': ''}
+                except ResellerException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+	# edit reseller notification messages
+        @route('/edit_messages', Http.PUT)
+        def put(self,request,mess1,mess2,mess3,mess4,mess5,mess6):
+                api_log.info('%s - [PUT] %s/edit_messages Data: mess1:"%s" mess2:"%s" mess3:"%s" mess4:"%s" mess5:"%s" mess6:"%s"' % (request.getHost().host,self.path,mess1,mess2,mess3,mess4,mess5,mess6))
+                try:
+                        reseller = Reseller()
+                        reseller.edit_messages(mess1, mess2, mess3, mess4, mess5, mess6)
+                        data = {'status': 'success', 'error': ''}
+                except ResellerException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+        # delete reseller
+        @route('/<msisdn>', Http.DELETE)
+        def delete(self,request,msisdn):
+                api_log.info('%s - [DELETE] %s/%s' % (request.getHost().host,self.path,msisdn))
+                try:
+                        reseller = Reseller()
+                        reseller.delete(msisdn)
+                        data = {'status': 'success', 'error': ''}
+                except ResellerException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+
+
 class CreditRESTService:
 	path = '/credit'
 
@@ -117,6 +201,21 @@ class CreditRESTService:
                         data = {'status': 'failed', 'error': str(e)}
 		api_log.info(data)
                 return data
+
+
+        @route('/reseller', Http.POST)
+        def post(self, request, msisdn, amount):
+                api_log.info('%s - [POST] %s Data: msisdn:"%s" amount:"%s"' % (request.getHost().host,self.path,msisdn,amount))
+                try:
+                        credit = Credit()
+                        credit.add_to_reseller(msisdn,amount)
+                        data = {'status': 'success', 'error': ''}
+                except CreditException as e:
+                        data = {'status': 'failed', 'error': str(e)}
+                api_log.info(data)
+                return data
+
+
 
 class SMSRESTService:
         path = '/sms'
@@ -347,7 +446,7 @@ class RccnAPI(Daemonizer):
 
 	def main_loop(self):
 		api_log.info('Starting up RCCN API manager')
-		app = RESTResource((SubscriberRESTService(),CreditRESTService(),StatisticsRESTService(),SMSRESTService(),ConfigurationRESTService()))
+		app = RESTResource((SubscriberRESTService(),ResellerRESTService(),CreditRESTService(),StatisticsRESTService(),SMSRESTService(),ConfigurationRESTService()))
 		app.run(8085)
 
 if __name__ == '__main__':
