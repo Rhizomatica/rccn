@@ -137,7 +137,7 @@ create table configuration (
 	charge_inbound_calls		smallint not null default 0,
 	charge_inbound_rate		decimal,
 	charge_inbound_rate_type	varchar,
-	smsc_shortcode			varchar not null default 10000
+	smsc_shortcode			varchar not null default '10000'
 );
 
 

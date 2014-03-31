@@ -73,7 +73,7 @@ class SMS:
 			if not source_authorized and not numbering.is_number_internal(source):
 				sms_log.info('Sender unauthorized send notification message')
 				self.context = 'SMS_UNAUTH'
-				self.send('10000',source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
+				self.send(config['smsc'],source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
 				return
 
 			if numbering.is_number_local(destination):
@@ -106,10 +106,10 @@ class SMS:
 								self.context = 'SMS_UNAUTH'
 								if not source_authorized:
 									sms_log.info('Sender unauthorized send notification message')
-									self.send('10000',source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
+									self.send(config['smsc'],source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
 								else:
 									sms_log.info('Destination unauthorized inform sender with a notification message')
-									self.send('10000',source,'Este usuario no se ha registrado. Él no va a recibir su mensaje.')
+									self.send(config['smsc'],source,'Este usuario no se ha registrado. Él no va a recibir su mensaje.')
 
 				except SubscriberException as e:
 					raise SMSException('Receive SMS error: %s' % e)
@@ -192,7 +192,7 @@ class SMS:
 		sub = Subscriber()
                 subscribers_list = sub.get_all()
 		for mysub in subscribers_list:
-			self.send('10000',mysub[1],text)
+			self.send(config['smsc'],mysub[1],text)
 			sms_log.debug('Broadcast message sent to %s' % mysub[1])
 			time.sleep(1)
 

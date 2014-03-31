@@ -21,13 +21,13 @@ def handler(session, *args):
 		amount = text_data[2]
 	except IndexError:
 		mess = reseller.get_message(1)
-		if mess != None: sms.send('10000',reseller_msisdn,mess)
+		if mess != None: sms.send(config['smsc'],reseller_msisdn,mess)
 		raise ExtensionException('Invalid format')
 
 	if not pin or not subscriber_msisdn or not subscriber_msisdn.isdigit() or not amount or not amount.replace(".", "", 1).isdigit():
 		# send notification invalid text format
 		mess = reseller.get_message(1)
-		if mess != None: sms.send('10000',reseller_msisdn,mess)
+		if mess != None: sms.send(config['smsc'],reseller_msisdn,mess)
 		raise ExtensionException('Invalid format')
 	
 
@@ -38,7 +38,7 @@ def handler(session, *args):
 		reseller.validate_data(pin)
 	except ResellerException as e:
 		mess = reseller.get_message(1)
-		if mess != None: sms.send('10000',reseller_msisdn,mess)
+		if mess != None: sms.send(config['smsc'],reseller_msisdn,mess)
 		raise ExtensionException('Invalid data: %s' % e)
 	
 	try:
@@ -46,8 +46,8 @@ def handler(session, *args):
 	except ResellerException as e:
 		mess2 = reseller.get_message(2)
 		mess3 = reseller.get_message(3)
-		if mess2 != None: sms.send('10000',subscriber_msisdn,mess2)
-		if mess3 != None: sms.send('10000',reseller_msisdn,mess3)
+		if mess2 != None: sms.send(config['smsc'],subscriber_msisdn,mess2)
+		if mess3 != None: sms.send(config['smsc'],reseller_msisdn,mess3)
 		
 	try:
 		reseller.add_subscriber_credit(amount)
@@ -56,18 +56,18 @@ def handler(session, *args):
 		if mess4 != None: 
 			mess4 = mess4.replace('[var1]', str(amount))
 			mess4 = mess4.replace('[var2]', str(reseller.subscriber_balance))
-			sms.send('10000',subscriber_msisdn,mess4)
+			sms.send(config['smsc'],subscriber_msisdn,mess4)
 		mess5 = reseller.get_message(5)
 		if mess5 != None:
 			mess5 = mess5.replace('[var1]', str(amount))
 			mess5 = mess5.replace('[var3]', subscriber_msisdn)
 			mess5 = mess5.replace('[var4]', reseller.balance)
-			sms.send('10000',reseller_msisdn,mess5)
+			sms.send(config['smsc'],reseller_msisdn,mess5)
 	except ResellerException as e:
 		mess6 = reseller.get_message(6)
 		if mess6 != None: 
-			sms.send('10000',subscriber_msisdn,mess6)
-			sms.send('10000',reseller_msisdn,mess6)
+			sms.send(config['smsc'],subscriber_msisdn,mess6)
+			sms.send(config['smsc'],reseller_msisdn,mess6)
 		raise ExtensionException('General error credit could not be added: %s' % e)
 
 	try:

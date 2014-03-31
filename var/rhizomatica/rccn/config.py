@@ -100,7 +100,11 @@ try:
 	config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
 	config['local_ip'] = site_conf['ip_address']
 	
-except psycopg2.DatabaseError, e:
+	# load SMS shortcode into global config
+	cur.execute('SELECT smsc_shortcode FROM configuration')
+	smsc_shortcode = cur.fetchone()
+	config['smsc'] = smsc_shortcode[0]
+except psycopg2.DatabaseError as e:
 	log.error('Database connection error %s' % e)
 
 
