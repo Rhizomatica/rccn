@@ -84,6 +84,8 @@ rrdtool graph $RHIZO_DIR/graphs/cpu-$age.png --start -$age -aPNG -w 600 -l 0 -u 
   GPRINT:minI:"Min %6.2lf%%" \
   GPRINT:avgI:"Avg %6.2lf%%\n"
 
+rrdtool graph $RHIZO_DIR/graphs/temperature-$age.png --start -$age -aPNG --slope-mode -w 600 -t "Temperature" --vertical-label "temperature (°C)" DEF:temp1=$RHIZO_DIR/temperature.rrd:temp:MAX LINE1:temp1#ff0000:"Temperature"
+
 
 rrdtool graph $RHIZO_DIR/graphs/memory-$age.png --start -$age -aPNG -w 600 -t "Memory Usage" \
 "DEF:dsC=$RHIZO_DIR/memory.rrd:cached:AVERAGE" \

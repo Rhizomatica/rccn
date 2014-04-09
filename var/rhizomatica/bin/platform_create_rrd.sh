@@ -22,6 +22,10 @@ RRA:AVERAGE:0.5:6:672 \
 RRA:AVERAGE:0.5:24:732 \
 RRA:AVERAGE:0.5:144:1460
 
+rrdtool create $RHIZO_DIR/temperature.rrd --step 300 \
+DS:temp:GAUGE:600:0:U \
+RRA:MAX:0.5:1:10080
+
 rrdtool create $RHIZO_DIR/memory.rrd --step 300 \
 DS:cached:GAUGE:600:U:U \
 DS:buffer:GAUGE:600:U:U \

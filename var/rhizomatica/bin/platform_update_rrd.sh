@@ -8,6 +8,9 @@ rrdtool update $RHIZO_DIR/loadaverage.rrd N:$loadaverage
 cpustat=`cat /proc/stat|head -1| sed "s/^cpu\ \+\([0-9]*\)\ \([0-9]*\)\ \([0-9]*\)\ \([0-9]*\).*/\1:\2:\3:\4/"`
 rrdtool update $RHIZO_DIR/cpu.rrd N:$cpustat
 
+temperature=`sensors | grep temp1: | head -1 | awk '{print $2}' | sed -e 's/°C//g' -e 's/\+//g'`
+rrdtool update $RHIZO_DIR/temperature.rrd N:$temperature
+
 C=$(egrep ^Cached /proc/meminfo|awk '{print $2}')
 B=$(egrep ^Buffers /proc/meminfo|awk '{print $2}')
 F=$(egrep ^MemFree /proc/meminfo|awk '{print $2}')
