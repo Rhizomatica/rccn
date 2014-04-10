@@ -76,6 +76,10 @@ msgstr ""
 msgid "System Stats"
 msgstr ""
 
+#: include/menu.php:16
+msgid "Network Stats"
+msgstr ""
+
 #: include/menu.php:37
 msgid "Subscribers"
 msgstr ""

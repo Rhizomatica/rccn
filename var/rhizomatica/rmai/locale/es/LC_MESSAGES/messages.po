@@ -72,6 +72,10 @@ msgstr "Cuenta de VOIP"
 msgid "System Stats"
 msgstr "Estadísticas del Sistema"
 
+#: include/menu.php:16
+msgid "Network Stats"
+msgstr "Estadísticas de la Red"
+
 #: include/menu.php:13
 msgid "Site"
 msgstr "Sitio"

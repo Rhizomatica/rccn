@@ -13,6 +13,7 @@ function print_menu($select) {
         echo "<li><a href='site.php'>"._("Site")."</a></li>";
 	echo "<li><a href='account.php'>"._("VOIP Account")."</a></li>";
 	echo "<li><a href='platform_stats.php'>"._("System Stats")."</a></li>";
+	echo "<li><a href='network_stats.php'>"._("Network Stats")."</a></li>";
 	echo "</li>";
 	echo "</ul>";
 
