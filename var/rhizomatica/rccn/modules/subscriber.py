@@ -106,6 +106,58 @@ class Subscriber:
                         raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 			sq_hlr.close()
 
+       def get_online(self):
+                try:
+                        sq_hlr = sqlite3.connect(sq_hlr_path)
+                        sq_hlr_cursor = sq_hlr.cursor()
+                        sq_hlr_cursor.execute("select count(*) from subscriber where length(extension) = 11 and lac > 0")
+                        connected = sq_hlr_cursor.fetchone()
+                        sq_hlr.close()
+                        return connected[0]
+                except sqlite3.Error as e:
+                        raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+                        sq_hlr.close()
+
+        def get_offline(self):
+                try:
+                        sq_hlr = sqlite3.connect(sq_hlr_path)
+                        sq_hlr_cursor = sq_hlr.cursor()
+                        sq_hlr_cursor.execute("select count(*) from subscriber where length(extension) = 11 and lac = 0")
+                        offline = sq_hlr_cursor.fetchone()
+                        sq_hlr.close()
+                        return offline[0]
+                except sqlite3.Error as e:
+                        raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+                        sq_hlr.close()
+
+        def get_unpaid_subscription(self):
+                try:
+                        cur = db_conn.cursor()
+                        cur.execute('SELECT count(*) FROM subscribers WHERE subscription_status=0')
+                        sub = cur.fetchone()
+                        return sub[0]
+                except psycopg2.DatabaseError, e:
+                        raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+
+
+        def get_paid_subscription(self):
+                try:
+                        cur = db_conn.cursor()
+                        cur.execute('SELECT count(*) FROM subscribers WHERE subscription_status=1')
+                        sub = cur.fetchone()
+                        return sub[0]
+                except psycopg2.DatabaseError, e:
+                        raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+
+
+        def get_unauthorized(self):
+                try:
+                        cur = db_conn.cursor()
+                        cur.execute('SELECT count(*) FROM subscribers WHERE authorized=0')
+                        sub = cur.fetchone()
+                        return sub[0]
+                except psycopg2.DatabaseError, e:
+                        raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
 	def get(self, msisdn):
 		try:

@@ -37,6 +37,8 @@ class Subscriber
 		if (!is_array($data)) {
 			if ($data->status == 'failed') {
 				throw new SubscriberException($data->error);
+			} else {
+				return $data;
 			}
 		} else {
 			$this->id = $data[0];

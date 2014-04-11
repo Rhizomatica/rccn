@@ -143,6 +143,26 @@ msgstr "Abonados al Servicio Telefónico"
 msgid "Activation date"
 msgstr "Fecha de Activación"
 
+#: subscribers.php:62
+msgid "Unpaid subscription"
+msgstr "Suscripción no remunerado"
+
+#: subscribers.php:63
+msgid "Unauthorized"
+msgstr "No autorizado"
+
+#: subscribers.php:64
+msgid "Paid subscription"
+msgstr "Suscripción de pago"
+
+#: subscribers.php:65
+msgid "Online"
+msgstr "En linea"
+
+#: subscribers.php:66
+msgid "Offline"
+msgstr "Desconectado"
+
 #: subscriber_edit.php:52 subscribers.php:62 subscribers.php:79
 msgid "Authorized"
 msgstr "Autorizato"

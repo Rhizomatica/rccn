@@ -2,6 +2,7 @@
 
 	require_once('include/header.php');
 	require_once('include/menu.php');
+	require_once('modules/subscriber.php');
 
 ?>
 			<? print_menu('subscribers'); ?>
@@ -48,7 +49,26 @@
 
                         });
                         
-	                </script>
+	                </script><br/>
+                        <?php
+                            try {
+                                $sub = new Subscriber();
+                                $unpaid_subscribers = $sub->get('unpaid_subscription');
+                                $unauthorized_subscribers = $sub->get('unauthorized');
+                                $paid_subscribers = $sub->get('paid_subscription');
+                                $online = $sub->get('online');
+                                $offline = $sub->get('offline');
+                                echo "<div>";
+                                echo "<div class='left_box' style='margin-left:10px;'>"._("Unpaid subscription").": <b>$unpaid_subscribers</b></div>";
+                                echo "<div class='left_box'>"._("Unauthorized").": <b>$unauthorized_subscribers</b></div>";
+                                echo "<div class='left_box'>"._("Paid subscription").": <b>$paid_subscribers</b></div>";
+                                echo "<div class='left_box'>"._("Online").": <b>$online</b></div>";
+                                echo "<div class='left_box'>"._("Offline").": <b>$offline</b></div>";
+                                echo "</div>";
+
+                            }
+                            catch (SubscriberException $e) { }
+                        ?>
 
 
 			<h1><?= _('Subscribers Phones') ?></h1><br/>

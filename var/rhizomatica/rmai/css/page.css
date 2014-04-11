@@ -297,3 +297,8 @@ nav ul {
 .center {
 	align: center;
 }
+
+.left_box {
+        float: left;
+        margin-left: 30px;
+}

@@ -48,12 +48,22 @@ class SubscriberRESTService:
 			sub = Subscriber()
 			if msisdn == 'all_connected':
 				data = json.dumps(sub.get_all_connected(), cls=PGEncoder)
+			elif msisdn == 'unpaid_subscription':
+				data = json.dumps(sub.get_unpaid_subscription(), cls=PGEncoder)
+			elif msisdn == 'paid_subscription':
+				data = json.dumps(sub.get_paid_subscription(), cls=PGEncoder)
+			elif msisdn == 'unauthorized':
+				data = json.dumps(sub.get_unauthorized(), cls=PGEncoder)
+			elif msisdn == 'online':
+				data = json.dumps(sub.get_online(), cls=PGEncoder)
+			elif msisdn == 'offline':
+				data = json.dumps(sub.get_offline(), cls=PGEncoder)
 			else:
 				data = json.dumps(sub.get(msisdn), cls=PGEncoder)
 		except SubscriberException as e:
-			print e
 			data = {'status': 'failed', 'error': str(e)}
-		api_log.info(data)
+		if msisdn != 'all_connected':
+			api_log.info(data)
 		return data
  
 	# add new subscriber

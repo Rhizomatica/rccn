@@ -143,6 +143,26 @@ msgstr ""
 msgid "Activation date"
 msgstr ""
 
+#: subscribers.php:62
+msgid "Unpaid subscription"
+msgstr ""
+
+#: subscribers.php:63
+msgid "Unauthorized"
+msgstr ""
+
+#: subscribers.php:64
+msgid "Paid subscription"
+msgstr ""
+
+#: subscribers.php:65
+msgid "Online"
+msgstr ""
+
+#: subscribers.php:66
+msgid "Offline"
+msgstr ""
+
 #: subscriber_edit.php:52 subscribers.php:62 subscribers.php:79
 msgid "Authorized"
 msgstr ""
