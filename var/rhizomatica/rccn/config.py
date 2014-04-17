@@ -101,9 +101,11 @@ try:
 	config['local_ip'] = site_conf['ip_address']
 	
 	# load SMS shortcode into global config
-	cur.execute('SELECT smsc_shortcode FROM configuration')
-	smsc_shortcode = cur.fetchone()
-	config['smsc'] = smsc_shortcode[0]
+	cur.execute('SELECT smsc_shortcode,sms_sender_unauthorized,sms_destination_unauthorized FROM configuration')
+	smsc = cur.fetchone()
+	config['smsc'] = smsc[0]
+	config['sms_sender_unauthorized'] = smsc[1]
+	config['sms_destination_unauthorized'] = smsc[2]
 except psycopg2.DatabaseError as e:
 	log.error('Database connection error %s' % e)
 

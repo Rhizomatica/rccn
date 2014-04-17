@@ -191,6 +191,6 @@ class Context:
 		try:
 			site_ip = self.numbering.get_site_ip(self.destination_number)
 			log.info('Send call to site IP: %s' % site_ip)
-			self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+self.destination_number+'@'+site_ip+':5060')
+			self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
 		except NumberingException as e:
 			log.error(e)

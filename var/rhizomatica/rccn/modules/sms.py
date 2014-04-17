@@ -73,7 +73,7 @@ class SMS:
 			if not source_authorized and not numbering.is_number_internal(source):
 				sms_log.info('Sender unauthorized send notification message')
 				self.context = 'SMS_UNAUTH'
-				self.send(config['smsc'],source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
+				self.send(config['smsc'],source,config['sms_source_unauthorized'])
 				return
 
 			if numbering.is_number_local(destination):
@@ -106,10 +106,10 @@ class SMS:
 								self.context = 'SMS_UNAUTH'
 								if not source_authorized:
 									sms_log.info('Sender unauthorized send notification message')
-									self.send(config['smsc'],source,'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.')
+									self.send(config['smsc'],source,config['sms_source_unauthorized'])
 								else:
 									sms_log.info('Destination unauthorized inform sender with a notification message')
-									self.send(config['smsc'],source,'Este usuario no se ha registrado. Él no va a recibir su mensaje.')
+									self.send(config['smsc'],source,config['sms_destination_unauthorized'])
 
 				except SubscriberException as e:
 					raise SMSException('Receive SMS error: %s' % e)
@@ -185,7 +185,7 @@ class SMS:
 		appstring = "OpenBSC"
 		appport = 4242
 		vty = obscvty.VTYInteract(appstring, "127.0.0.1", appport)
-		cmd = 'subscriber extension %s sms sender extension 10000 send %s' % (num,text)
+		cmd = 'subscriber extension %s sms sender extension %s send %s' % (num,config['smsc'],text)
 		vty.command(cmd)
 
 	def broadcast_to_all_subscribers(self, text):
