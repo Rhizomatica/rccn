@@ -28,38 +28,35 @@ reminder_msg = 'Recuerda: su servicio sera desactivado si no paga su cuota antes
 deactivate_msg = 'Su servicio ha sido desactivado hasta que haga su cooperacion mensual.'
 
 if len(sys.argv) > 2:
-	print 'RCCN Subscription Checker\n'
-	print 'Usage: %s [notice|reminder|deactivate]' % sys.argv[0]
-        sys.exit(1)
-
+    print 'RCCN Subscription Checker\n'
+    print 'Usage: %s [notice|reminder|deactivate]' % sys.argv[0]
+    sys.exit(1)
 
 action = sys.argv[1]
 
 rsc = Subscription(subscription_log)
 
 if action == 'notice':
-	subscription_log.info('Send notification to all subscribers to pay the subscription fee')
-	try:
-		totalsub = rsc.update_subscriptions(0)
-		subscription_log.info('Updated subscription status to unpaid for %d subscribers' % totalsub)
-		subscription_log.info('Send SMS of paying the subscription fee to all subscribers')
-		rsc.send_subscription_fee_notice(notice_msg)
-	except SubscriptionException as e:
-		subscription_log.error('%s' % e)
+    subscription_log.info('Send notification to all subscribers to pay the subscription fee')
+    try:
+        totalsub = rsc.update_subscriptions(0)
+        subscription_log.info('Updated subscription status to unpaid for %d subscribers' % totalsub)
+        subscription_log.info('Send SMS of paying the subscription fee to all subscribers')
+        rsc.send_subscription_fee_notice(notice_msg)
+    except SubscriptionException as e:
+        subscription_log.error('%s' % e)
 elif action == 'reminder':
-	subscription_log.info('Send reminder to all subscribers that haven\'t yet paid the subscription')
-	try:
-		rsc.send_subscription_fee_reminder(reminder_msg)
-	except SubscriptionException as e:
-		subscription_log.error('%s' % e)
+    subscription_log.info('Send reminder to all subscribers that haven\'t yet paid the subscription')
+    try:
+        rsc.send_subscription_fee_reminder(reminder_msg)
+    except SubscriptionException as e:
+        subscription_log.error('%s' % e)
 elif action == 'deactivate':
-	subscription_log.info('Deactivate all subscribers that haven\'t paid their subscription fee')
-	try:
-		rsc.deactivate_subscriptions(deactivate_msg)
-	except SubscriptionException as e:
-		subscription_log.error('%s' % e)
+    subscription_log.info('Deactivate all subscribers that haven\'t paid their subscription fee')
+    try:
+        rsc.deactivate_subscriptions(deactivate_msg)
+    except SubscriptionException as e:
+        subscription_log.error('%s' % e)
 else:
-	subscription_log.info('Invalid option')
-	sys.exit(1)	
-
-
+    subscription_log.info('Invalid option')
+    sys.exit(1)

@@ -13,4 +13,3 @@ online_noreg_subs=`echo "select count(*) from Subscriber where length(extension)
 rrdtool update $RHIZO_DIR/hlr.rrd N:$online_reg_subs:$online_noreg_subs
 
 $RHIZO_DIR/../bin/network_graph_rrd.sh > /dev/null
-

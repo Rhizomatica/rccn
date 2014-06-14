@@ -47,5 +47,6 @@ rrdtool graph --start -$age -v 'subscribers' -w 600 -t "Online not registered su
 'GPRINT:onlinenoreg:AVERAGE:Average\:%6.0lf %s' \
 'GPRINT:onlinenoreg:MAX:Maximum\:%6.0lf %s'
 
+
 done
 

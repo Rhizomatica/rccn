@@ -37,6 +37,7 @@ create table subscribers (
 	authorized	smallint not null default 0,
 	balance		decimal not null default 0.00,
 	subscription_status	smallint not null default 0,
+        subscription_date       timestamp default current_timestamp,
 	created		timestamp default current_timestamp
 );
 CREATE UNIQUE INDEX msisdn_index ON subscribers(msisdn);

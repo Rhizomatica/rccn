@@ -19,7 +19,6 @@ class Credit
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
 			throw new CreditException($e->getMessage());
 		}
-			
                 $data = $response->body;
                 if ($data->status == 'failed') {
                         throw new CreditException($data->error);
@@ -42,13 +41,6 @@ class Credit
 
 }
 
-
-/*$credit = new Credit();
-try {
-	$credit->add('INV002','68820123991',2.00);
-} catch (CreditException $e) {
-	echo $e->getMessage();
-}*/
 
 
 ?>

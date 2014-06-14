@@ -28,93 +28,92 @@ from subscriber import Subscriber, SubscriberException
 from sms import SMS, SMSException
 
 class SubscriptionException(Exception):
-        pass
+    pass
 
 class Subscription:
 
-	def __init__(self, logger):
-		self.logger = logger
+    def __init__(self, logger):
+        self.logger = logger
 
-	def get_unpaid_subscriptions(self):
-		# get all subscribers that haven't paid yet
-		try:
-                        cur = db_conn.cursor()
-                        cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
-			count = cur.rowcount
-                        if count > 0:
-                                subscribers_list = cur.fetchall()
-				self.logger.info('Found %s subscribers with unpaid subscription to the service' % count)
-				return subscribers_list
-                        else:
-				self.logger.info('PG_HLR Everyone paid, we are good to go')
-                except psycopg2.DatabaseError, e:
-                        raise SubscriptionException('PG_HLR error getting subscribers subscription_status: %s' % e)
+    def get_unpaid_subscriptions(self):
+        # get all subscribers that haven't paid yet
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
+            count = cur.rowcount
+            if count > 0:
+                subscribers_list = cur.fetchall()
+                self.logger.info('Found %s subscribers with unpaid subscription to the service' % count)
+                return subscribers_list
+            else:
+                self.logger.info('PG_HLR Everyone paid, we are good to go')
+        except psycopg2.DatabaseError as e:
+            raise SubscriptionException('PG_HLR error getting subscribers subscription_status: %s' % e)
 
 
-        def update_subscriptions(self, status):
+    def update_subscriptions(self, status):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('UPDATE subscribers SET subscription_status=%(status)d' % {'status': status})
+            count = cur.rowcount
+            if count > 0:
+                db_conn.commit()
+                return count
+            else:
+                self.logger.info('PG_HLR No subscribers to update status found')
+        except psycopg2.DatabaseError as e:
+            raise SubscriptionException('PG_HLR error in updating subscriptions status: %s' % e)
+
+    def deactivate_subscriptions(self, msg):
+        try:
+            sms = SMS()
+            cur = db_conn.cursor()
+            cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
+            count = cur.rowcount
+            if count > 0:
+                self.logger.info('Found %d subscribers to be deactivated' % count)
+                subscribers_list = cur.fetchall()
+                for mysub in subscribers_list:
+                    self.logger.debug('Send SMS that account is deactivated to %s' % mysub[0])
+                    sms.send_immediate(mysub[0], msg)
+                
                 try:
-                        cur = db_conn.cursor()
-                        cur.execute('UPDATE subscribers SET subscription_status=%(status)d' % {'status': status})
-			count = cur.rowcount
-                        if count > 0:
-                                db_conn.commit()
-				return count
-                        else:
-				self.logger.info('PG_HLR No subscribers to update status found')
+                    cur = db_conn.cursor()
+                    cur.execute('UPDATE subscribers SET authorized=0 WHERE subscription_status=0')
+                    count = cur.rowcount
+                    if count > 0:
+                        db_conn.commit()
+                        self.logger.info('Subscription deactivated for %d subscribers' % count)
                 except psycopg2.DatabaseError as e:
-			raise SubscriptionException('PG_HLR error in updating subscriptions status: %s' % e)
-
-	def deactivate_subscriptions(self,msg):
-		try:
-			sms = SMS()
-			cur = db_conn.cursor()
-                        cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
-                        count = cur.rowcount
-                        if count > 0:
-				self.logger.info('Found %d subscribers to be deactivated' % count)
-                                subscribers_list = cur.fetchall()
-				for mysub in subscribers_list:
-					self.logger.debug('Send SMS that account is deactivated to %s' % mysub[0])
-					sms.send_immediate(mysub[0],msg)
-				
-				try:
-					cur = db_conn.cursor()
-					cur.execute('UPDATE subscribers SET authorized=0 WHERE subscription_status=0')
-					count = cur.rowcount
-					if count > 0:
-						db_conn.commit()
-						self.logger.info('Subscription deactivated for %d subscribers' % count)
-				except psycopg2.DatabaseError as e:
-					raise SubscriptionException('PG_HLR error in deactivating subscriptions: %s' % e)
-			else:
-				self.logger.info('No subscribers need to be deactivate')
-		except psycopg2.DatabaseError as e:
-			raise SubscriptionException('PG_HLR error in checking subscriptions to deactivate: %s' % e)
+                    raise SubscriptionException('PG_HLR error in deactivating subscriptions: %s' % e)
+            else:
+                self.logger.info('No subscribers need to be deactivate')
+        except psycopg2.DatabaseError as e:
+            raise SubscriptionException('PG_HLR error in checking subscriptions to deactivate: %s' % e)
 
 
-	def send_subscription_fee_notice(self, msg):
-		# get all subscribers
-		try:
-			sub = Subscriber()
-			subscribers_list = sub.get_all()
-		except SubscriberException as e:
-			raise SubscriptionException('%s' % e)
+    def send_subscription_fee_notice(self, msg):
+        # get all subscribers
+        try:
+            sub = Subscriber()
+            subscribers_list = sub.get_all()
+        except SubscriberException as e:
+            raise SubscriptionException('%s' % e)
 
-		sms = SMS()
+        sms = SMS()
 
-		for mysub in subscribers_list:
-			self.logger.debug("Send sms to %s %s" % (mysub[1],msg))
-			sms.send_immediate(mysub[1],msg)
+        for mysub in subscribers_list:
+            self.logger.debug("Send sms to %s %s" % (mysub[1], msg))
+            sms.send_immediate(mysub[1], msg)
 
-	def send_subscription_fee_reminder(self, msg):
-		try:
-			subscribers_list = self.get_unpaid_subscriptions()
-		except SubscriptionException as e:
-			raise SubscribtionException('ERROR in getting unpaid subscriptions')
+    def send_subscription_fee_reminder(self, msg):
+        try:
+            subscribers_list = self.get_unpaid_subscriptions()
+        except SubscriptionException as e:
+            raise SubscribtionException('ERROR in getting unpaid subscriptions')
 
-		sms = SMS()
-		
-		for mysub in subscribers_list:
-			self.logger.debug("Send sms to %s %s" % (mysub[0],msg))
-			sms.send_immediate(mysub[0],msg)
-	
+        sms = SMS()
+        
+        for mysub in subscribers_list:
+            self.logger.debug("Send sms to %s %s" % (mysub[0], msg))
+            sms.send_immediate(mysub[0], msg) 

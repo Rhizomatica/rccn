@@ -24,50 +24,79 @@ import sys
 sys.path.append("..")
 from config import *
 
+from reseller import Reseller, ResellerException
 from subscriber import Subscriber, SubscriberException 
 
 class CreditException(Exception):
-        pass
+    pass
 
 class Credit:
 
-	def add(self, msisdn, credit):
-		sub = Subscriber()
-		try:
-			mysub = sub.get(msisdn)
-		except SubscriberException as e:
-			raise CreditException(e)
+    def add(self, msisdn, credit):
+        sub = Subscriber()
+        try:
+            mysub = sub.get(msisdn)
+        except SubscriberException as e:
+            raise CreditException(e)
 
-		current_balance = sub.get_balance(msisdn)
-		new_balance = Decimal(str(credit)) + Decimal(str(current_balance))
+        current_balance = sub.get_balance(msisdn)
+        new_balance = Decimal(str(credit)) + Decimal(str(current_balance))
 
-		# update subscriber balance
-		try:
-			cur = db_conn.cursor()
-			cur.execute('UPDATE subscribers SET balance=%(new_balance)s WHERE msisdn=%(msisdn)s', {'new_balance': Decimal(str(new_balance)), 'msisdn': msisdn})
-                except psycopg2.DatabaseError as e:
-                        raise CreditException('PG_HLR error updating subscriber balance: %s' % e)
+        # update subscriber balance
+        try:
+            cur = db_conn.cursor()
+            cur.execute('UPDATE subscribers SET balance=%(new_balance)s WHERE msisdn=%(msisdn)s', {'new_balance': Decimal(str(new_balance)), 'msisdn': msisdn})
+        except psycopg2.DatabaseError as e:
+            raise CreditException('PG_HLR error updating subscriber balance: %s' % e)
 
-		# insert transaction into the credit history
-		try:
-			cur = db_conn.cursor()
-			cur.execute('INSERT INTO credit_history(msisdn,previous_balance,current_balance,amount) VALUES(%s,%s,%s,%s)', (msisdn, current_balance, new_balance, credit))
-		except psycopg2.DatabaseError as e:
-			db_conn.rollback()
-			raise CreditException('PG_HLR error inserting invoice in the history: %s' % e)
-		finally:
-			db_conn.commit()
+        # insert transaction into the credit history
+        try:
+            cur = db_conn.cursor()
+            cur.execute('INSERT INTO credit_history(msisdn,previous_balance,current_balance,amount) VALUES(%s,%s,%s,%s)', (msisdn, current_balance, new_balance, credit))
+        except psycopg2.DatabaseError as e:
+            db_conn.rollback()
+            raise CreditException('PG_HLR error inserting invoice in the history: %s' % e)
+        finally:
+            db_conn.commit()
 
+    def add_to_reseller(self, msisdn, credit):
+        reseller = Reseller()
+        try:
+            myres = reseller.get(msisdn)
+        except ResellerException as e:
+            raise CreditException(e)
+
+        reseller.reseller_msisdn = msisdn
+        current_balance = reseller.get_balance()
+        new_balance = Decimal(str(credit)) + Decimal(str(current_balance))
+
+        # update subscriber balance
+        try:
+            cur = db_conn.cursor()
+            cur.execute('UPDATE resellers SET balance=%(new_balance)s WHERE msisdn=%(msisdn)s', {'new_balance': Decimal(str(new_balance)), 'msisdn': msisdn})
+        except psycopg2.DatabaseError as e:
+            raise CreditException('PG_HLR error updating reseller balance: %s' % e)
+
+        # insert transaction into the credit history
+        try:
+            cur = db_conn.cursor()
+            cur.execute('INSERT INTO resellers_credit_history(msisdn,previous_balance,current_balance,amount) VALUES(%s,%s,%s,%s)', (msisdn, Decimal(str(current_balance)), 
+            Decimal(str(new_balance)), Decimal(str(credit))))
+        except psycopg2.DatabaseError as e:
+            db_conn.rollback()
+            raise CreditException('PG_HLR error inserting reseller invoice in the history: %s' % e)
+        finally:
+            db_conn.commit()
 
 if __name__ == '__main__':
-	credit = Credit()
-	#sub.set_balance('68820110010',3.86)
-	try:
-		#sub.add('37511','Antanz',4.00)
-		#sub.edit('68820137511','Antanz_edit',3.86)
-		credit.add('68820137514', 1.00)
-		#a = sub.get('68820137511')
-		#print a
-		#sub.delete('68820137511')
-	except CreditException as e:
-		print "Error: %s" % e
+    credit = Credit()
+    #sub.set_balance('68820110010',3.86)
+    try:
+        #sub.add('37511','Antanz',4.00)
+        #sub.edit('68820137511','Antanz_edit',3.86)
+        credit.add('68820137514', 1.00)
+        #a = sub.get('68820137511')
+        #print a
+        #sub.delete('68820137511')
+    except CreditException as e:
+        print "Error: %s" % e

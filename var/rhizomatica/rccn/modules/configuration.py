@@ -25,63 +25,62 @@ sys.path.append("..")
 from config import *
 
 class ConfigurationException(Exception):
-	pass
+    pass
 
 class Configuration:
 
-	def get_site(self):
-		try:
-			cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-			cur.execute('SELECT * from site')
-			site_conf = cur.fetchone()
-			if site_conf != None:
-				return site_conf
-		except psycopg2.DatabaseError as e:
-			raise ConfigurationException('Database error getting site info: %s' % e)	
-	
-	def get_site_config(self):
-		try:
-			cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-			cur.execute('SELECT * from configuration')
-			site_conf = cur.fetchone()
-			if site_conf != None:
-				return site_conf
-		except psycopg2.DatabaseError as e:
-			raise ConfigurationException('Database error getting site config: %s' % e)
-	
-	def get_local_calls_limit(self):
-		try:
-			cur = db_conn.cursor()
-			cur.execute('SELECT limit_local_calls,limit_local_minutes FROM configuration')
-			limit = cur.fetchone()
-			if limit != None:
-				return (limit[0],limit[1]*60)
-			else:
-				return False
-		except psycopg2.DatabaseError as e:
-			raise ConfigurationException('Database error checking for local calls limit: %s' % e)
+    def get_site(self):
+        try:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT * from site')
+            site_conf = cur.fetchone()
+            if site_conf != None:
+                return site_conf
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error getting site info: %s' % e)    
+    
+    def get_site_config(self):
+        try:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT * from configuration')
+            site_conf = cur.fetchone()
+            if site_conf != None:
+                return site_conf
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error getting site config: %s' % e)
+    
+    def get_local_calls_limit(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT limit_local_calls,limit_local_minutes FROM configuration')
+            limit = cur.fetchone()
+            if limit != None:
+                return (limit[0], limit[1] * 60)
+            else:
+                return False
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error checking for local calls limit: %s' % e)
 
-	def check_charge_inbound_calls(self):
-		try:
-			cur = db_conn.cursor()
-			cur.execute('SELECT charge_inbound_calls FROM configuration')
-			charge = cur.fetchone()
-			if charge != None:
-				return charge[0]
-			else:
-				return False
-		except psycopg2.DatabaseError as e:
-			raise ConfigurationException('Database error checking for charge inbound calls: %s' % e)
-			
-	def get_charge_inbound_calls(self):
-		try:
-			cur = db_conn.cursor()
-			cur.execute('SELECT charge_inbound_rate,charge_inbound_rate_type FROM configuration')
-			charge = cur.fetchone()
-			if charge != None:
-				return charge
-			else:
-				raise ConfigurationException('No configuration found for charging inbound calls')
-		except psycopg2.DatabaseError as e:
-			raise ConfigurationException('Database error getting info for charging inbound calls: %s' % e) 	
-
+    def check_charge_inbound_calls(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT charge_inbound_calls FROM configuration')
+            charge = cur.fetchone()
+            if charge != None:
+                return charge[0]
+            else:
+                return False
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error checking for charge inbound calls: %s' % e)
+            
+    def get_charge_inbound_calls(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT charge_inbound_rate,charge_inbound_rate_type FROM configuration')
+            charge = cur.fetchone()
+            if charge != None:
+                return charge
+            else:
+                raise ConfigurationException('No configuration found for charging inbound calls')
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error getting info for charging inbound calls: %s' % e)

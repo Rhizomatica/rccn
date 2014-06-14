@@ -9,12 +9,12 @@ from decimal import Decimal
 from datetime import date
 
 class PGEncoder(json.JSONEncoder):
-	def default(self, obj):
-		if isinstance(obj, date):
-			return str(obj)
-		if isinstance(obj, Decimal):
-			return str(obj)
-		return json.JSONEncoder.default(self, obj)
+    def default(self, obj):
+        if isinstance(obj, date):
+            return str(obj)
+        if isinstance(obj, Decimal):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 # paths
@@ -43,14 +43,13 @@ rlog.setFormatter(formatter)
 
 logging.basicConfig()
 
-
 # initialize logger RCCN
 log = logging.getLogger('RCCN')
 log.addHandler(smlog)
 log.setLevel( logging.DEBUG)
 
 # initialize logger BILLING
-bill_log= logging.getLogger('RCCN_BILLING')
+bill_log = logging.getLogger('RCCN_BILLING')
 bill_log.addHandler(blog)
 bill_log.setLevel(logging.DEBUG)
 
@@ -76,38 +75,38 @@ res_log.setLevel(logging.DEBUG)
 
 # Extensions
 class ExtensionException(Exception):
-        pass
+    pass
 
 extensions_list = []
 os.chdir(rhizomatica_dir+'/rccn/extensions/')
 files = glob.glob(rhizomatica_dir+'/rccn/extensions/ext_*.py')
 for f in files:
-        file_name = f.rpartition('.')[0]
-        ext_name = file_name.split('_')[1]
-        extensions_list.append(ext_name)
+    file_name = f.rpartition('.')[0]
+    ext_name = file_name.split('_')[1]
+    extensions_list.append(ext_name)
 
 
 # initialize DB handler
 db_conn = None
 config = {}
 try:
-	db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu',host='localhost')
-	cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-	cur.execute('SELECT * from site')
-	site_conf = cur.fetchone()
-	
-	config['site_name'] = site_conf['site_name']
-	config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
-	config['local_ip'] = site_conf['ip_address']
-	
-	# load SMS shortcode into global config
-	cur.execute('SELECT smsc_shortcode,sms_sender_unauthorized,sms_destination_unauthorized FROM configuration')
-	smsc = cur.fetchone()
-	config['smsc'] = smsc[0]
-	config['sms_sender_unauthorized'] = smsc[1]
-	config['sms_destination_unauthorized'] = smsc[2]
+    db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu', host='localhost')
+    cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT * from site')
+    site_conf = cur.fetchone()
+    
+    config['site_name'] = site_conf['site_name']
+    config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
+    config['local_ip'] = site_conf['ip_address']
+    
+    # load SMS shortcode into global config
+    cur.execute('SELECT smsc_shortcode,sms_sender_unauthorized,sms_destination_unauthorized FROM configuration')
+    smsc = cur.fetchone()
+    config['smsc'] = smsc[0]
+    config['sms_source_unauthorized'] = smsc[1]
+    config['sms_destination_unauthorized'] = smsc[2]
 except psycopg2.DatabaseError as e:
-	log.error('Database connection error %s' % e)
+    log.error('Database connection error %s' % e)
 
 
 # load modules

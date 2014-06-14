@@ -1,6 +1,6 @@
 ############################################################################
 #
-#  RCCN (Rhizomatica Community Cellular Network)
+# RCCN (Rhizomatica Community Cellular Network)
 #
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
 #
@@ -19,46 +19,47 @@
 #
 ############################################################################
 
-
 from config import *
 from dialplan import Dialplan
 from freeswitch import *
 
-
 def hangup_hook(session, what):
-	return
+    """ Unused hangup hook """
+    return
 
-def fsapi(session,stream,event,args):
-	to_be_billed = session.getVariable("billing")
-	duration = int(session.getVariable('billsec'))
-	context = session.getVariable('context')
-	destination_number = session.getVariable('destination_number')
-	subscriber = session.getVariable('caller_id_number')
-	if to_be_billed == "1" and duration != 0:
-		biller = Billing()
-		biller.bill(session,subscriber,destination_number,context,duration)
-	else:	
-		bill_log.info('===========================================================================')
-		bill_log.info('Do not bill call for %s on context %s with duration %s' % (subscriber,context.upper(),duration))
+def fsapi(session, stream, event, args):
+    """ Handler when the call is hangup. used for billing """
+    to_be_billed = session.getVariable("billing")
+    duration = int(session.getVariable('billsec'))
+    context = session.getVariable('context')
+    destination_number = session.getVariable('destination_number')
+    subscriber = session.getVariable('caller_id_number')
+    if to_be_billed == "1" and duration != 0:
+        biller = Billing()
+        biller.bill(session, subscriber, destination_number, context, duration)
+    else:   
+        bill_log.info('===========================================================================')
+        bill_log.info('Do not bill call for %s on context %s with duration %s' % (subscriber, context.upper(), duration))
 
 def input_callback(session, what, obj):
-	if (what == "dtmf"):
-		consoleLog("info", what + " " + obj.digit + "\n")
-	else:
-		consoleLog("info", what + " " + obj.serialize() + "\n")		
-	return "pause"
+    if (what == "dtmf"):
+        consoleLog("info", what + " " + obj.digit + "\n")
+    else:
+        consoleLog("info", what + " " + obj.serialize() + "\n")     
+    return "pause"
 
 def handler(session, args):
-	session.setVariable('billing', '0')
-	destination_number = session.getVariable("destination_number")	
-	dialplan = Dialplan(session)
-	log.info('===========================================================================')
-	log.info("Lookup dialplan for called number: %s" % destination_number)
-	dialplan.lookup()
+    """ Main calls handler """
+    session.setVariable('billing', '0')
+    destination_number = session.getVariable("destination_number")  
+    dialplan = Dialplan(session)
+    log.info('===========================================================================')
+    log.info("Lookup dialplan for called number: %s" % destination_number)
+    dialplan.lookup()
 
 def xml_fetch(params):
 
-	xml = '''
+    xml = '''
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="freeswitch/xml">
   <section name="dialplan" description="RE Dial Plan For FreeSWITCH">
@@ -73,9 +74,4 @@ def xml_fetch(params):
   </section>
 </document>
 '''
-
-	return xml
-
-
-
-
+    return xml
