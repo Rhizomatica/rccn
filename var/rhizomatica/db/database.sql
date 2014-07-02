@@ -1,4 +1,11 @@
-create table cdr (
+CREATE TABLE meta (
+	id  serial primary key,
+	key varchar not null,
+	value varchar not null
+);
+INSERT INTO meta(key,value) VALUES ('db_revision','9');
+
+CREATE TABLE cdr (
     id                        serial primary key,
     local_ip_v4               inet not null,
     caller_id_name            varchar,
@@ -21,16 +28,27 @@ create table cdr (
     destination_name          varchar,
     cost      		      decimal
 );
+CREATE INDEX caller_id_number_index ON cdr(caller_id_number);
+CREATE INDEX destination_number_index ON cdr(destination_number);
+CREATE INDEX start_stamp_index ON cdr(start_stamp);
+CREATE INDEX context_index ON cdr(context);
+CREATE INDEX destination_name_index ON cdr(destination_name);
 
-create table sms (
+
+CREATE TABLE sms (
 	id			serial primary key,
 	source_addr		varchar not null,
 	destination_addr 	varchar not null,
 	context			varchar,
 	send_stamp		timestamp default current_timestamp
 );
+CREATE INDEX source_addr_index ON sms(source_addr);
+CREATE INDEX destination_addr ON sms(destination_addr);
+CREATE INDEX context_sms_index ON sms(context);
+CREATE INDEX send_stamp_index ON sms(send_stamp);
 
-create table subscribers (
+
+CREATE TABLE subscribers (
 	id		serial primary key,
 	msisdn 		varchar,
 	name		varchar,
@@ -59,8 +77,7 @@ CREATE TRIGGER check_subscription_change
     WHEN (OLD.subscription_status != NEW.subscription_status)
     EXECUTE PROCEDURE update_subscription_change_date();
 
-
-create table credit_history (
+CREATE TABLE credit_history (
 	id			serial primary key,
 	receipt_id		varchar not null,
 	msisdn			varchar not null,
@@ -69,6 +86,9 @@ create table credit_history (
 	amount			decimal not null,
 	created	timestamp 	default current_timestamp
 );
+CREATE INDEX msidn_credit_history_index ON credit_history(msisdn);
+CREATE INDEX created_index ON credit_history(created);
+
 
 -- function to generate receipt number based on the table sequence
 CREATE OR REPLACE FUNCTION gen_receipt_number() RETURNS TRIGGER AS $$
@@ -87,7 +107,7 @@ CREATE TRIGGER t_receipt_number
    EXECUTE PROCEDURE gen_receipt_number('INV','credit_history_id_seq');
 
 
-create table site (
+CREATE TABLE site (
 	site_name		varchar not null,
 	postcode		varchar not null,
 	pbxcode 		varchar not null,
@@ -95,9 +115,7 @@ create table site (
 	ip_address		varchar not null
 );
 
---insert into site(site_name,postcode,pbxcode,network_name,ip_address) values('Talea','68820','1','Talea Red Cellular','10.66.0.10');
-
-create table providers (
+CREATE TABLE providers (
 	id			serial primary key,
 	provider_name		varchar not null,
 	username		varchar not null,
@@ -107,7 +125,7 @@ create table providers (
 	active			smallint not null default 0
 );
 
-create table dids (
+CREATE TABLE dids (
 	id			serial primary key,
 	provider_id		int not null,
 	subscriber_number	varchar,
@@ -115,18 +133,14 @@ create table dids (
 	callerid		varchar
 );
 
---insert into dids(provider_id,phonenumber) values(1,'5547382004');
---insert into dids(provider_id,subscriber_number,phonenumber) values(1,'68820110010','rhizo1');
-
-
-create table rates (
+CREATE TABLE rates (
 	id			serial primary key,
 	destination		varchar not null,
 	prefix			varchar not null,
 	cost			decimal not null
 );
 
-create table configuration (
+CREATE TABLE configuration (
 	limit_local_calls		smallint not null default 0,
 	limit_local_minutes		integer,
 	charge_local_calls		smallint not null default 0,
@@ -144,7 +158,7 @@ create table configuration (
 );
 
 
-create table users (
+CREATE TABLE users (
 	id		serial primary key,
 	username	varchar not null,
 	password	varchar not null,
@@ -171,6 +185,8 @@ CREATE TABLE resellers_credit_history (
         current_balance  decimal,
         amount           decimal
 );
+CREATE INDEX created_res_hist_index ON resellers_credit_history(created);
+CREATE INDEX msisdn_res_index ON resellers_credit_history(msisdn);
 
 
 CREATE TRIGGER t_reseller_receipt_number
@@ -179,13 +195,16 @@ CREATE TRIGGER t_reseller_receipt_number
    EXECUTE PROCEDURE gen_receipt_number('RNV','resellers_credit_history_id_seq');
 
 
-CREATE TABLE resellers_transactions(
+CREATE TABLE resellers_transactions (
         id                      serial primary key,
         created                 timestamp default current_timestamp,
         reseller_msisdn         varchar not null,
         subscriber_msisdn       varchar not null,
         amount                  decimal not null
 );
+CREATE INDEX created_res_tran_index ON resellers_transactions(created);
+CREATE INDEX msisdn_res_tran_index ON resellers_transactions(reseller_msisdn);
+CREATE INDEX subscriber_res_tran_index ON resellers_transactions(subscriber_msisdn);
 
 CREATE TABLE resellers_configuration (
 	message1		varchar,
@@ -195,5 +214,6 @@ CREATE TABLE resellers_configuration (
 	message5		varchar,
 	message6 		varchar
 );
+
 INSERT INTO resellers_configuration VALUES('Invalid data','Reseller does not have enough funds to add credit to your account',
 'Not enough funds to add the credit requested','Amount of [var1] pesos successfully added to your account. New balance: [var2]','[var1] pesos successfully transferred to [var3]. Your current balance is: [var4]', 'General error credit could not be added');

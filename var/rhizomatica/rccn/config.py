@@ -21,6 +21,9 @@ class PGEncoder(json.JSONEncoder):
 rhizomatica_dir = '/var/rhizomatica'
 sq_hlr_path = '/var/lib/osmocom/hlr.sqlite3'
 
+kannel_password = 'Nan3RZhekZy0'
+pgsql_password = 'xEP3Y4W8gG*4*zu'
+
 # Loggers
 smlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rccn.log', 'a', 104857600, 5)
 formatter = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s %(message)s')
@@ -90,7 +93,7 @@ for f in files:
 db_conn = None
 config = {}
 try:
-    db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password='xEP3Y4W8gG*4*zu', host='localhost')
+    db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password=pgsql_password, host='localhost')
     cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * from site')
     site_conf = cur.fetchone()

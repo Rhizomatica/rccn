@@ -40,9 +40,9 @@ class SMS:
         self.server = '127.0.0.1'
         self.port = 14002
         self.username = 'rhizomatica'
-        self.password = 'Nan3RZhekZy0'
+        self.password = kannel_password
         self.charset = 'UTF-8'
-        self.coding = 2 
+        self.coding = 2
         self.context = 'SMS_LOCAL'
         self.save_sms = 1
 
