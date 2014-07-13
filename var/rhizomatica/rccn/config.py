@@ -7,6 +7,7 @@ import riak
 from logging import handlers as loghandlers
 from decimal import Decimal
 from datetime import date
+from config_values import *
 
 class PGEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -16,13 +17,6 @@ class PGEncoder(json.JSONEncoder):
             return str(obj)
         return json.JSONEncoder.default(self, obj)
 
-
-# paths
-rhizomatica_dir = '/var/rhizomatica'
-sq_hlr_path = '/var/lib/osmocom/hlr.sqlite3'
-
-kannel_password = 'Nan3RZhekZy0'
-pgsql_password = 'xEP3Y4W8gG*4*zu'
 
 # Loggers
 smlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rccn.log', 'a', 104857600, 5)
@@ -93,7 +87,7 @@ for f in files:
 db_conn = None
 config = {}
 try:
-    db_conn = psycopg2.connect(database='rhizomatica', user='rhizomatica', password=pgsql_password, host='localhost')
+    db_conn = psycopg2.connect(database=pgsql_db, user=pgsql_user, password=pgsql_pwd, host=pgsql_host)
     cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * from site')
     site_conf = cur.fetchone()
