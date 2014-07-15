@@ -45,13 +45,13 @@ kannel_username = 'rhizomatica'
 kannel_password = 'Nan3RZhekZy0'
 
 # VOIP provider
-provider_name = "provider"
-username = "6142088545"
-from-user = "6142088545"
-password = "1469"
-proxy = "169.132.196.11"
-did = "6142088545"
-cli = "525541703851"
+voip_provider_name = "provider"
+voip_username = "6142088545"
+voip_fromuser = "6142088545"
+voip_password = "1469"
+voip_proxy = "169.132.196.11"
+voip_did = "6142088545"
+voip_cli = "525541703851"
 
 # Subscription SMS notification
 notice_msg = 'Favor de pagar su cooperacion mensual de 30 pesos. Gracias.' 
