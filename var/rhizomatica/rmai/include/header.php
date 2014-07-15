@@ -15,7 +15,7 @@ setlocale(LC_ALL, $language);
 
 // Set the text domain as 'messages'
 $domain = 'messages';
-bindtextdomain($domain, "/var/rhizomatica/rmai/locale"); 
+bindtextdomain($domain, "/var/rhizomatica/rai/locale"); 
 bind_textdomain_codeset($domain, 'UTF-8');
 textdomain($domain);
 
@@ -27,7 +27,7 @@ header('Content-Type: text/html; charset=utf-8');
         <head>
                 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
                 
-                <title>RMAI - Rhizomatica Administration Interface</title>
+                <title>RAI - Rhizomatica Administration Interface</title>
                 <style type="text/css" title="currentStyle">
                         @import "css/page.css";
                         @import "css/table.css";
@@ -44,6 +44,6 @@ header('Content-Type: text/html; charset=utf-8');
                 <div id="container">
 			<? if (!isset($no_title)) { ?>
                         <div class="full_width big">
-                                <img src="img/rhizomatica_logo_small.png" style="vertical-align: middle;" /> RMAI - RhizoMatica Administration Interface
+                                <img src="img/rhizomatica_logo_small.png" style="vertical-align: middle;" /> RAI - Rhizomatica Administration Interface
                         </div>
 			<? } ?>

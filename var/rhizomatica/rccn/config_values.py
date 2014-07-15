@@ -35,8 +35,9 @@ smsc_shortcode = "10000"
 sms_sender_unauthorized = 'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.'
 sms_destination_unauthorized = 'Este usuario no se ha registrado. Él no va a recibir su mensaje.'
 
-rmai_admin_user = "admin"
-rmai_admin_pwd = ',.admin1'
+# web administration
+rai_admin_user = "admin"
+rai_admin_pwd = ',.admin1'
 
 kannel_server = '127.0.0.1'
 kannel_port = 14002

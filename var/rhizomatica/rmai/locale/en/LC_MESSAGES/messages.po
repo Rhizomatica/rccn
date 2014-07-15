@@ -1,4 +1,4 @@
-# RMAI ENGLISH LOCALE.
+# RAI ENGLISH LOCALE.
 # Copyright (C) 2014 Rhizomatica
 # This file is distributed under the same license as the Rhizomatica package.
 # Tele <tele@rhizomatica.org>, 2013.
@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: RMAI 1.0\n"
+"Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: tele@rhizomatica.org \n"
 "POT-Creation-Date: 2014-04-09 21:58+0200\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
