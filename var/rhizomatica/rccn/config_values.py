@@ -1,3 +1,6 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
+
 # Configuration settings
 rhizomatica_dir = '/var/rhizomatica'
 sq_hlr_path = '/var/lib/osmocom/hlr.sqlite3'
@@ -12,10 +15,8 @@ pgsql_host = 'localhost'
 site_name = "Test"
 postcode = "12345"
 pbxcode = "1"
-# network name
 network_name = "TestNetwork"
-# VPN ip address
-ip_address = "10.66.0.14"
+vpn_ip_address = "10.66.0.14"
 wan_ip_address = "192.168.1.99"
 
 # SITE settings
