@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# To activate the remaining voip account balance notification to specific users add to cron:
+# 0 */5  * *   *     root /var/rhizomatica/bin/check_account_balance.sh
 
 MSISDN=( "68820132107" "68820122786" )
 BALANCE=`/var/rhizomatica/bin/get_account_balance.sh`

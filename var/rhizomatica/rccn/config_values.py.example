@@ -8,7 +8,7 @@ sq_hlr_path = '/var/lib/osmocom/hlr.sqlite3'
 # database
 pgsql_db = 'rhizomatica'
 pgsql_user = 'rhizomatica'
-pgsql_pwd = 'xEP3Y4W8gG*4*zu'
+pgsql_pwd = 'yourpwd'
 pgsql_host = 'localhost'
 
 # SITE
@@ -43,14 +43,14 @@ rai_admin_pwd = ',.admin1'
 kannel_server = '127.0.0.1'
 kannel_port = 14002
 kannel_username = 'rhizomatica'
-kannel_password = 'Nan3RZhekZy0'
+kannel_password = 'yourpwd'
 
 # VOIP provider
 voip_provider_name = "provider"
 voip_username = "6142088545"
 voip_fromuser = "6142088545"
-voip_password = "1469"
-voip_proxy = "169.132.196.11"
+voip_password = "32423534534"
+voip_proxy = "1.1.1.1"
 voip_did = "6142088545"
 voip_cli = "525541703851"
 
