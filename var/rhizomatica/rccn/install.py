@@ -23,6 +23,7 @@
 import sys, os, subprocess
 import psycopg2
 import psycopg2.extras
+import sqlite3
 from config_values import *
 from decimal import Decimal
 
@@ -95,7 +96,7 @@ try:
     sql = """ INSERT INTO configuration VALUES(%(limit_local_calls)s,%(limit_local_minutes)s,%(charge_local_calls)s,%(charge_local_rate)s,
               %(charge_local_rate_type)s,%(charge_internal_calls)s,%(charge_internal_rate)s,%(charge_internal_rate_type)s,
               %(charge_inbound_calls)s,%(charge_inbound_rate)s,%(charge_inbound_rate_type)s,%(smsc_shortcode)s,%(sms_sender_unauthorized)s,%(sms_destination_unauthorized)s)
-          """
+         """
     cur.execute(sql, {'limit_local_calls': limit_local_calls, 'limit_local_minutes': limit_local_minutes, 'charge_local_calls': charge_local_calls,
                         'charge_local_rate': Decimal(str(charge_local_rate)) if charge_local_rate != '' else None, 
                         'charge_local_rate_type': charge_local_rate_type, 'charge_internal_calls': charge_internal_calls,
@@ -109,6 +110,19 @@ except psycopg2.DatabaseError as e:
     print 'Database error adding Site configuration: %s' % e
     sys.exit(1)
 print 'Done'
+
+print('Creating SMSC shortcode on HLR').ljust(40),
+try:
+    sq_hlr = sqlite3.connect(sq_hlr_path)
+    sq_hlr_cursor = sq_hlr.cursor()
+    sq_hlr_cursor.execute("insert into subscriber(created,updated,imsi,name,extension,authorized) values('2013-12-27 08:00:57','2013-12-27 08:00:57','334020111111111','SMSC',?,1)", [(smsc_shortcode)])
+    sq_hlr.commit()
+    sq_hlr.close()
+except sqlite3.Error as e:
+    print 'Database error adding SMSC shortcode: %s' % e
+    sys.exit(1)
+print 'Done'
+
 
 print('Creating RAI admin password... ').ljust(40),
 rai_pwd = subprocess.check_output(['php','-r echo password_hash("%s",PASSWORD_DEFAULT);' % rai_admin_pwd])
