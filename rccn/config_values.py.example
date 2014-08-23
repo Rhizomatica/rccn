@@ -38,7 +38,7 @@ sms_destination_unauthorized = 'Este usuario no se ha registrado. Él no va a re
 
 # web administration
 rai_admin_user = "admin"
-rai_admin_pwd = ',.admin1'
+rai_admin_pwd = 'adminpwd'
 
 kannel_server = '127.0.0.1'
 kannel_port = 14002
@@ -47,12 +47,12 @@ kannel_password = 'yourpwd'
 
 # VOIP provider
 voip_provider_name = "provider"
-voip_username = "6142088545"
-voip_fromuser = "6142088545"
-voip_password = "32423534534"
+voip_username = "1234567890"
+voip_fromuser = "1234567890"
+voip_password = "NewPass"
 voip_proxy = "1.1.1.1"
-voip_did = "6142088545"
-voip_cli = "525541703851"
+voip_did = "1234567890"
+voip_cli = "525512345678"
 
 # Subscription SMS notification
 notice_msg = 'Favor de pagar su cooperacion mensual de 30 pesos. Gracias.' 
