@@ -65,16 +65,36 @@ class Numbering:
         siteprefix = destination_number[:6]
         if siteprefix == config['internal_prefix']:
             return False
-        riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
         sites = riak_client.bucket('sites')
         if sites.get(siteprefix).exists == True:
             return True
         else:
             return False
 
+    def is_number_roaming(self, number):
+        rk_hlr = riak_client.bucket('hlr')
+        subscriber = rk_hlr.get_index('msisdn_bin', number)
+        if subscriber.results != 0:
+            # user found check if home_bts != current_bts
+            if subscriber[1] != subscriber[2]:
+                # subscriber is roaming, check auth
+                if subscriber[3] == 1:
+                    return True
+                else:
+                    raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
+        return False                
+
+    def get_current_bts(self, number):
+        rk_hlr = riak_client.bucket('hlr')
+        subscriber = rk_hlr.get_index('msisdn_bin', number)
+        if subscriber.results != 0:
+            return subscriber[2]
+        else:
+            raise NumberException('RK_DB subscriber %s not found' % number)
+        return False
+
     def get_site_ip(self, destination_number):
         siteprefix = destination_number[:6]
-        riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
         site = riak_client.bucket('sites')
         site_data = site.get(siteprefix)
         if site_data.data['ip_address'] != None:

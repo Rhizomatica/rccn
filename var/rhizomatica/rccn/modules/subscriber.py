@@ -174,11 +174,11 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('select extension from subscriber where extension=?', [(msisdn)])
+            sq_hlr_cursor.execute('select extension,imsi from subscriber where extension=?', [(msisdn)])
             extension = sq_hlr_cursor.fetchone()
             if  extension == None:
                 raise SubscriberException('Extension not found in the HLR')
-            
+            imsi = extension[1]
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
@@ -204,7 +204,7 @@ class Subscriber:
         cmd = 'subscriber extension %s name %s' % (subscriber_number, name)
         vty.command(cmd)
             
-        # provision the subscriber in the database
+        # provision subscriber in the database
         try:
             cur = db_conn.cursor()
             cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
@@ -212,7 +212,12 @@ class Subscriber:
             db_conn.commit()
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
-            
+           
+        # add subscriber to the distributed HLR
+        rk_hlr = riak_client.bucket('hlr')
+        rk_hlr.new(imsi, data={"msisdn": subscriber_number, "home_bts": config['local_ip'], "authorized": 1})
+        rk_hlr.add_index('msisdn_bin', subscriber_number)
+        rk_hlr.store()
 
     def delete(self, msisdn):
         # delete subscriber on the HLR sqlite DB

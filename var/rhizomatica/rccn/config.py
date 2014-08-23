@@ -4,6 +4,7 @@ import psycopg2.extras
 import sqlite3
 import json
 import riak
+from riak.transports.pbc.transport import RiakPbcTransport
 from logging import handlers as loghandlers
 from decimal import Decimal
 from datetime import date
@@ -105,6 +106,10 @@ try:
 except psycopg2.DatabaseError as e:
     log.error('Database connection error %s' % e)
 
+# Connect to riak
+#riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
+# use protocol buffers
+riak_client = riak.RiakClient(pb_port=8087, protocol='pbc')
 
 # load modules
 from modules import subscriber

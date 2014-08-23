@@ -76,7 +76,7 @@ class Dialplan:
 
 
     def lookup(self):
-        """ Dialplan processing to route the call to the right context """
+        """ Dialplan processing to route call to the right context """
         # the processing is async we need a variable
         processed = 0
 
@@ -93,6 +93,28 @@ class Dialplan:
         except NumberingException as e:
             log.error(e)
 
+     
+        # check if calling number or destination number is a roaming subscriber
+        try:
+            if (self.is_number_roaming(self.calling_number)):
+                processed = 1
+                log.info('Calling number is roaming')
+                self.context.roaming('caller')
+        except NumberingException as e:
+            log.error(e)
+            # TODO: play message of calling number is not authorized to call
+            self.session.hangup()
+
+        try:
+            if (self.is_number_roaming(self.destination_number)):
+                processed = 1
+                log.info('Destination number is roaming')
+                self.context.roaming('called')
+        except NumberingException as e:
+            log.error(e)
+            # TODO: play message of destination number unauthorized to receive call
+            self.session.hangup()
+
         # check if destination number is an international call. prefix with + or 00
         if (self.destination_number[0] == '+' or (re.search(r'^00', self.destination_number) != None)) and processed == 0:
             log.debug('Called number is an international call or national')
@@ -108,6 +130,7 @@ class Dialplan:
                     processed = 1
                     # check if calling number is another site
                     if self.numbering.is_number_internal(self.calling_number) and len(self.calling_number) == 11:
+
                         # check if dest number is authorized to receive call
                         #if self.subscriber.is_authorized(self.calling_number,0):
                         log.info('INTERNAL call from another site')

@@ -121,7 +121,7 @@ class Context:
             if self.configuration.check_charge_local_calls() == 1:
                 log.info('LOCAL call will be billed')
                 self.session.setVariable('billing', '1')
-            except ConfigurationException as e:
+        except ConfigurationException as e:
                 log.error(e)
  
         # check if the call duration has to be limited
@@ -210,6 +210,105 @@ class Context:
         try:
             site_ip = self.numbering.get_site_ip(self.destination_number)
             log.info('Send call to site IP: %s' % site_ip)
-            self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+            self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
         except NumberingException as e:
             log.error(e)
+
+
+    def roaming(self, roaming_subject):
+        """ Roaming context. Calls from and to subscribers that are currently roaming """
+
+        if roaming_subject == 'caller':
+            # calling number is roaming
+            # check if destination number is roaming as well
+            if self_numbering.is_number_roaming(self.destination_number):
+                # well destination number is roaming as well, send call to the current_bts where the subscriber is roaming
+                try:
+                    site_ip = self.numbering.get_current_bts(self.destination_number)
+                    log.info('Called number is roaming send call to current_bts: %s' % site_ip)
+                    self.session.setVariable('context','ROAMING_INTERNAL')
+                    # if current_bts is the same as local site, send the call to the local LCR
+                    if site_ip == config['local_ip']:
+                        log.info('Currentbts same as local site send call to LCR')
+                        self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
+                    else:
+                        self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                except NumberingException as e:
+                    log.error(e)                
+            else:
+                # destination number is not roaming check if destination number is for local site
+                if self.numbering.is_number_local(self.destination_number) and len(self.destination_number) == 11:
+                    log.info('Called number is a local number')
+
+                    if self.subscriber.is_authorized(self.destination_number, 0):
+                        # check if the call duration has to be limited
+                        try:
+                            limit = self.configuration.get_local_calls_limit()
+                            if limit != False:
+                                if limit[0] == 1:
+                                    log.info('Limit call duration to: %s seconds' % limit[1])
+                                    self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
+                        except ConfigurationException as e:
+                            log.error(e)
+        
+                        log.info('Send call to LCR')
+                        self.session.setVariable('context','ROAMING_LOCAL')
+                        self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
+                    else:
+                        # local destination subscriber unauthorized
+                        # TODO: play message destination unauthorized to receive call
+                        self.session.hangup()
+                else:
+                    # number is not local, check if number is internal
+                    if self.numbering.is_number_internal(self.destination_number) and len(self.destination_number) == 11:
+                        # number is internal send call to destination site
+                        try:
+                            site_ip = self.numbering.get_site_ip(self.destination_number)
+                            log.info('Send call to site IP: %s' % site_ip)
+                            self.session.setVariable('context','ROAMING_INTERNAL')
+                            self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                        except NumberingException as e:
+                            log.error(e)
+                    else:
+                        # check if destination number is an international call
+                        if self.destination_number[0] == '+' or re.search(r'^00', self.destination_number) != None:
+                            log.info('Called number is an international call or national')
+                            site_ip = self.numbering.get_site_ip(self.calling_number)
+                            # check if home_bts is same as local site, if yes send call to local context outbound
+                            if site_ip == config['local_ip']:
+                                log.info('Caller is roaming and calling outside, send call to voip provider')
+                                self.outbound()
+                            else:
+                                log.info('Send call to home_bts %s of roaming user' % site_ip)
+                                self.session.setVariable('context','ROAMING_OUTBOUND')
+                                self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                        else:
+                            # called number must be wrong, hangup call
+                            self.session.hangup()
+        else:
+            # the destination number is roaming send call to current_bts of subscriber
+            try:
+                site_ip = self.numbering.get_current_bts(self.destination_number)
+                # if current bts is local site send call to local LCR
+                if site_ip == config['local_ip']:
+                    log.info('Called number is roaming on our site send call to LCR')
+                    self.session.setVariable('context','ROAMING_LOCAL')
+                    self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
+                else:
+                    log.info('Called number is roaming send call to current_bts: %s' % site_ip)
+                    self.session.setVariable('context','ROAMING_INTERNAL')
+                    self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+            except NumberingException as e:
+                log.error(e)
+                
+            
+                    
+
+                    
+                    
+                    
+
+                
+
+
+            
