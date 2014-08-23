@@ -28,7 +28,7 @@ from config import *
 
 import urllib, obscvty, time
 from subscriber import Subscriber, SubscriberException 
-from self.numbering import Numbering, NumberingException
+from numbering import Numbering, NumberingException
 from threading import Thread
 
 class SMSException(Exception):
