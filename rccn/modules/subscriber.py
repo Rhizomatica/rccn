@@ -215,7 +215,7 @@ class Subscriber:
            
         # add subscriber to the distributed HLR
         rk_hlr = riak_client.bucket('hlr')
-        rk_hlr.new(imsi, data={"msisdn": subscriber_number, "home_bts": config['local_ip'], "authorized": 1})
+        rk_hlr.new(imsi, data={"msisdn": subscriber_number, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
         rk_hlr.add_index('msisdn_bin', subscriber_number)
         rk_hlr.store()
 
