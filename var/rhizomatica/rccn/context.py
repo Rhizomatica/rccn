@@ -115,7 +115,15 @@ class Context:
             self.session.setVariable('context', 'INTERNAL')
         else:
             self.session.setVariable('context', 'LOCAL')
-        
+       
+        # check if local call has to be billed
+        try:
+            if self.configuration.check_charge_local_calls() == 1:
+                log.info('LOCAL call will be billed')
+                self.session.setVariable('billing', '1')
+            except ConfigurationException as e:
+                log.error(e)
+ 
         # check if the call duration has to be limited
         try:
             limit = self.configuration.get_local_calls_limit()
@@ -146,7 +154,7 @@ class Context:
         except NumberingException as e:
             log.error(e)
 
-        if len(subscriber_number) == 11:
+        if subscriber_number != None:
             log.info('DID assigned to: %s' % subscriber_number) 
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:

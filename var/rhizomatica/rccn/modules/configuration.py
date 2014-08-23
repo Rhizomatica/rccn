@@ -61,6 +61,31 @@ class Configuration:
         except psycopg2.DatabaseError as e:
             raise ConfigurationException('Database error checking for local calls limit: %s' % e)
 
+    
+    def check_charge_local_calls(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT charge_local_calls FROM configuration')
+            charge = cur.fetchone()
+            if charge != None:
+                return charge[0]
+            else:
+                return False
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error checking for charge local calls: %s' % e)
+           
+    def get_charge_local_calls(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT charge_local_rate,charge_local_rate_type FROM configuration')
+            charge = cur.fetchone()
+            if charge != None:
+                return charge
+            else:
+                raise ConfigurationException('No configuration for for charging local calls')
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error getting info charging local calls: %s' % e)
+
     def check_charge_inbound_calls(self):
         try:
             cur = db_conn.cursor()

@@ -31,13 +31,24 @@ class BillingException(Exception):
     pass
 
 class Billing:
-    
+    """ Rating/Billing """
+ 
     def get_matching_prefix(self, arr_prefixes, num):
+        """ Get matching prefix
+
+        :param arr_prefixes: Array containing list of prefixes
+        :param num: Phone number
+        """
         for idx, val in enumerate(arr_prefixes):
             if num.startswith(val):
                 return (val, idx)
 
     def get_call_duration(self, balance, cost):
+        """ Calculate call duration
+
+        :param balance: Current balance
+        :param cost: Cost
+        """
         call_min = Decimal(balance) / Decimal(cost)
         total_call_sec = int((call_min * 60))
         return total_call_sec
@@ -97,6 +108,15 @@ class Billing:
 
 
     def bill(self, session, subscriber, destination_number, context, duration):
+        if context == 'LOCAL':
+            bill_log.info('===========================================================================')
+            bill_log.info('LOCAL Context')
+            bleg_connected = session.getVariable('bleg_uuid')
+            hangup_cause = session.getVariable('hangup_cause')
+            subscriber = session.getVariable('bleg_destination_number')
+            #print session.getVariable('bleg_billsec')
+            configuration = Configuration()
+
         if context == 'OUTBOUND':
             bill_log.info('===========================================================================')
             bill_log.info('OUTBOUND Context Bill subscriber %s destination %s' % (subscriber, destination_number))
