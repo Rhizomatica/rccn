@@ -149,6 +149,11 @@ table.display {
 	 */
 }
 
+table.display tbody {
+        color : #333;
+}
+
+
 table.display thead th {
 	padding: 3px 18px 3px 10px;
 	border-bottom: 1px solid black;
@@ -182,23 +187,23 @@ table.display td.center {
  */
 
 .sorting_asc {
-	background: url('../images/sort_asc.png') no-repeat center right;
+	background: url('../img/sort_asc.png') no-repeat center right;
 }
 
 .sorting_desc {
-	background: url('../images/sort_desc.png') no-repeat center right;
+	background: url('../img/sort_desc.png') no-repeat center right;
 }
 
 .sorting {
-	background: url('../images/sort_both.png') no-repeat center right;
+	background: url('../img/sort_both.png') no-repeat center right;
 }
 
 .sorting_asc_disabled {
-	background: url('../images/sort_asc_disabled.png') no-repeat center right;
+	background: url('../img/sort_asc_disabled.png') no-repeat center right;
 }
 
 .sorting_desc_disabled {
-	background: url('../images/sort_desc_disabled.png') no-repeat center right;
+	background: url('../img/sort_desc_disabled.png') no-repeat center right;
 }
  
 table.display thead th:active,
@@ -246,7 +251,7 @@ table.display tr.even.gradeU {
 
 
 tr.odd {
-	background-color: #FFE8A8;
+	background-color: #E1E0DE;
 }
 
 tr.even {
@@ -349,7 +354,7 @@ td.details {
 }
 
 .paging_full_numbers a.paginate_active {
-	background-color: #E98000;
+	background-color: #E95C00;
 }
 
 table.display tr.even.row_selected td {
@@ -366,7 +371,7 @@ table.display tr.odd.row_selected td {
  */
 /* For the standard odd/even */
 tr.odd td.sorting_1 {
-	background-color: #FFDEA8;
+	background-color: #E1E0DE;
 }
 
 tr.odd td.sorting_2 {
@@ -378,7 +383,7 @@ tr.odd td.sorting_3 {
 }
 
 tr.even td.sorting_1 {
-	background-color: #EAEBFF;
+	background-color: white;
 }
 
 tr.even td.sorting_2 {
