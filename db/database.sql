@@ -61,7 +61,7 @@ CREATE TABLE subscribers (
 CREATE UNIQUE INDEX msisdn_index ON subscribers(msisdn);
 
 
-CREATE FUNCTION update_subscription_change_date()
+CREATE OR REPLACE FUNCTION update_subscription_change_date()
   RETURNS TRIGGER
   LANGUAGE plpgsql
 AS $$
