@@ -28,7 +28,7 @@ from config import *
 
 import urllib, obscvty, time
 from subscriber import Subscriber, SubscriberException 
-from numbering import Numbering, NumberingException
+from self.numbering import Numbering, NumberingException
 from threading import Thread
 
 class SMSException(Exception):
@@ -44,11 +44,20 @@ class SMS:
         self.charset = 'UTF-8'
         self.coding = 2
         self.context = 'SMS_LOCAL'
+        self.source = ''
+        self.destination = ''
+        self.text = ''
         self.save_sms = 1
+
+        self.numbering = Numbering()
+
 
     def receive(self, source, destination, text, charset, coding):
         self.charset = charset
         self.coding = coding
+        self.source = source
+        self.destination = destination
+        self.text = text
 
         sms_log.info('Received SMS: %s %s %s' % (source, destination, text))
         # SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
@@ -56,8 +65,29 @@ class SMS:
         try:
             # auth checks
             # get auth info
-            numbering = Numbering()
             sub = Subscriber()
+
+            # check if source or destination is roaming
+            try:
+                if self.numbering.is_number_roaming(self.calling_number):
+                    sms_log.info('Source number is roaming')
+                    self.roaming('caller')
+            except NumberingException as e:
+                sms_log.info('Sender unauthorized send notification message')
+                self.context = 'SMS_UNAUTH'
+                self.send(config['smsc'], source, config['sms_source_unauthorized'])
+                return
+
+            try:
+                if self.numbering.is_number_roaming(self.destination_number):
+                    sms_log.info('Destination number is roaming')
+                    self.roaming('called')
+            except NumberingException as e:
+                sms_log.info('Destination unauthorized send notification message')
+                self.context = 'SMS_UNAUTH'
+                self.send(config['smsc'], source, config['sms_destination_unauthorized'])
+                return
+
             try:
                 source_authorized = sub.is_authorized(source, 0)
             except SubscriberException as e:
@@ -69,13 +99,14 @@ class SMS:
 
             sms_log.info('Source_authorized: %s Destination_authorized: %s' % (str(source_authorized), str(destination_authorized)))
 
-            if not source_authorized and not numbering.is_number_internal(source):
+
+            if not source_authorized and not self.numbering.is_number_internal(source):
                 sms_log.info('Sender unauthorized send notification message')
                 self.context = 'SMS_UNAUTH'
                 self.send(config['smsc'], source, config['sms_source_unauthorized'])
                 return
 
-            if numbering.is_number_local(destination):
+            if self.numbering.is_number_local(destination):
                 sms_log.info('SMS_LOCAL check if subscriber is authorized')
                 # get auth info
                 sub = Subscriber()
@@ -88,12 +119,12 @@ class SMS:
                         self.context = 'SMS_LOCAL'
                         self.send(source, destination, text)
                     else:
-                        if not numbering.is_number_local(source) and destination_authorized:
+                        if not self.numbering.is_number_local(source) and destination_authorized:
                             sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
                             self.context = 'SMS_INTERNAL'
                             self.send(source, destination, text)
                         else:
-                            if destination_authorized and not numbering.is_number_local(source):
+                            if destination_authorized and not self.numbering.is_number_local(source):
                                 sms_log.info('SMS_INBOUND Forward SMS back to BSC')
                                 # number is local send SMS back to SMSc
                                 self.context = 'SMS_INBOUND'
@@ -125,10 +156,10 @@ class SMS:
                         raise SMSException('Receive SMS error: %s' % e)
                 else:
                     # check if sms is for another location
-                    if numbering.is_number_internal(destination) and len(destination) == 11:
+                    if self.numbering.is_number_internal(destination) and len(destination) == 11:
                         sms_log.info('SMS is for another site')
                         try:
-                            site_ip = numbering.get_site_ip(destination)
+                            site_ip = self.numbering.get_site_ip(destination)
                             sms_log.info('Send SMS to site IP: %s' % site_ip)
                             self.context = 'SMS_INTERNAL'
                             self.send(source, destination, text, site_ip)
@@ -167,6 +198,69 @@ class SMS:
                     self.save(source, destination, self.context)
             except IOError:
                 raise SMSException('Error sending SMS to site %s' % server)
+
+    def roaming(self, subject):
+        
+        self.numbering = Numbering()
+
+        if roaming_subject == 'caller':
+            # calling number is roaming 
+            # check if destination number is roaming as well
+            if self.numbering.is_number_roaming(self.destination):
+                # well destination number is roaming as well send SMS to current_bts where the subscriber is roaming
+                try:
+                    current_bts = self.numbering.get_current_bts(self.destination)
+                    sms_log.info('Destination number is roaming send SMS to current_bts: %s' % current_bts)
+                    if current_bts == config['local_ip']:
+                        log.info('Current bts same as local site send call to local Kannel')
+                        self.context = 'SMS_ROAMING_LOCAL'
+                        self.send(self.source, self.destination, self.text)
+                    else:
+                        # send sms to destination site
+                        self.context = 'SMS_ROAMING_INTERNAL'
+                        self.send(self.source, self.destination, self.text, current_bts)
+                except NumberingException as e:
+                    sms_log.error(e)
+            else:
+                # destination is not roaming check if destination if local site
+                if self.numbering.is_number_local(self.destination_number) and len(self.destination_number) == 11:
+                    sms_log.info('Destination is a local number')
+
+                    if self.subscriber.is_authorized(self.destination, 0):
+                        sms_log.info('Send sms to local kannel')
+                        self.context = 'SMS_ROAMING_LOCAL'
+                        self.send(self.source, self.destination, self.text)
+                    else:
+                        # destination cannot receive SMS inform source
+                        self.context = 'SMS_ROAMING_UNAUTH'
+                        self.send(config['smsc'], source, config['sms_destination_unauthorized'])
+                else:
+                    # number is not local check if number is internal
+                    if self.numbering.is_number_internal(self.destination) and len(self.destination) == 11:
+                        # number is internal send SMS to destination site
+                        current_bts = self.numbering.get_site_ip(self.destination)
+                        self.context = 'SMS_ROAMING_INTERNAL'
+                        self.send(self.source, self.destination, self.text, current_bts)
+                    else:
+                        # check if number is for outbound.
+                        # not implemented yet. just return
+                        sms_log.info('Invalid destination for SMS')
+                        return
+        else:
+            # the destination is roaming send call to current_bts
+            try:
+                current_bts = self.numbering.get_current_bts(self.destination)
+                if current_bts == config['local_ip']:
+                    sms_log.info('Destination is roaming on our site send SMS to local kannel')
+                    self.session.setVariable('context','SMS_ROAMING_LOCAL')
+                    self.send(self.source, self.destination, self.text)
+                else:
+                    sms_log.info('Destination is roaming send sms to other site')
+                    self.session.setVariable('context', 'SMS_ROAMING_INTERNAL')
+                    self.send(self.source, self.destination, self.text, current_bts)
+            except NumberingException as e:
+                sms_log.error(e)
+                
 
     def save(self, source, destination, context):
         # insert SMS in the history
