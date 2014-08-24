@@ -77,6 +77,18 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('Database error in checking subscriber authorization: %s' % e)
 
+    def is_online(self, subscriber_number):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select msisdn from subscriber where msisdn=%(number)s and lac > 0", {'number': subscriber_number})
+            connected = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            return len(connected) > 0
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
     def get_all(self):
         try:
             cur = db_conn.cursor()
@@ -118,6 +130,22 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
+    def get_all_roaming(self, number):
+        results = riak_client.add('hlr').map(
+            """
+            function(value, keyData, arg) {
+                 var data = Riak.mapValuesJson(value)[0];
+                 if ((data.home_bts == %s) &&
+                     (data.current_bts != data.home_bts))
+                   return [value.key];
+                 else
+                   return [];
+            }
+            """ % config['local_ip']
+            ).run()
+        # return [(msisdn, imsi)]
+        return [(r[1][0], r[0]) for r in results]
 
     def get_online(self):
         try:
@@ -193,7 +221,13 @@ class Subscriber:
     def update(self, msisdn, name, number):
         imsi = self._get_imsi(msisdn)
         self._authorize_subscriber_in_local_hlr(msisdn, number, name)
-        self._update_subscriber_in_distributed_hlr(imsi, number, local)
+        self.update_location(imsi, number)
+
+    def update_location(self, imsi, msisdn):
+        rk_hlr = riak_client.bucket('hlr')
+        data = rk_hlr.get(imsi)
+        data["current_bts"] = config['local_ip']
+        data.store()
 
     def delete(self, msisdn):
         # delete subscriber on the HLR sqlite DB
@@ -349,12 +383,6 @@ class Subscriber:
         rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
         rk_hlr.add_index('msisdn_bin', msisdn)
         rk_hlr.store()
-
-    def _update_subscriber_in_distributed_hlr(self, imsi, msisdn):
-        rk_hlr = riak_client.bucket('hlr')
-        data = rk_hlr.get(imsi)
-        data["current_bts"] = config['local_ip']
-        data.store()
 
 if __name__ == '__main__':
     sub = Subscriber()
