@@ -30,7 +30,7 @@ from decimal import Decimal
 print 'RCCN Installation script\n'
 
 try:
-    db_conn = psycopg2.connect(database=pgsql_db, user=pgsql_user, password='rhizomatica', host=pgsql_host)
+    db_conn = psycopg2.connect(database=pgsql_db, user=pgsql_user, password=pgsql_pwd, host=pgsql_host)
     db_conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 except psycopg2.DatabaseError as e:
     print 'Database connection error %s' % e
