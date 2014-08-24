@@ -229,6 +229,11 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
 
+        # delete subscriber on the distributed HLR
+        rk_hlr = riak_client.bucket('hlr')
+        subscriber = rk_hlr.get_index('msisdn_bin', number)
+        subscriber.delete()
+
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
         # auth 1 subscriber enabled 
