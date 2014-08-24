@@ -22,9 +22,7 @@ rhizomatica roaming checker
 
 import sys
 
-from modules.subscriber import Subscriber, SubscriberException
-from modules.numbering import Numbering, NumberingException
-from confing import roaming_log
+from config import *
 
 def update_foreign_subscribers():
     numbering = Numbering()
