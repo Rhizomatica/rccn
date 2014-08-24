@@ -26,14 +26,14 @@ from modules.subscriber import Subscriber, SubscriberException
 from modules.numbering import Numbering, NumberingException
 from confing import roaming_log
 
-if __name__ == '__main__':
+def update_foreign_subscribers():
     numbering = Numbering()
     sub = Subscriber()
     try:
         unregistered = sub.get_all_unregistered()
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
-        sys.exit(1)
+        return
 
     for msisdn,imsi in unregistered:
         try:
@@ -42,4 +42,18 @@ if __name__ == '__main__':
         except NumberingException as e:
             roaming_log.debug("Couldn't retrieve msisdn from the imsi: %s" % e)
         except SubscriberException as e:
-            roaming_log.error("An error ocurred adding the roaming number %d: %s" % (number, e))
+            roaming_log.error("An error ocurred adding the roaming number %s: %s" % (number, e))
+
+def update_local_subscribers():
+    sub = Subscriber()
+    subscribers = sub.get_all_roaming()
+    for msisdn,imsi in subscribers:
+        try:
+            if sub.is_online(msisdn):
+                sub.update_location(imsi, msisdn)
+        except SubscriberException as e:
+            roaming_log.error("An error ocurred updating the location of %s: %s" % (msisdn, e))
+
+if __name__ == '__main__':
+    update_foreign_subscribers()
+    update_local_subscribers()
