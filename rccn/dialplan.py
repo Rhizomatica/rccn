@@ -96,7 +96,7 @@ class Dialplan:
      
         # check if calling number or destination number is a roaming subscriber
         try:
-            if (self.is_number_roaming(self.calling_number)):
+            if (self.numbering.is_number_roaming(self.calling_number)):
                 processed = 1
                 log.info('Calling number is roaming')
                 self.context.roaming('caller')
@@ -106,7 +106,7 @@ class Dialplan:
             self.session.hangup()
 
         try:
-            if (self.is_number_roaming(self.destination_number)):
+            if (self.numbering.is_number_roaming(self.destination_number)):
                 processed = 1
                 log.info('Destination number is roaming')
                 self.context.roaming('called')
