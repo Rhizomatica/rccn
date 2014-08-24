@@ -264,9 +264,10 @@ class Subscriber:
             raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
 
         # delete subscriber on the distributed HLR
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
-        subscriber.delete()
+        self._delete_in_distributed_hlr(msisdn)
+        #rk_hlr = riak_client.bucket('hlr')
+        #subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+        #subscriber.delete()
 
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
@@ -383,6 +384,14 @@ class Subscriber:
         distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
         distributed_hlr.add_index('msisdn_bin', msisdn)
         distributed_hlr.store()
+
+    def _delete_in_distributed_hlr(self, msisdn):
+        rk_hlr = riak_client.bucket('hlr')
+        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+        if subscriber.results != 0:
+                subscriber.get(results[0]).delete()
+
+
 
 if __name__ == '__main__':
     sub = Subscriber()
