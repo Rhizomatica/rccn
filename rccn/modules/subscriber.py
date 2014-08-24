@@ -354,7 +354,7 @@ class Subscriber:
         rk_hlr = riak_client.bucket('hlr')
         data = rk_hlr.get(imsi)
         data["current_bts"] = config['local_ip']
-        rk_hlr.store()
+        data.store()
 
 if __name__ == '__main__':
     sub = Subscriber()
