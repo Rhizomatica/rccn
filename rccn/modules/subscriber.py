@@ -373,7 +373,7 @@ class Subscriber:
 
     def _delete_in_distributed_hlr(self, imsi):
         rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get(imsi).delete()
+        rk_hlr.get(imsi).delete()
 
 
 if __name__ == '__main__':
@@ -381,6 +381,7 @@ if __name__ == '__main__':
     #sub.set_balance('68820110010',3.86)
     try:
         sub.add('20133', 'Test', 0)
+	#sub.delete('66666249987')
         #sub.edit('68820137511','Antanz_edit',3.86)
         #sub.authorized('68820137511',0)
         #print sub.get_all_connected()
