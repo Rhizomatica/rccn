@@ -136,7 +136,7 @@ class Subscriber:
             """
             function(value, keyData, arg) {
                  var data = Riak.mapValuesJson(value)[0];
-                 if ((data.home_bts == %s) &&
+                 if ((data.home_bts == "%s") &&
                      (data.current_bts != data.home_bts))
                    return [value.key];
                  else
