@@ -84,6 +84,15 @@ class Numbering:
                     raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
         return False                
 
+    def get_msisdn_from_imsi(self, imsi):
+        rk_hlr = riak_client.bucket('hlr')
+        subscriber = rk_hlr.get(imsi)
+        if subscriber.results == 0:
+            raise NumberException('RK_DB imsi %s not found' % imsi)
+        if subscriber[3] != 1:
+            raise NumberException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber[0]))
+        return subscriber[0]
+
     def get_current_bts(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)

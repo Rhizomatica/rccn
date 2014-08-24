@@ -106,6 +106,19 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
+    def get_all_unregistered(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select extension,imsi from subscriber where length(extension) = 5 and lac > 0")
+            unregistered = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            return unregistered
+
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
     def get_online(self):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -170,54 +183,17 @@ class Subscriber:
             raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
 
     def add(self, msisdn, name, balance):
-        # check if the subscriber exists in the HLR
-        try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('select extension,imsi from subscriber where extension=?', [(msisdn)])
-            extension = sq_hlr_cursor.fetchone()
-            if  extension == None:
-                raise SubscriberException('Extension not found in the HLR')
-            imsi = extension[1]
-        except sqlite3.Error as e:
-            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-
-        # update subscriber data in the sqlite HLR
-        #try:
-        #   subscriber_number = config['internal_prefix']+msisdn
-        #   sq_hlr_cursor.execute('UPDATE Subscriber set extension=?,name=?,authorized=1 where extension=?', (subscriber_number, name, extension[0]))
-        #   sq_hlr.commit()
-        #except sqlite3.Error as e:
-        #   raise SubscriberException('SQ_HLR error updating subscriber data: %s' % e.args[0])
-        #finally:
-        #   sq_hlr.close()
+        imsi = self._get_imsi(msisdn)
         subscriber_number = config['internal_prefix'] + msisdn
-        appstring = 'OpenBSC'
-        appport = 4242
-        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
-        cmd = 'enable'
-        vty.command(cmd)
-        cmd = 'subscriber extension %s extension %s' % (msisdn, subscriber_number)
-        vty.command(cmd)
-        cmd = 'subscriber extension %s authorized 1' % subscriber_number
-        vty.command(cmd)
-        cmd = 'subscriber extension %s name %s' % (subscriber_number, name)
-        vty.command(cmd)
-            
-        # provision subscriber in the database
-        try:
-            cur = db_conn.cursor()
-            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
-            {'msisdn': subscriber_number, 'name': name, 'balance': Decimal(str(balance))})
-            db_conn.commit()
-        except psycopg2.DatabaseError as e:
-            raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
-           
-        # add subscriber to the distributed HLR
-        rk_hlr = riak_client.bucket('hlr')
-        rk_hlr.new(imsi, data={"msisdn": subscriber_number, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
-        rk_hlr.add_index('msisdn_bin', subscriber_number)
-        rk_hlr.store()
+
+        self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
+        self._provision_in_database(subscriber_number, name, balance)
+        self._provision_in_distributed_hlr(imsi, subscriber_number)
+
+    def update(self, msisdn, name, number):
+        imsi = self._get_imsi(msisdn)
+        self._authorize_subscriber_in_local_hlr(msisdn, number, name)
+        self._update_subscriber_in_distributed_hlr(imsi, number, local)
 
     def delete(self, msisdn):
         # delete subscriber on the HLR sqlite DB
@@ -327,6 +303,53 @@ class Subscriber:
                 raise SubscriberException('PG_HLR No subscriber found') 
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error updating subscriber data: %s' % e)
+
+    def _get_imsi(self, msisdn):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute('select extension,imsi from subscriber where extension=?', [(msisdn)])
+            extension = sq_hlr_cursor.fetchone()
+            if  extension == None:
+                raise SubscriberException('Extension not found in the HLR')
+            imsi = extension[1]
+        except sqlite3.Error as e:
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+        return imsi
+
+    def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):
+        appstring = 'OpenBSC'
+        appport = 4242
+        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+        cmd = 'enable'
+        vty.command(cmd)
+        cmd = 'subscriber extension %s extension %s' % (msisdn, new_msisdn)
+        vty.command(cmd)
+        cmd = 'subscriber extension %s authorized 1' % new_msisdn
+        vty.command(cmd)
+        cmd = 'subscriber extension %s name %s' % (new_msisdn, name)
+        vty.command(cmd)
+
+    def _provision_in_database(self, msisdn, name, balance):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
+            {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance))})
+            db_conn.commit()
+        except psycopg2.DatabaseError as e:
+            raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
+
+    def _provision_in_distributed_hlr(self, imsi, msisdn):
+        rk_hlr = riak_client.bucket('hlr')
+        rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
+        rk_hlr.add_index('msisdn_bin', msisdn)
+        rk_hlr.store()
+
+    def _update_subscriber_in_distributed_hlr(self, imsi, msisdn):
+        rk_hlr = riak_client.bucket('hlr')
+        data = rk_hlr.get(imsi)
+        data["current_bts"] = config['local_ip']
+        rk_hlr.store()
 
 if __name__ == '__main__':
     sub = Subscriber()
