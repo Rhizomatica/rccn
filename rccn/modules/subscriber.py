@@ -230,19 +230,9 @@ class Subscriber:
         data.store()
 
     def delete(self, msisdn):
-        # delete subscriber on the HLR sqlite DB
-        #try:
-        #   sq_hlr = sqlite3.connect(sq_hlr_path)
-        #   sq_hlr_cursor = sq_hlr.cursor()
-        #   sq_hlr_cursor.execute('DELETE FROM subscriber WHERE extension=?', [(msisdn)])
-        #   if sq_hlr_cursor.rowcount > 0:
-        #       sq_hlr.commit()
-        #   else:
-        #       raise SubscriberException('SQ_HLR No subscriber found')
-        #except sqlite3.Error as e:
-        #   raise SubscriberException('SQ_HLR error deleting subscriber: %s' % e.args[0])
-        #finally:
-        #   sq_hlr.close()
+        
+        imsi = self._get_imsi(msisdn)
+
         subscriber_number = msisdn[-5:]
         appstring = 'OpenBSC'
         appport = 4242
@@ -263,11 +253,7 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
 
-        # delete subscriber on the distributed HLR
-        self._delete_in_distributed_hlr(msisdn)
-        #rk_hlr = riak_client.bucket('hlr')
-        #subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
-        #subscriber.delete()
+        self._delete_in_distributed_hlr(imsi)
 
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
@@ -355,7 +341,7 @@ class Subscriber:
             imsi = extension[1]
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-        return imsi
+        return str(imsi)
 
     def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):
         appstring = 'OpenBSC'
@@ -381,16 +367,13 @@ class Subscriber:
 
     def _provision_in_distributed_hlr(self, imsi, msisdn):
         rk_hlr = riak_client.bucket('hlr')
-        distributed_hlr = rk_hlr.new(str(imsi), data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
+        distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
         distributed_hlr.add_index('msisdn_bin', msisdn)
         distributed_hlr.store()
 
-    def _delete_in_distributed_hlr(self, msisdn):
+    def _delete_in_distributed_hlr(self, imsi):
         rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
-        if subscriber.results != 0:
-                subscriber.get(results[0]).delete()
-
+        subscriber = rk_hlr.get(imsi).delete()
 
 
 if __name__ == '__main__':
