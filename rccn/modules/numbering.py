@@ -88,9 +88,9 @@ class Numbering:
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get(str(imsi))
         if not subscriber.exists:
-            raise NumberException('RK_DB imsi %s not found' % imsi)
+            raise NumberingException('RK_DB imsi %s not found' % imsi)
         if subscriber.data["authorized"] != 1:
-            raise NumberException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber[0]))
+            raise NumberingException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber[0]))
         return subscriber.data["msisdn"]
 
     def get_current_bts(self, number):
@@ -99,7 +99,7 @@ class Numbering:
         if subscriber.results != []:
             return subscriber[2]
         else:
-            raise NumberException('RK_DB subscriber %s not found' % number)
+            raise NumberingException('RK_DB subscriber %s not found' % number)
         return False
 
     def get_site_ip(self, destination_number):
