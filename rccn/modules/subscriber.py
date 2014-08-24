@@ -225,12 +225,11 @@ class Subscriber:
 
     def update_location(self, imsi, msisdn):
         rk_hlr = riak_client.bucket('hlr')
-        data = rk_hlr.get(str(imsi))
-        data["current_bts"] = config['local_ip']
-        data.store()
+        subscriber = rk_hlr.get(str(imsi))
+        subscriber.data["current_bts"] = config['local_ip']
+        subscriber.store()
 
     def delete(self, msisdn):
-        
         imsi = self._get_imsi(msisdn)
 
         subscriber_number = msisdn[-5:]

@@ -87,16 +87,16 @@ class Numbering:
     def get_msisdn_from_imsi(self, imsi):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get(str(imsi))
-        if subscriber.results == 0:
+        if not subscriber.exists:
             raise NumberException('RK_DB imsi %s not found' % imsi)
-        if subscriber[3] != 1:
+        if subscriber.data["authorized"] != 1:
             raise NumberException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber[0]))
-        return subscriber[0]
+        return subscriber.data["msisdn"]
 
     def get_current_bts(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if subscriber.results != 0:
+        if subscriber.results != []:
             return subscriber[2]
         else:
             raise NumberException('RK_DB subscriber %s not found' % number)
