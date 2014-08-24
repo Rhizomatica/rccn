@@ -95,8 +95,9 @@ class Numbering:
     def get_current_bts(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if subscriber.results != []:
-            return subscriber[2]
+        if subscriber.results != None:
+            subscriber = rk_hlr.get(subscriber.results[0])
+            return subscriber.data['current_bts']
         else:
             raise NumberingException('RK_DB subscriber %s not found' % number)
         return False
