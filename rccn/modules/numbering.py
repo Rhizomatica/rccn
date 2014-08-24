@@ -86,7 +86,7 @@ class Numbering:
 
     def get_msisdn_from_imsi(self, imsi):
         rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get(imsi)
+        subscriber = rk_hlr.get(str(imsi))
         if subscriber.results == 0:
             raise NumberException('RK_DB imsi %s not found' % imsi)
         if subscriber[3] != 1:

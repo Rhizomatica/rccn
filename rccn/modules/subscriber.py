@@ -225,7 +225,7 @@ class Subscriber:
 
     def update_location(self, imsi, msisdn):
         rk_hlr = riak_client.bucket('hlr')
-        data = rk_hlr.get(imsi)
+        data = rk_hlr.get(str(imsi))
         data["current_bts"] = config['local_ip']
         data.store()
 
@@ -373,7 +373,7 @@ class Subscriber:
 
     def _delete_in_distributed_hlr(self, imsi):
         rk_hlr = riak_client.bucket('hlr')
-        rk_hlr.get(imsi).delete()
+        rk_hlr.get(str(imsi)).delete()
 
 
 if __name__ == '__main__':
