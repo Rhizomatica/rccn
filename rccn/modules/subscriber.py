@@ -265,7 +265,7 @@ class Subscriber:
 
         # delete subscriber on the distributed HLR
         rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', number)
+        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
         subscriber.delete()
 
     def authorized(self, msisdn, auth):
