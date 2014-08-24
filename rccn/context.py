@@ -221,7 +221,7 @@ class Context:
         if roaming_subject == 'caller':
             # calling number is roaming
             # check if destination number is roaming as well
-            if self_numbering.is_number_roaming(self.destination_number):
+            if self.numbering.is_number_roaming(self.destination_number):
                 # well destination number is roaming as well, send call to the current_bts where the subscriber is roaming
                 try:
                     site_ip = self.numbering.get_current_bts(self.destination_number)

@@ -74,11 +74,10 @@ class Numbering:
     def is_number_roaming(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if subscriber.results != []:
-            # user found check if home_bts != current_bts
-            if subscriber[1] != subscriber[2]:
-                # subscriber is roaming, check auth
-                if subscriber[3] == 1:
+        if subscriber.results != None:
+            subscriber = rk_hlr.get(subscriber.results[0])
+            if subscriber.data["home_bts"] != subscriber.data["current_bts"]:
+                if subscriber.data["authorized"] == 1:
                     return True
                 else:
                     raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
@@ -145,3 +144,8 @@ class Numbering:
                 return None
         except psycopg2.DatabaseError, e:
             raise NumberingException('Database error getting the Gateway: %s' % e)
+
+
+if __name__ == '__main__':
+	num = Numbering()
+	num.is_number_roaming('66666139666')
