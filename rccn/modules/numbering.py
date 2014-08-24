@@ -74,7 +74,7 @@ class Numbering:
     def is_number_roaming(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if subscriber.results != 0:
+        if subscriber.results != []:
             # user found check if home_bts != current_bts
             if subscriber[1] != subscriber[2]:
                 # subscriber is roaming, check auth
