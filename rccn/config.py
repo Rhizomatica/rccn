@@ -39,6 +39,9 @@ smslog.setFormatter(formatter)
 rlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/reseller.log', 'a', 104857600, 5)
 rlog.setFormatter(formatter)
 
+roaminglog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/roaming.log', 'a', 104857600, 5)
+roaminglog.setFormatter(formatter)
+
 logging.basicConfig()
 
 # initialize logger RCCN
@@ -70,6 +73,11 @@ sms_log.setLevel(logging.DEBUG)
 res_log = logging.getLogger('RCCN_RESELLER')
 res_log.addHandler(rlog)
 res_log.setLevel(logging.DEBUG)
+
+# initialize logger ROAMING
+roaming_log = logging.getLogger('RCCN_ROAMING')
+roaming_log.addHandler(roaminglog)
+roaming_log.setLevel(logging.DEBUG)
 
 # Extensions
 class ExtensionException(Exception):
