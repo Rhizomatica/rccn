@@ -131,7 +131,7 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
-    def get_all_roaming(self, number):
+    def get_all_roaming(self):
         results = riak_client.add('hlr').map(
             """
             function(value, keyData, arg) {
@@ -145,7 +145,10 @@ class Subscriber:
             """ % config['local_ip']
             ).run()
         # return [(msisdn, imsi)]
-        return [(r[1][0], r[0]) for r in results]
+	if results:
+            return [(r[1][0], r[0]) for r in results]
+	else:
+            return []
 
     def get_online(self):
         try:
