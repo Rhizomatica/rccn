@@ -381,7 +381,7 @@ class Subscriber:
 
     def _provision_in_distributed_hlr(self, imsi, msisdn):
         rk_hlr = riak_client.bucket('hlr')
-        distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
+        distributed_hlr = rk_hlr.new(str(imsi), data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
         distributed_hlr.add_index('msisdn_bin', msisdn)
         distributed_hlr.store()
 
