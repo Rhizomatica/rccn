@@ -20,8 +20,6 @@
 rhizomatica roaming checker
 """
 
-import sys
-
 from config import *
 
 def update_foreign_subscribers():
