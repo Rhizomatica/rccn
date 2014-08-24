@@ -20,6 +20,8 @@
 rhizomatica roaming checker
 """
 
+import sys
+
 from modules.subscriber import Subscriber, SubscriberException
 from modules.numbering import Numbering, NumberingException
 from confing import roaming_log
@@ -31,7 +33,7 @@ if __name__ == '__main__':
         unregistered = sub.get_all_unregistered()
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
-        return
+        sys.exit(1)
 
     for msisdn,imsi in unregistered:
         try:
