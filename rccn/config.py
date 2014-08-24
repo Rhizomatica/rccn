@@ -45,6 +45,9 @@ rlog.setFormatter(formatter)
 roaminglog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/roaming.log', mode, maxBytes, backupCount)
 roaminglog.setFormatter(formatter)
 
+purgerlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/purger.log', mode, maxBytes, backupCount)
+purgerlog.setFormatter(formatter)
+
 logging.basicConfig()
 
 # initialize logger RCCN
@@ -81,6 +84,11 @@ res_log.setLevel(logging.DEBUG)
 roaming_log = logging.getLogger('RCCN_ROAMING')
 roaming_log.addHandler(roaminglog)
 roaming_log.setLevel(logging.DEBUG)
+
+# initialize logger PURGER
+purger_log = logging.getLogger('RCCN_PURGER')
+purger_log.addHandler(roaminglog)
+purger_log.setLevel(logging.DEBUG)
 
 # Extensions
 class ExtensionException(Exception):
