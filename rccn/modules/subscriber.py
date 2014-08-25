@@ -84,7 +84,7 @@ class Subscriber:
             sq_hlr_cursor.execute("select extension from subscriber where imsi=%(imsi)s and lac > 0" % {'imsi': imsi})
             connected = sq_hlr_cursor.fetchall()
             sq_hlr.close()
-            if len(connected) < 0:
+            if len(connected) <= 0:
                 raise SubscriberException('imsi %s not found' % imsi)
             return connected[0]
         except sqlite3.Error as e:
