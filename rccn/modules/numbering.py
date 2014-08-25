@@ -103,7 +103,7 @@ class Numbering:
         return False
 
     def get_site_ip(self, destination_number):
-        siteprefix = destination_number[:6]
+        siteprefix = str(destination_number)[:6]
         site = riak_client.bucket('sites')
         site_data = site.get(siteprefix)
         if site_data.data['ip_address'] != None:

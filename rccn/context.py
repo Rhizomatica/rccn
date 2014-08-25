@@ -273,6 +273,7 @@ class Context:
                         # check if destination number is an international call
                         if self.destination_number[0] == '+' or re.search(r'^00', self.destination_number) != None:
                             log.info('Called number is an international call or national')
+			    log.debug('Calling number %s' self.calling_number)
                             site_ip = self.numbering.get_site_ip(self.calling_number)
                             # check if home_bts is same as local site, if yes send call to local context outbound
                             if site_ip == config['local_ip']:
