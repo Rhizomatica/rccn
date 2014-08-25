@@ -33,6 +33,12 @@ def update_foreign_subscribers():
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
         return
 
+    try:
+        unregistered += sub.get_all_foreign()
+    except SubscriberException as e:
+        roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
+        return
+
     for msisdn,imsi in unregistered:
         try:
             number =  numbering.get_msisdn_from_imsi(imsi)
