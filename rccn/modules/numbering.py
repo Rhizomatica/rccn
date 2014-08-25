@@ -74,7 +74,7 @@ class Numbering:
     def is_number_roaming(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if subscriber.results != None:
+        if len(subscriber.results) != 0:
             subscriber = rk_hlr.get(subscriber.results[0])
             if subscriber.data["home_bts"] != subscriber.data["current_bts"]:
                 if subscriber.data["authorized"] == 1:
@@ -95,7 +95,7 @@ class Numbering:
     def get_current_bts(self, number):
         rk_hlr = riak_client.bucket('hlr')
         subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if subscriber.results != None:
+        if len(subscriber.results) != 0:
             subscriber = rk_hlr.get(subscriber.results[0])
             return subscriber.data['current_bts']
         else:
