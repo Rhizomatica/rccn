@@ -43,10 +43,19 @@ def update_foreign_subscribers():
         try:
             number =  numbering.get_msisdn_from_imsi(imsi)
             sub.update(msisdn, "roaming number", number)
+            send_welcome_sms(number)
+            roaming_log.info("Subscriber %s in roaming" % number)
         except NumberingException as e:
             roaming_log.debug("Couldn't retrieve msisdn from the imsi: %s" % e)
         except SubscriberException as e:
             roaming_log.error("An error ocurred adding the roaming number %s: %s" % (number, e))
+
+def send_welcome_sms(number):
+    try:
+        sms = SMS()
+        sms.send(smsc_shortcode, number, sms_welcome_roaming)
+    except SMSException as e:
+        roaming_log.error("An error ocurred sending welcome sms to %s: %s" % (number, e))
 
 def update_local_subscribers():
     sub = Subscriber()
