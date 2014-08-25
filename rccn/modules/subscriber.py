@@ -77,14 +77,16 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('Database error in checking subscriber authorization: %s' % e)
 
-    def is_online(self, subscriber_number):
+    def get_local_msisdn(self, imsi):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select msisdn from subscriber where msisdn=%(number)s and lac > 0", {'number': subscriber_number})
+            sq_hlr_cursor.execute("select extension from subscriber where imsi=%(imsi)s and lac > 0" % {'imsi': imsi})
             connected = sq_hlr_cursor.fetchall()
             sq_hlr.close()
-            return len(connected) > 0
+            if len(connected) < 0:
+                raise SubscriberException('imsi %s not found' % imsi)
+            return connected[0]
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
@@ -144,11 +146,9 @@ class Subscriber:
             }
             """ % config['local_ip']
             ).run()
-        # return [(msisdn, imsi)]
-	if results:
-            return [(r[1][0], r[0]) for r in results]
-	else:
+        if not results:
             return []
+	return results
 
     def get_online(self):
         try:

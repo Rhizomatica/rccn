@@ -45,12 +45,16 @@ def update_foreign_subscribers():
 def update_local_subscribers():
     sub = Subscriber()
     subscribers = sub.get_all_roaming()
-    for msisdn,imsi in subscribers:
+    for imsi in subscribers:
         try:
-            if sub.is_online(msisdn):
-                sub.update_location(imsi, msisdn)
+            msisdn = sub.get_local_msisdn(imsi)
         except SubscriberException as e:
-            roaming_log.error("An error ocurred updating the location of %s: %s" % (msisdn, e))
+            roaming_log.info("Couldn't retrieve the msisdn from imsi %s: %s" % (imsi, e))
+            continue
+        try:
+            sub.update_location(imsi, msisdn)
+        except SubscriberException as e:
+            roaming_log.error("An error ocurred updating the location of %s: %s" % (imsi, e))
 
 if __name__ == '__main__':
     update_foreign_subscribers()
