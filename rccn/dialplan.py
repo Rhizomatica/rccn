@@ -98,7 +98,7 @@ class Dialplan:
         try:
             if (self.numbering.is_number_roaming(self.calling_number)):
                 processed = 1
-                log.info('Calling number is roaming')
+                log.info('Calling number %s is roaming' % self.calling_number)
                 self.context.roaming('caller')
         except NumberingException as e:
             log.error(e)
@@ -108,7 +108,7 @@ class Dialplan:
         try:
             if (self.numbering.is_number_roaming(self.destination_number)):
                 processed = 1
-                log.info('Destination number is roaming')
+                log.info('Destination number %s is roaming' $ self.destination_number)
                 self.context.roaming('called')
         except NumberingException as e:
             log.error(e)
