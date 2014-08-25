@@ -25,26 +25,32 @@ import sys
 from config import *
 
 def update_foreign_subscribers():
-    numbering = Numbering()
     sub = Subscriber()
     try:
         unregistered = sub.get_all_unregistered()
+        update_list(unregistered, True)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
-        return
 
     try:
-        unregistered += sub.get_all_foreign()
+        foreign = sub.get_all_foreign()
+        update_list(foreign)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
-        return
 
-    for msisdn,imsi in unregistered:
+
+def update_list(subscribers, welcome=False):
+    numbering = Numbering()
+    sub = Subscriber()
+    for msisdn,imsi in subscribers:
         try:
             number =  numbering.get_msisdn_from_imsi(imsi)
             sub.update(msisdn, "roaming number", number)
-            send_welcome_sms(number)
+
+            if welcome:
+                send_welcome_sms(number)
             roaming_log.info("Subscriber %s in roaming" % number)
+
         except NumberingException as e:
             roaming_log.debug("Couldn't retrieve msisdn from the imsi: %s" % e)
         except SubscriberException as e:
