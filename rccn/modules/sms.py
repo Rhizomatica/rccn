@@ -42,7 +42,7 @@ class SMS:
         self.username = kannel_username
         self.password = kannel_password
         self.charset = 'UTF-8'
-        self.coding = 2
+        self.coding = 1
         self.context = 'SMS_LOCAL'
         self.source = ''
         self.destination = ''
@@ -69,7 +69,7 @@ class SMS:
 
             # check if source or destination is roaming
             try:
-                if self.numbering.is_number_roaming(self.calling_number):
+                if self.numbering.is_number_roaming(source):
                     sms_log.info('Source number is roaming')
                     self.roaming('caller')
             except NumberingException as e:
@@ -79,7 +79,7 @@ class SMS:
                 return
 
             try:
-                if self.numbering.is_number_roaming(self.destination_number):
+                if self.numbering.is_number_roaming(destination):
                     sms_log.info('Destination number is roaming')
                     self.roaming('called')
             except NumberingException as e:
@@ -298,7 +298,7 @@ class SMS:
 if __name__ == '__main__':
     sms = SMS()
     try:
-        sms.send('10000', '68820132107', 'test')
+        sms.send('10000', '66666127621', 'test')
         #sms.receive('68820132107','777','3010#68820135624#10','UTF-8',2)
         #sms.send_broadcasit('antani')
     except SMSException as e:
