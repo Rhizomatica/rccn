@@ -301,7 +301,7 @@ class SMS:
 if __name__ == '__main__':
     sms = SMS()
     try:
-        sms.send('10000', '66666127621', 'test')
+        sms.send('10000', '66666248674', 'test')
         #sms.receive('68820132107','777','3010#68820135624#10','UTF-8',2)
         #sms.send_broadcasit('antani')
     except SMSException as e:

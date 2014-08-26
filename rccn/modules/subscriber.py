@@ -298,6 +298,15 @@ class Subscriber:
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
             
+        rk_hlr = riak_client.bucket('hlr')
+        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+        if len(subscriber.results) != 0:
+            subscriber = rk_hlr.get(subscriber.results[0])
+            subscriber.data['authorized'] = auth
+            subscriber.store()
+	else:
+            raise NumberingException('RK_DB subscriber %s not found' % msisdn)
+
 
     def subscription(self, msisdn, status):
         # status 0 - subscription not paid
