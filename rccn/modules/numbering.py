@@ -89,7 +89,7 @@ class Numbering:
         if not subscriber.exists:
             raise NumberingException('RK_DB imsi %s not found' % imsi)
         if subscriber.data["authorized"] != 1:
-            raise NumberingException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber[0]))
+            raise NumberingException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber.data['msisdn']))
         return subscriber.data["msisdn"]
 
     def get_current_bts(self, number):
