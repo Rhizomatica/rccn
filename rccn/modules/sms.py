@@ -203,7 +203,7 @@ class SMS:
         
         self.numbering = Numbering()
 
-        if roaming_subject == 'caller':
+        if subject == 'caller':
             # calling number is roaming 
             # check if destination number is roaming as well
             if self.numbering.is_number_roaming(self.destination):
@@ -252,11 +252,11 @@ class SMS:
                 current_bts = self.numbering.get_current_bts(self.destination)
                 if current_bts == config['local_ip']:
                     sms_log.info('Destination is roaming on our site send SMS to local kannel')
-                    self.session.setVariable('context','SMS_ROAMING_LOCAL')
+                    self.context = 'SMS_ROAMING_LOCAL'
                     self.send(self.source, self.destination, self.text)
                 else:
                     sms_log.info('Destination is roaming send sms to other site')
-                    self.session.setVariable('context', 'SMS_ROAMING_INTERNAL')
+                    self.context = 'SMS_ROAMING_INTERNAL'
                     self.send(self.source, self.destination, self.text, current_bts)
             except NumberingException as e:
                 sms_log.error(e)
