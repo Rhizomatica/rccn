@@ -142,6 +142,15 @@ class Subscriber:
             sq_hlr.close()
             return foreign
 
+    def get_all_inactive_since(self, days):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension like %(prefix)s%%) and updated > date('now', '-%(days)s days')", {'days': days, 'prefix': config['internal_prefix']})
+            inactive = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            return inactive
+
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
@@ -161,7 +170,7 @@ class Subscriber:
             ).run()
         if not results:
             return []
-	return results
+        return results
 
     def get_online(self):
         try:
@@ -268,7 +277,30 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
 
-        self._delete_in_distributed_hlr(imsi)
+        self._delete_in_distributed_hlr(msisdn)
+
+    def purge(self, msisdn):
+        # delete subscriber on the HLR sqlite DB
+        appstring = 'OpenBSC'
+        appport = 4242
+        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+        cmd = 'enable'
+        vty.command(cmd)
+        cmd = 'subscriber extension %s delete' % msisdn
+        vty.command(cmd)
+
+        # PG_HLR delete subscriber
+        try:
+            cur = db_conn.cursor()
+            cur.execute('DELETE FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            if cur.rowcount > 0:
+                db_conn.commit()
+            else:
+                raise SubscriberException('PG_HLR No subscriber found') 
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
+
+        self._delete_in_distributed_hlr(msisdn)
 
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
@@ -386,10 +418,11 @@ class Subscriber:
         distributed_hlr.add_index('msisdn_bin', msisdn)
         distributed_hlr.store()
 
-    def _delete_in_distributed_hlr(self, imsi):
+    def _delete_in_distributed_hlr(self, msisdn):
         rk_hlr = riak_client.bucket('hlr')
-        rk_hlr.get(str(imsi)).delete()
-
+        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+        for key in subscriber:
+            rk_hlr.get(key).delete()
 
 if __name__ == '__main__':
     sub = Subscriber()

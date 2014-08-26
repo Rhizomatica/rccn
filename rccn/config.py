@@ -20,27 +20,33 @@ class PGEncoder(json.JSONEncoder):
 
 
 # Loggers
-smlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rccn.log', 'a', 104857600, 5)
+mode = 'a'
+maxBytes = 104857600
+backupCount = 5
+smlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rccn.log', mode, maxBytes, backupCount)
 formatter = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s %(message)s')
 smlog.setFormatter(formatter)
 
-blog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/billing.log', 'a', 104857600, 5)
+blog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/billing.log', mode, maxBytes, backupCount)
 blog.setFormatter(formatter)
 
-alog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rapi.log', 'a', 104857600, 5)
+alog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rapi.log', mode, maxBytes, backupCount)
 alog.setFormatter(formatter)
 
-slog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/subscription.log', 'a', 104857600, 5)
+slog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/subscription.log', mode, maxBytes, backupCount)
 slog.setFormatter(formatter)
 
-smslog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/sms.log', 'a', 104857600, 5)
+smslog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/sms.log', mode, maxBytes, backupCount)
 smslog.setFormatter(formatter)
 
-rlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/reseller.log', 'a', 104857600, 5)
+rlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/reseller.log', mode, maxBytes, backupCount)
 rlog.setFormatter(formatter)
 
-roaminglog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/roaming.log', 'a', 104857600, 5)
+roaminglog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/roaming.log', mode, maxBytes, backupCount)
 roaminglog.setFormatter(formatter)
+
+purgerlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/purger.log', mode, maxBytes, backupCount)
+purgerlog.setFormatter(formatter)
 
 logging.basicConfig()
 
@@ -78,6 +84,11 @@ res_log.setLevel(logging.DEBUG)
 roaming_log = logging.getLogger('RCCN_ROAMING')
 roaming_log.addHandler(roaminglog)
 roaming_log.setLevel(logging.DEBUG)
+
+# initialize logger PURGER
+purger_log = logging.getLogger('RCCN_PURGER')
+purger_log.addHandler(roaminglog)
+purger_log.setLevel(logging.DEBUG)
 
 # Extensions
 class ExtensionException(Exception):
