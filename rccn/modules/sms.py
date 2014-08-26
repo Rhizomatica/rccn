@@ -72,6 +72,7 @@ class SMS:
                 if self.numbering.is_number_roaming(source):
                     sms_log.info('Source number is roaming')
                     self.roaming('caller')
+		    return
             except NumberingException as e:
                 sms_log.info('Sender unauthorized send notification message')
                 self.context = 'SMS_UNAUTH'
@@ -82,6 +83,7 @@ class SMS:
                 if self.numbering.is_number_roaming(destination):
                     sms_log.info('Destination number is roaming')
                     self.roaming('called')
+                    return
             except NumberingException as e:
                 sms_log.info('Destination unauthorized send notification message')
                 self.context = 'SMS_UNAUTH'
