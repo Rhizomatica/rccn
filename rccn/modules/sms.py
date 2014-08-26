@@ -225,7 +225,7 @@ class SMS:
                     sms_log.error(e)
             else:
                 # destination is not roaming check if destination if local site
-                if self.numbering.is_number_local(self.destination_number) and len(self.destination_number) == 11:
+                if self.numbering.is_number_local(self.destination) and len(self.destination) == 11:
                     sms_log.info('Destination is a local number')
 
                     if self.subscriber.is_authorized(self.destination, 0):
