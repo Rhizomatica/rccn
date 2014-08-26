@@ -42,7 +42,7 @@ class SMS:
         self.username = kannel_username
         self.password = kannel_password
         self.charset = 'UTF-8'
-        self.coding = 1
+        self.coding = 2
         self.context = 'SMS_LOCAL'
         self.source = ''
         self.destination = ''
@@ -204,6 +204,7 @@ class SMS:
     def roaming(self, subject):
         
         self.numbering = Numbering()
+	self.subscriber = Subscriber()
 
         if subject == 'caller':
             # calling number is roaming 
@@ -235,7 +236,7 @@ class SMS:
                     else:
                         # destination cannot receive SMS inform source
                         self.context = 'SMS_ROAMING_UNAUTH'
-                        self.send(config['smsc'], source, config['sms_destination_unauthorized'])
+                        self.receive(config['smsc'], source, config['sms_destination_unauthorized'], self.charset, self.coding)
                 else:
                     # number is not local check if number is internal
                     if self.numbering.is_number_internal(self.destination) and len(self.destination) == 11:
