@@ -19,18 +19,23 @@
 """
 rhizomatica inactive purger
 """
-
 from modules.subscriber import Subscriber, SubscriberException
 from confing import purger_log
 
 DAYS_INACTIVE = 7
 
+
 def purge_inactive_subscribers():
+    """
+    Purge all subscribers inactive for more than
+    DAYS_INACTIVE
+    """
     sub = Subscriber()
     try:
         inactive = sub.get_all_inactive_since(DAYS_INACTIVE)
     except SubscriberException as e:
-        purger_log.error("An error ocurred getting the list of inactive: %s" % e)
+        purger_log.error(
+            "An error ocurred getting the list of inactive: %s" % e)
         return
 
     for msisdn in inactive:
