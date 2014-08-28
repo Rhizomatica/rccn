@@ -1,5 +1,5 @@
 ############################################################################
-# 
+#
 # Copyright (C) 2014 tele <tele@rhizomatica.org>
 #
 # Subscription Checker
@@ -19,7 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ############################################################################
-
+"""
+Rhizomatica Subscription Checker.
+"""
 import sys
 from config import *
 
@@ -33,22 +35,30 @@ action = sys.argv[1]
 rsc = Subscription(subscription_log)
 
 if action == 'notice':
-    subscription_log.info('Send notification to all subscribers to pay the subscription fee')
+    subscription_log.info(
+        'Send notification to all subscribers to pay the subscription fee')
     try:
         totalsub = rsc.update_subscriptions(0)
-        subscription_log.info('Updated subscription status to unpaid for %d subscribers' % totalsub)
-        subscription_log.info('Send SMS of paying the subscription fee to all subscribers')
+        subscription_log.info(
+            'Updated subscription status to unpaid '
+            'for %d subscribers' % totalsub)
+        subscription_log.info(
+            'Send SMS of paying the subscription fee to all subscribers')
         rsc.send_subscription_fee_notice(notice_msg)
     except SubscriptionException as e:
         subscription_log.error('%s' % e)
 elif action == 'reminder':
-    subscription_log.info('Send reminder to all subscribers that haven\'t yet paid the subscription')
+    subscription_log.info(
+        'Send reminder to all subscribers that '
+        'haven\'t yet paid the subscription')
     try:
         rsc.send_subscription_fee_reminder(reminder_msg)
     except SubscriptionException as e:
         subscription_log.error('%s' % e)
 elif action == 'deactivate':
-    subscription_log.info('Deactivate all subscribers that haven\'t paid their subscription fee')
+    subscription_log.info(
+        'Deactivate all subscribers that '
+        'haven\'t paid their subscription fee')
     try:
         rsc.deactivate_subscriptions(deactivate_msg)
     except SubscriptionException as e:
