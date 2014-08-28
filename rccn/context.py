@@ -179,7 +179,7 @@ class Context:
             # check if destination subscriber is roaming
             try:
                 if len(dest_num) == 5:
-                    self.destination_number = config['internal_prefix']+self.dest_num
+                    self.destination_number = config['internal_prefix']+dest_num
                 elif len(dest_num) == 11:
                     self.destination_number = dest_num
                 if self.numbering.is_number_roaming(self.destination_number):
