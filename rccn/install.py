@@ -22,6 +22,7 @@
 """
 RCCN installation script.
 """
+import json
 import os
 import sys
 import subprocess
