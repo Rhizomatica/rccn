@@ -175,6 +175,21 @@ class Context:
             log.debug('Collect DTMF to call internal number')
             dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm", "007_el_numero_no_es_corecto.gsm", "\\d+")
             log.debug('Collecting digits: %s' % dest_num)
+
+            # check if destination subscriber is roaming
+            try:
+                if len(dest_num) == 5:
+                    self.destination_number = config['internal_prefix']+self.dest_num
+                elif len(dest_num) == 11:
+                    self.destination_number = dest_num
+                if self.numbering.is_number_roaming(self.destination_number):
+                    log.info('Destination number %s is roaming' % self.destination_number)
+                    self.roaming('called')
+            except NumberingException as e:
+                log.error(e)
+                # TODO: play message of destination number unauthorized to receive call
+                self.session.hangup()
+
             try:
                 if self.subscriber.is_authorized(dest_num, 1) and (len(dest_num) == 11 or len(dest_num) == 5):
                     # check if the inbound call has to be billed
@@ -273,7 +288,7 @@ class Context:
                         # check if destination number is an international call
                         if self.destination_number[0] == '+' or re.search(r'^00', self.destination_number) != None:
                             log.info('Called number is an international call or national')
-			    calling = self.session.getVariable('caller_id_number')
+                            calling = self.session.getVariable('caller_id_number')
                             site_ip = self.numbering.get_site_ip(calling)
                             # check if home_bts is same as local site, if yes send call to local context outbound
                             if site_ip == config['local_ip']:
@@ -286,7 +301,7 @@ class Context:
                         else:
                             # called number must be wrong, hangup call
                             self.session.hangup()
-        else:
+        elif roaming_subject == 'called':
             # the destination number is roaming send call to current_bts of subscriber
             try:
                 site_ip = self.numbering.get_current_bts(self.destination_number)
@@ -301,6 +316,16 @@ class Context:
                     self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
             except NumberingException as e:
                 log.error(e)
+        elif roaming_subject == 'inbound':
+                try:
+                    site_ip = self.numbering.get_current_bts(self.destination_number)
+                    if site_ip != config['local_ip']:
+                        log.info('INBOUND Called number is roaming send call to current_bts: %s' % site_ip)
+                        self.session.setVariable('context','ROAMING_INBOUND')
+                        self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                except NumberingException as e:
+                    log.error(e)
+
                 
             
                     
