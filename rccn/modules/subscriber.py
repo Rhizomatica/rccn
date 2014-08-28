@@ -149,7 +149,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension like %(prefix)s%%) and extension != %(smsc)s and updated < date('now', '-%(days)s days')", {'days': days, 'smsc': config['smsc'], 'prefix': config['internal_prefix']})
+            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension like \"%(prefix)s%%\") and extension != %(smsc)s and updated < date('now', '-%(days)s days')", {'days': days, 'smsc': config['smsc'], 'prefix': config['internal_prefix']})
             inactive = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return inactive
