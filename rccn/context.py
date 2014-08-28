@@ -184,7 +184,7 @@ class Context:
                     self.destination_number = dest_num
                 if self.numbering.is_number_roaming(self.destination_number):
                     log.info('Destination number %s is roaming' % self.destination_number)
-                    self.roaming('called')
+                    self.roaming('inbound')
             except NumberingException as e:
                 log.error(e)
                 # TODO: play message of destination number unauthorized to receive call
