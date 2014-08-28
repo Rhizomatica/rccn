@@ -20,8 +20,7 @@
 rhizomatica inactive purger
 """
 
-from modules.subscriber import Subscriber, SubscriberException
-from confing import purger_log
+from config import *
 
 DAYS_INACTIVE = 7
 
