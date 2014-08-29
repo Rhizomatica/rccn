@@ -149,7 +149,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension like \"%(prefix)s%%\") and extension != %(smsc)s and updated < date('now', '-%(days)s days')", {'days': days, 'smsc': config['smsc'], 'prefix': config['internal_prefix']})
+            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension not like \"%(prefix)s%%\") and extension != %(smsc)s and updated < date('now', '-%(days)s days')" % {'days': days, 'smsc': config['smsc'], 'prefix': config['internal_prefix']})
             inactive = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return inactive
@@ -291,19 +291,6 @@ class Subscriber:
         vty.command(cmd)
         cmd = 'subscriber extension %s delete' % msisdn
         vty.command(cmd)
-
-        # PG_HLR delete subscriber
-        try:
-            cur = db_conn.cursor()
-            cur.execute('DELETE FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
-            if cur.rowcount > 0:
-                db_conn.commit()
-            else:
-                raise SubscriberException('PG_HLR No subscriber found') 
-        except psycopg2.DatabaseError, e:
-            raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
-
-        self._delete_in_distributed_hlr(msisdn)
 
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
