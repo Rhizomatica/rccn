@@ -20,6 +20,7 @@ class PGEncoder(json.JSONEncoder):
             return str(obj)
         return json.JSONEncoder.default(self, obj)
 
+RIAK_TIMEOUT = 1000
 
 # Loggers
 mode = 'a'
@@ -130,7 +131,7 @@ except psycopg2.DatabaseError as e:
 # Connect to riak
 #riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
 # use protocol buffers
-riak_client = riak.RiakClient(pb_port=8087, protocol='pbc')
+riak_client = riak.RiakClient(pb_port=8087, protocol='pbc', RETRY_COUNT=1)
 
 # load modules
 from modules import subscriber

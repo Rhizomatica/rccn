@@ -74,9 +74,9 @@ class Numbering:
     def is_number_roaming(self, number):
         try:
             rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', number)
+            subscriber = rk_hlr.get_index('msisdn_bin', number, timeout=RIAK_TIMEOUT)
             if len(subscriber.results) != 0:
-                subscriber = rk_hlr.get(subscriber.results[0])
+                subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
                 if subscriber.data["home_bts"] != subscriber.data["current_bts"]:
                     if subscriber.data["authorized"] == 1:
                         return True
@@ -91,7 +91,7 @@ class Numbering:
     def get_msisdn_from_imsi(self, imsi):
         try:
             rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get(str(imsi))
+            subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
             if not subscriber.exists:
                 raise NumberingException('RK_DB imsi %s not found' % imsi)
             if subscriber.data["authorized"] != 1:
@@ -104,9 +104,9 @@ class Numbering:
     def get_current_bts(self, number):
         try:
             rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', number)
+            subscriber = rk_hlr.get_index('msisdn_bin', number, timeout=RIAK_TIMEOUT)
             if len(subscriber.results) != 0:
-                subscriber = rk_hlr.get(subscriber.results[0])
+                subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
                 return subscriber.data['current_bts']
             else:
                 raise NumberingException('RK_DB subscriber %s not found' % number)

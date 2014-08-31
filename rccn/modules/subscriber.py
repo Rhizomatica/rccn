@@ -254,7 +254,7 @@ class Subscriber:
     def update_location(self, imsi, msisdn):
         try:
             rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get(str(imsi))
+            subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
             subscriber.data["current_bts"] = config['local_ip']
             subscriber.store()
 
@@ -326,9 +326,9 @@ class Subscriber:
         
         try:
             rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+            subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
             if len(subscriber.results) != 0:
-                subscriber = rk_hlr.get(subscriber.results[0])
+                subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
                 subscriber.data['authorized'] = auth
                 subscriber.store()
             else:
@@ -432,7 +432,7 @@ class Subscriber:
     def _delete_in_distributed_hlr(self, msisdn):
         try:
             rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+            subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
             for key in subscriber:
                 rk_hlr.get(key).delete()
 
