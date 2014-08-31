@@ -133,7 +133,7 @@ except psycopg2.DatabaseError as e:
 # use protocol buffers
 try:
     riak_client = riak.RiakClient(pb_port=8087, protocol='pbc', RETRY_COUNT=1)
-except riak.RiakError as e:
+except:
     log.error('RK_HLR error: unable to connect')
 
 # load modules

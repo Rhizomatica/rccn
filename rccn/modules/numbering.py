@@ -86,6 +86,8 @@ class Numbering:
 
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error checking if number is in roaming:' % e)
+        except:
+            raise NumberingException('RK_HLR error: unable to connect')
 
 
     def get_msisdn_from_imsi(self, imsi):
@@ -100,6 +102,9 @@ class Numbering:
 
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the msisdn from an imsi: %s' % e)
+        except:
+            raise NumberingException('RK_HLR error: unable to connect')
+
 
     def get_current_bts(self, number):
         try:
@@ -114,6 +119,9 @@ class Numbering:
 
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the current bts: %s' % e)
+        except:
+            raise NumberingException('RK_HLR error: unable to connect')
+
 
     def get_site_ip(self, destination_number):
         siteprefix = destination_number[:6]

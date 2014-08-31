@@ -159,21 +159,27 @@ class Subscriber:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
     def get_all_roaming(self):
-        results = riak_client.add('hlr').map(
-            """
-            function(value, keyData, arg) {
-                 var data = Riak.mapValuesJson(value)[0];
-                 if ((data.home_bts == "%s") &&
-                     (data.current_bts != data.home_bts))
-                   return [value.key];
-                 else
-                   return [];
-            }
-            """ % config['local_ip']
-            ).run()
-        if not results:
-            return []
-        return results
+        try:
+            results = riak_client.add('hlr').map(
+                """
+                function(value, keyData, arg) {
+                     var data = Riak.mapValuesJson(value)[0];
+                     if ((data.home_bts == "%s") &&
+                         (data.current_bts != data.home_bts))
+                       return [value.key];
+                     else
+                       return [];
+                }
+                """ % config['local_ip']
+                ).run()
+            if not results:
+                return []
+            return results
+        except riak.RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)            
+        except:
+            raise SubscriberException('RK_HLR error: unable to connect')
+
 
     def get_online(self):
         try:
@@ -260,6 +266,9 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
+        except:
+            raise SubscriberException('RK_HLR error: unable to connect')
+
 
     def delete(self, msisdn):
         imsi = self._get_imsi(msisdn)
@@ -336,6 +345,9 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
+        except:
+            raise SubscriberException('RK_HLR error: unable to connect')
+
 
 
     def subscription(self, msisdn, status):
@@ -428,6 +440,8 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
+        except:
+            raise SubscriberException('RK_HLR error: unable to connect')
 
     def _delete_in_distributed_hlr(self, msisdn):
         try:
@@ -438,6 +452,9 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
+        except:
+            raise SubscriberException('RK_HLR error: unable to connect')
+
 
 if __name__ == '__main__':
     sub = Subscriber()
