@@ -407,7 +407,7 @@ class Subscriber:
         vty.command(cmd)
         cmd = 'subscriber extension %s authorized 1' % new_msisdn
         vty.command(cmd)
-        cmd = 'subscriber extension %s name %s' % (new_msisdn, name)
+        cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
         vty.command(cmd)
 
     def _provision_in_database(self, msisdn, name, balance):

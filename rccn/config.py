@@ -4,6 +4,8 @@ import psycopg2.extras
 import sqlite3
 import json
 import riak
+import unidecode
+from unidecode import unidecode
 from riak.transports.pbc.transport import RiakPbcTransport
 from logging import handlers as loghandlers
 from decimal import Decimal
