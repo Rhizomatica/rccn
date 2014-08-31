@@ -1,0 +1,4 @@
+rai/include/database.php
+*.pyc
+*.log
+*.swp
