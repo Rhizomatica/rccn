@@ -177,7 +177,7 @@ class Subscriber:
             return results
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)            
-        except socket.error(111, 'Connection refused'):
+        except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
 
@@ -266,7 +266,7 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
-        except socket.error(111, 'Connection refused'):
+        except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
 
@@ -345,7 +345,7 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
-        except socket.error(111, 'Connection refused'):
+        except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
 
@@ -440,7 +440,7 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
-        except socket.error(111, 'Connection refused'):
+        except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
     def _delete_in_distributed_hlr(self, msisdn):
@@ -452,7 +452,7 @@ class Subscriber:
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
-        except socket.error(111, 'Connection refused'):
+        except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
 
