@@ -84,7 +84,7 @@ class Numbering:
                         raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
             return False                
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise NumberingException('RK_HLR error checking if number is in roaming:' % e)
 
 
@@ -98,7 +98,7 @@ class Numbering:
                 raise NumberingException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber.data['msisdn']))
             return subscriber.data["msisdn"]
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the msisdn from an imsi: %s' % e)
 
     def get_current_bts(self, number):
@@ -112,7 +112,7 @@ class Numbering:
                 raise NumberingException('RK_DB subscriber %s not found' % number)
             return False
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the current bts: %s' % e)
 
     def get_site_ip(self, destination_number):

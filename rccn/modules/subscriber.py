@@ -258,7 +258,7 @@ class Subscriber:
             subscriber.data["current_bts"] = config['local_ip']
             subscriber.store()
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
 
     def delete(self, msisdn):
@@ -334,7 +334,7 @@ class Subscriber:
             else:
                 raise NumberingException('RK_DB subscriber %s not found' % msisdn)
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
 
 
@@ -426,7 +426,7 @@ class Subscriber:
             distributed_hlr.add_index('msisdn_bin', msisdn)
             distributed_hlr.store()
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
 
     def _delete_in_distributed_hlr(self, msisdn):
@@ -436,7 +436,7 @@ class Subscriber:
             for key in subscriber:
                 rk_hlr.get(key).delete()
 
-        except RiakError as e:
+        except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
 
 if __name__ == '__main__':
