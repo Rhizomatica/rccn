@@ -86,7 +86,7 @@ class Numbering:
 
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error checking if number is in roaming:' % e)
-        except:
+        except socket.error(111, 'Connection refused'):
             raise NumberingException('RK_HLR error: unable to connect')
 
 
@@ -102,7 +102,7 @@ class Numbering:
 
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the msisdn from an imsi: %s' % e)
-        except:
+        except socket.error(111, 'Connection refused'):
             raise NumberingException('RK_HLR error: unable to connect')
 
 
@@ -119,7 +119,7 @@ class Numbering:
 
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the current bts: %s' % e)
-        except:
+        except socket.error(111, 'Connection refused'):
             raise NumberingException('RK_HLR error: unable to connect')
 
 

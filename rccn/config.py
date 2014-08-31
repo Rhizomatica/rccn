@@ -5,6 +5,7 @@ import sqlite3
 import json
 import riak
 import unidecode
+import socket
 from unidecode import unidecode
 from riak.transports.pbc.transport import RiakPbcTransport
 from logging import handlers as loghandlers
@@ -133,7 +134,7 @@ except psycopg2.DatabaseError as e:
 # use protocol buffers
 try:
     riak_client = riak.RiakClient(pb_port=8087, protocol='pbc', RETRY_COUNT=1)
-except:
+except socket.error(111, 'Connection refused'):
     log.error('RK_HLR error: unable to connect')
 
 # load modules
