@@ -252,10 +252,14 @@ class Subscriber:
         self.update_location(imsi, number)
 
     def update_location(self, imsi, msisdn):
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get(str(imsi))
-        subscriber.data["current_bts"] = config['local_ip']
-        subscriber.store()
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get(str(imsi))
+            subscriber.data["current_bts"] = config['local_ip']
+            subscriber.store()
+
+        except RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
 
     def delete(self, msisdn):
         imsi = self._get_imsi(msisdn)
@@ -320,14 +324,18 @@ class Subscriber:
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
         
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
-        if len(subscriber.results) != 0:
-            subscriber = rk_hlr.get(subscriber.results[0])
-            subscriber.data['authorized'] = auth
-            subscriber.store()
-	else:
-            raise NumberingException('RK_DB subscriber %s not found' % msisdn)
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+            if len(subscriber.results) != 0:
+                subscriber = rk_hlr.get(subscriber.results[0])
+                subscriber.data['authorized'] = auth
+                subscriber.store()
+            else:
+                raise NumberingException('RK_DB subscriber %s not found' % msisdn)
+
+        except RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
 
 
     def subscription(self, msisdn, status):
@@ -412,16 +420,24 @@ class Subscriber:
             raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
 
     def _provision_in_distributed_hlr(self, imsi, msisdn):
-        rk_hlr = riak_client.bucket('hlr')
-        distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
-        distributed_hlr.add_index('msisdn_bin', msisdn)
-        distributed_hlr.store()
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
+            distributed_hlr.add_index('msisdn_bin', msisdn)
+            distributed_hlr.store()
+
+        except RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
 
     def _delete_in_distributed_hlr(self, msisdn):
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
-        for key in subscriber:
-            rk_hlr.get(key).delete()
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get_index('msisdn_bin', msisdn)
+            for key in subscriber:
+                rk_hlr.get(key).delete()
+
+        except RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
 
 if __name__ == '__main__':
     sub = Subscriber()
