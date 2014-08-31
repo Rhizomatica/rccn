@@ -72,35 +72,48 @@ class Numbering:
             return False
 
     def is_number_roaming(self, number):
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if len(subscriber.results) != 0:
-            subscriber = rk_hlr.get(subscriber.results[0])
-            if subscriber.data["home_bts"] != subscriber.data["current_bts"]:
-                if subscriber.data["authorized"] == 1:
-                    return True
-                else:
-                    raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
-        return False                
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get_index('msisdn_bin', number)
+            if len(subscriber.results) != 0:
+                subscriber = rk_hlr.get(subscriber.results[0])
+                if subscriber.data["home_bts"] != subscriber.data["current_bts"]:
+                    if subscriber.data["authorized"] == 1:
+                        return True
+                    else:
+                        raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
+            return False                
+
+        except RiakError as e:
+            raise NumberingException('RK_HLR error checking if number is in roaming:' % e)
+
 
     def get_msisdn_from_imsi(self, imsi):
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get(str(imsi))
-        if not subscriber.exists:
-            raise NumberingException('RK_DB imsi %s not found' % imsi)
-        if subscriber.data["authorized"] != 1:
-            raise NumberingException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber.data['msisdn']))
-        return subscriber.data["msisdn"]
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get(str(imsi))
+            if not subscriber.exists:
+                raise NumberingException('RK_DB imsi %s not found' % imsi)
+            if subscriber.data["authorized"] != 1:
+                raise NumberingException('RK_DB imsi %s (%s) not authorized' % (imsi, subscriber.data['msisdn']))
+            return subscriber.data["msisdn"]
+
+        except RiakError as e:
+            raise NumberingException('RK_HLR error getting the msisdn from an imsi: %s' % e)
 
     def get_current_bts(self, number):
-        rk_hlr = riak_client.bucket('hlr')
-        subscriber = rk_hlr.get_index('msisdn_bin', number)
-        if len(subscriber.results) != 0:
-            subscriber = rk_hlr.get(subscriber.results[0])
-            return subscriber.data['current_bts']
-        else:
-            raise NumberingException('RK_DB subscriber %s not found' % number)
-        return False
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get_index('msisdn_bin', number)
+            if len(subscriber.results) != 0:
+                subscriber = rk_hlr.get(subscriber.results[0])
+                return subscriber.data['current_bts']
+            else:
+                raise NumberingException('RK_DB subscriber %s not found' % number)
+            return False
+
+        except RiakError as e:
+            raise NumberingException('RK_HLR error getting the current bts: %s' % e)
 
     def get_site_ip(self, destination_number):
         siteprefix = destination_number[:6]
