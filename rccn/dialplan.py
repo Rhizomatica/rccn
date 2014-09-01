@@ -114,6 +114,7 @@ class Dialplan:
             log.error(e)
 
         # check if calling number or destination number is a roaming subscriber
+        log.info('Check if calling/called number is roaming')
         try:
             if (self._n.is_number_roaming(self.calling_number)):
                 processed = 1
