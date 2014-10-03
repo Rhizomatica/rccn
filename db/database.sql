@@ -3,7 +3,8 @@ CREATE TABLE meta (
 	key varchar not null,
 	value varchar not null
 );
-INSERT INTO meta(key,value) VALUES ('db_revision','9');
+INSERT INTO meta(key,value) VALUES ('db_revision','10');
+INSERT INTO meta(key,value) VALUES ('hlr_sync', '');
 
 CREATE TABLE cdr (
     id                        serial primary key,
@@ -217,3 +218,20 @@ CREATE TABLE resellers_configuration (
 
 INSERT INTO resellers_configuration VALUES('Invalid data','Reseller does not have enough funds to add credit to your account',
 'Not enough funds to add the credit requested','Amount of [var1] pesos successfully added to your account. New balance: [var2]','[var1] pesos successfully transferred to [var3]. Your current balance is: [var4]', 'General error credit could not be added');
+
+
+CREATE TABLE hlr (
+        id              serial primary key,
+        created         timestamp default current_timestamp,
+        msisdn          varchar not null,
+	home_bts	varchar not null,
+	current_bts	varchar not null,
+	authorized	varchar not null,
+	updated		timestamp
+);
+
+CREATE INDEX updated_hlr_index ON hlr(updated);
+CREATE INDEX homebts_hlr_index ON hlr(home_bts);
+CREATE INDEX currentbts_hlr_index ON hlr(current_bts);
+CREATE INDEX msisdn_hlr_index ON hlr(msisdn);
+CREATE INDEX authorized_hlr_index ON hlr(authorized);

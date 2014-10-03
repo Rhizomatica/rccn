@@ -427,17 +427,20 @@ class Subscriber:
             cur = db_conn.cursor()
             cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
             {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance))})
+            cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1)',
+            {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
 
     def _provision_in_distributed_hlr(self, imsi, msisdn):
         try:
+            now = int(time.time())
             rk_hlr = riak_client.bucket('hlr')
-            distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1})
+            distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1, "updated": now})
             distributed_hlr.add_index('msisdn_bin', msisdn)
+            distributed_hlr.add_index('modified_int', now)
             distributed_hlr.store()
-
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
         except socket.error:

@@ -73,22 +73,18 @@ class Numbering:
 
     def is_number_roaming(self, number):
         try:
-            rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', number, timeout=RIAK_TIMEOUT)
-            if len(subscriber.results) != 0:
-                subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
-                if subscriber.data["home_bts"] != subscriber.data["current_bts"]:
-                    if subscriber.data["authorized"] == 1:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT * FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
+            subscriber = cur.fetchone()
+            if subscriber != None:
+                if subscriber['home_bts'] != subscriber['current_bts']:
+                    if subscriber['authorized'] == 1:
                         return True
                     else:
                         raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
-            return False                
-
-        except riak.RiakError as e:
-            raise NumberingException('RK_HLR error checking if number is in roaming:' % e)
-        except socket.error:
-            raise NumberingException('RK_HLR error: unable to connect')
-
+            return False
+        except psycopg2.DatabaseError as e:
+            raise NumberingException('PG_HLR error checking if number is in roaming:' % e)
 
     def get_msisdn_from_imsi(self, imsi):
         try:
@@ -108,19 +104,17 @@ class Numbering:
 
     def get_current_bts(self, number):
         try:
-            rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', number, timeout=RIAK_TIMEOUT)
-            if len(subscriber.results) != 0:
-                subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
-                return subscriber.data['current_bts']
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT current_bts FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
+            subscriber = cur.fetchone()
+            if subscriber != None:
+                return subscriber['current_bts']
             else:
-                raise NumberingException('RK_DB subscriber %s not found' % number)
+                raise NumberingException('PG_DB subscriber not found' % (number))
             return False
 
-        except riak.RiakError as e:
-            raise NumberingException('RK_HLR error getting the current bts: %s' % e)
-        except socket.error:
-            raise NumberingException('RK_HLR error: unable to connect')
+        except psycopg2.DatabaseError as e:
+            raise NumberingException('PG_HLR error checking if number is in roaming:' % e)
 
 
     def get_site_ip(self, destination_number):

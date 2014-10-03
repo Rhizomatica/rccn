@@ -6,6 +6,7 @@ import json
 import riak
 import unidecode
 import socket
+import time
 from unidecode import unidecode
 from riak.transports.pbc.transport import RiakPbcTransport
 from logging import handlers as loghandlers
@@ -21,7 +22,7 @@ class PGEncoder(json.JSONEncoder):
             return str(obj)
         return json.JSONEncoder.default(self, obj)
 
-RIAK_TIMEOUT = 1000
+RIAK_TIMEOUT = 7000
 
 # Loggers
 mode = 'a'
@@ -51,6 +52,9 @@ roaminglog.setFormatter(formatter)
 
 purgerlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/purger.log', mode, maxBytes, backupCount)
 purgerlog.setFormatter(formatter)
+
+hlrsynclog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/hlr_sync.log', mode, maxBytes, backupCount)
+hlrsynclog.setFormatter(formatter)
 
 logging.basicConfig()
 
