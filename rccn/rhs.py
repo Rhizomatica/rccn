@@ -26,7 +26,6 @@ import sys
 import datetime
 from config import *
 
-
 now = int(time.time())
 
 def update_sync_time(time):
@@ -57,7 +56,7 @@ try:
     last_run = get_last_sync_time()
     last_run_datetime = datetime.datetime.fromtimestamp(last_run).strftime('%d-%m-%Y %H:%M:%S')
     hlrsync_log.info('Sync local HLR. last run: %s' % last_run_datetime)
-    subscribers = rk_hlr.get_index('modified_int', last_run-3600, last_run)
+    subscribers_results = rk_hlr.get_index('modified_int', last_run-3600, last_run)
     total_sub = len(subscribers_results)
     if total_sub != 0:
         hlrsync_log.info('Found %s subscribers updated since last run')
