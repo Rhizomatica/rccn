@@ -35,7 +35,7 @@ def update_sync_time(time):
         cur.execute("UPDATE meta SET value=%(time)s WHERE key='hlr_sync'", {'time': str(time)})
         db_conn.commit()
     except psycopg2.DatabaseError as e:
-        hlrsynclog.error('PG_HLR unable to update hlr sync timestmap db error: %s' % e)
+        hlrsync_log.error('PG_HLR unable to update hlr sync timestmap db error: %s' % e)
 
 def get_last_sync_time():
     try:
@@ -45,10 +45,10 @@ def get_last_sync_time():
         if sync_time != None:
             return int(sync_time[0])
         else:
-            hlrsynclog.error('Unable to get last sync time. exit')
+            hlrsync_log.error('Unable to get last sync time. exit')
             sys.exit(1)
     except psycopg2.DatabaseError as e:
-        hlrsynclog.error('PG_HLR database error getting last sync time')
+        hlrsync_log.error('PG_HLR database error getting last sync time')
         sys.exit(1)
 
 try:
@@ -56,11 +56,11 @@ try:
     # query riak and get list of all numbers modified since the last run
     last_run = get_last_sync_time()
     last_run_datetime = datetime.datetime.fromtimestamp(last_run).strftime('%d-%m-%Y %H:%M:%S')
-    hlrsynclog.info('Sync local HLR. last run: %s' % last_run_datetime)
+    hlrsync_log.info('Sync local HLR. last run: %s' % last_run_datetime)
     subscribers = rk_hlr.get_index('modified_int', last_run-3600, last_run)
     total_sub = len(subscribers_results)
     if total_sub != 0:
-        hlrsynclog.info('Found %s subscribers updated since last run')
+        hlrsync_log.info('Found %s subscribers updated since last run')
         for result in subscribers.results:
             sub = rk_hlr.get(result, timeout=RIAK_TIMEOUT)
             if sub.exists:
@@ -74,16 +74,16 @@ try:
                         # subscriber exists check if the updated date is different from the one in the distributed hlr
                         # if yes update data in db
                         if pg_sub[6] != sub.data['updated']:
-                            hlrsynclog.info('Subscriber %s has been updated in RK_HLR, update data on PG_HLR' % sub.data['msisdn'])
-                            hlrsynclog.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
+                            hlrsync_log.info('Subscriber %s has been updated in RK_HLR, update data on PG_HLR' % sub.data['msisdn'])
+                            hlrsync_log.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
                             (sub.data['msisdn'], sub.data['home_bts'], sub.data['current_bts'], sub.data['authorized'], sub.data['updated']))
                             cur.execute('UPDATE hlr SET msisdn=%(msisdn)s, home_bts=%(home_bts)s, current_bts=%(current_bts)s, authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
                             {'msisdn': sub.data['msisdn'], 'home_bts': sub.data['home_bts'], 'current_bts': sub.data['current_bts'], 'authorized': sub.data['authorized'], 'updated': sub.data['updated']})
                         else:
-                            hlrsynclog.info('Subscriber %s exists but no update necessary' % sub.data['msisdn'])
+                            hlrsync_log.info('Subscriber %s exists but no update necessary' % sub.data['msisdn'])
                     else:
-                        hlrsynclog.info('Subscriber %s does not exist, add to the PG_HLR' % sub.data['msisdn'])
-                        hlrsynclog.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
+                        hlrsync_log.info('Subscriber %s does not exist, add to the PG_HLR' % sub.data['msisdn'])
+                        hlrsync_log.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
                         (sub.data['msisdn'], sub.data['home_bts'], sub.data['current_bts'], sub.data['authorized'], sub.data['updated']))
                         # subscriber does not exists add it to the db
                         cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, %(authorized)s, %(updated)s)',
@@ -91,12 +91,12 @@ try:
 
                     db_conn.commit()
                 except psycopg2.DatabaseError as e:
-                    hlrsynclog.error('PG_HLR Database error in getting subscriber: %s' % e) 
+                    hlrsync_log.error('PG_HLR Database error in getting subscriber: %s' % e) 
     else:
-        hlrsynclog.info('No updated subscribers found since last run')
+        hlrsync_log.info('No updated subscribers found since last run')
     
-    hlrsynclog.info('Update sync time')
+    hlrsync_log.info('Update sync time')
     update_sync_time()
 
 except riak.RiakError as e:
-    hlrsynclog.error('RK_HLR error: %s' % e)
+    hlrsync_log.error('RK_HLR error: %s' % e)
