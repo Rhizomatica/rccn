@@ -99,7 +99,7 @@ purger_log.addHandler(roaminglog)
 purger_log.setLevel(logging.DEBUG)
 
 # initialize logger HLR SYNC
-hlrsync_log = logging.getLogger('RCCN_PURGER')
+hlrsync_log = logging.getLogger('RCCN_HLRSYNC')
 hlrsync_log.addHandler(hlrsynclog)
 hlrsync_log.setLevel(logging.DEBUG)
 
