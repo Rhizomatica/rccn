@@ -233,5 +233,5 @@ CREATE TABLE hlr (
 CREATE INDEX updated_hlr_index ON hlr(updated);
 CREATE INDEX homebts_hlr_index ON hlr(home_bts);
 CREATE INDEX currentbts_hlr_index ON hlr(current_bts);
-CREATE INDEX msisdn_hlr_index ON hlr(msisdn);
+CREATE UNIQUE INDEX msisdn_hlr_index ON hlr(msisdn);
 CREATE INDEX authorized_hlr_index ON hlr(authorized);
