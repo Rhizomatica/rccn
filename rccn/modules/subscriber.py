@@ -259,9 +259,12 @@ class Subscriber:
 
     def update_location(self, imsi, msisdn):
         try:
+            now = int(time.time())
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
-            subscriber.data["current_bts"] = config['local_ip']
+            subscriber.data['current_bts'] = config['local_ip']
+            subscriber.data['updated'] = now
+            subscriber.add_index('modified_int', now)
             subscriber.store()
 
         except riak.RiakError as e:
