@@ -266,11 +266,26 @@ class Subscriber:
             subscriber.data['updated'] = now
             subscriber.add_index('modified_int', now)
             subscriber.store()
+            self._update_location_pghlr(subscriber)
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
         except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
+        except SubscriberException as e:
+            raise SubscriberException('PG_HLR error updating info: %s' % e)
+
+    def _update_location_pghlr(self, subscriber):
+        try:
+            cur = db_conn.cursor()
+            update_date = datetime.datetime.fromtimestamp(subscriber.data['updated'])
+            cur.execute('UPDATE hlr SET msisdn=%(msisdn)s, home_bts=%(home_bts)s, current_bts=%(current_bts)s, '
+                        'authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
+            {'msisdn': subscriber.data['msisdn'], 'home_bts': subscriber.data['home_bts'], 'current_bts': subscriber.data['current_bts'], 
+            'authorized': subscriber.data['authorized'], 'updated': update_date})
+            db_conn.commit()
+        except psycopg2.DatabaseError as e:
+            raise SubscriberException('Database error: %s' % e)
 
 
     def delete(self, msisdn):
