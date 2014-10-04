@@ -56,7 +56,8 @@ try:
     hlrsync_log.info('Sync local HLR. last run: %s' % last_run_datetime)
     if last_run == 0:
         last_run = int(time.time())
-    subscribers = rk_hlr.get_index('modified_int', last_run - 3600, last_run)
+    now = int(time.time())
+    subscribers = rk_hlr.get_index('modified_int', last_run, now)
     total_sub = len(subscribers)
     if total_sub != 0:
         hlrsync_log.info('Found %s subscribers updated since last run' % total_sub)
