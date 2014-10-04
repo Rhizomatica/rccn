@@ -8,7 +8,7 @@ CREATE TABLE hlr (
         home_bts        varchar not null,
         current_bts     varchar not null,
         authorized      integer not null default 1,
-        updated         timestamp
+        updated         timestamp default current_timestamp
 );
 CREATE INDEX updated_hlr_index ON hlr(updated);
 CREATE INDEX homebts_hlr_index ON hlr(home_bts);
