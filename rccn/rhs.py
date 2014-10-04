@@ -70,7 +70,17 @@ try:
                     cur.execute('SELECT * FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': sub.data['msisdn']})
                     pg_sub = cur.fetchone()
                     if pg_sub != None:
-                        hlrsync_log.info('Subscriber %s exists, no need to update info' % sub.data['msisdn'])
+                        # subscriber exists check if the updated date is different from the one in the distributed hlr
+                        # if yes update data in db
+                        if pg_sub[5] != sub.data['updated']:
+                            hlrsync_log.info('Subscriber %s has been updated in RK_HLR, update data on PG_HLR' % sub.data['msisdn'])
+                            hlrsync_log.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
+                            (sub.data['msisdn'], sub.data['home_bts'], sub.data['current_bts'], sub.data['authorized'], sub.data['updated']))
+                            update_date = datetime.datetime.fromtimestamp(sub.data['updated'])
+                            cur.execute('UPDATE hlr SET msisdn=%(msisdn)s, home_bts=%(home_bts)s, current_bts=%(current_bts)s, authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
+                            {'msisdn': sub.data['msisdn'], 'home_bts': sub.data['home_bts'], 'current_bts': sub.data['current_bts'], 'authorized': sub.data['authorized'], 'updated': update_date})
+                        else:
+                            hlrsync_log.info('Subscriber %s exists but no update necessary' % sub.data['msisdn'])
                     else:
                         hlrsync_log.info('Subscriber %s does not exist, add to the PG_HLR' % sub.data['msisdn'])
                         hlrsync_log.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
