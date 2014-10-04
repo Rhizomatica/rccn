@@ -264,7 +264,7 @@ class Subscriber:
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
             subscriber.data['current_bts'] = config['local_ip']
             subscriber.data['updated'] = now
-            subscriber.add_index('modified_int', now)
+            subscriber.indexes = set([('modified_int', now)])
             subscriber.store()
             self._update_location_pghlr(subscriber)
 
