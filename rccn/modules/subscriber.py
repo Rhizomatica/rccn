@@ -311,6 +311,16 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
 
+        try:
+            cur = db_conn.cursor()
+            cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            if cur.rowcount > 0:
+                db_conn.commit()
+            else:
+                raise SubscriberException('PG_HLR No subscriber found hlr table') 
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error deleting subscriber in hlr table: %s' % e)
+
         self._delete_in_distributed_hlr(msisdn)
 
     def purge(self, msisdn):
