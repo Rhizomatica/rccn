@@ -23,6 +23,7 @@ Rhizomatica HLR Sync.
 """
 
 import sys
+import dateutil.parser as dateparser
 from config import *
 
 def update_sync_time(time):
@@ -53,9 +54,10 @@ try:
     last_run = get_last_sync_time()
     last_run_datetime = datetime.datetime.fromtimestamp(last_run).strftime('%d-%m-%Y %H:%M:%S')
     hlrsync_log.info('Sync local HLR. last run: %s' % last_run_datetime)
-    if last_run == 0:
-        last_run = int(time.time())
+    #if last_run == 0:
+    #    last_run = int(time.time())
     now = int(time.time())
+    print 'last %s now %s' % (last_run, now)
     subscribers = rk_hlr.get_index('modified_int', last_run, now)
     total_sub = len(subscribers)
     if total_sub != 0:
@@ -72,7 +74,13 @@ try:
                     if pg_sub != None:
                         # subscriber exists check if the updated date is different from the one in the distributed hlr
                         # if yes update data in db
-                        if pg_sub[5] != sub.data['updated']:
+                        print pg_sub[6]
+                        dt = dateparser.parse(str(pg_sub[6]))
+                        print dt
+                        pg_ts = int(time.mktime(dt.timetuple()))
+                        print pg_ts
+                        print sub.data['updated']
+                        if pg_ts != sub.data['updated']:
                             hlrsync_log.info('Subscriber %s has been updated in RK_HLR, update data on PG_HLR' % sub.data['msisdn'])
                             hlrsync_log.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
                             (sub.data['msisdn'], sub.data['home_bts'], sub.data['current_bts'], sub.data['authorized'], sub.data['updated']))
