@@ -81,7 +81,7 @@ class Numbering:
                     if subscriber['authorized'] == 1:
                         return True
                     else:
-                        raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber[2]))
+                        raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber['current_bts']))
             return False
         except psycopg2.DatabaseError as e:
             raise NumberingException('PG_HLR error checking if number is in roaming:' % e)

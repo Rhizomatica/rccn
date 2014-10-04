@@ -4,7 +4,7 @@ CREATE TABLE meta (
 	value varchar not null
 );
 INSERT INTO meta(key,value) VALUES ('db_revision','10');
-INSERT INTO meta(key,value) VALUES ('hlr_sync', '');
+INSERT INTO meta(key,value) VALUES ('hlr_sync', '0');
 
 CREATE TABLE cdr (
     id                        serial primary key,
@@ -226,7 +226,7 @@ CREATE TABLE hlr (
         msisdn          varchar not null,
 	home_bts	varchar not null,
 	current_bts	varchar not null,
-	authorized	varchar not null,
+	authorized	integer not null default 1,
 	updated		timestamp
 );
 
