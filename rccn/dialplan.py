@@ -97,59 +97,72 @@ class Dialplan:
         """
         # TODO split this monster function.
 
-        # the processing is async we need a variable
+        # the processing is async we need a flag
         processed = 0
 
+        # emergency call check
+        if (
+            emergency_shortcode != '' and emergency_contact != ''
+        ) and self.destination_number == emergency_shortcode:
+            log.info(
+                    'Emergency call send call to emergency contact %s'
+                    % emergency_contact)
+            processed = 1
+            self.session.setVariable('context','EMERGENCY')
+            self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"
+                                 +emergency_contact+'@127.0.0.1:5050')
+            
         # check if destination number is an incoming call
         # lookup dest number in DID table.
-        try:
-            if (self._n.is_number_did(self.destination_number)):
-                log.info('Called number is a DID')
-                log.debug('Execute context INBOUND call')
-                processed = 1
-                # send call to IVR execute context
-                self.session.setVariable('inbound_loop', '0')
-                self.context.inbound()
-        except NumberingException as e:
-            log.error(e)
+        if processed == 0:
+            try:
+                if (self._n.is_number_did(self.destination_number)):
+                    log.info('Called number is a DID')
+                    log.debug('Execute context INBOUND call')
+                    processed = 1
+                    # send call to IVR execute context
+                    self.session.setVariable('inbound_loop', '0')
+                    self.context.inbound()
+            except NumberingException as e:
+                log.error(e)
 
-        # check if calling number or destination number is a roaming subscriber
-        log.info('Check if calling/called number is roaming')
-        try:
-            if (self._n.is_number_roaming(self.calling_number)):
-                processed = 1
-                log.info('Calling number %s is roaming' % self.calling_number)
-                self.context.roaming('caller')
-        except NumberingException as e:
-            log.error(e)
-            # TODO: play message of calling number is not authorized to call
-            self.session.hangup()
+            # check if calling number or destination number is a roaming subscriber
+            log.info('Check if calling/called number is roaming')
+            try:
+                if (self._n.is_number_roaming(self.calling_number)):
+                    processed = 1
+                    log.info('Calling number %s is roaming' % self.calling_number)
+                    self.context.roaming('caller')
+            except NumberingException as e:
+                log.error(e)
+                # TODO: play message of calling number is not authorized to call
+                self.session.hangup()
 
-        try:
-            if (self._n.is_number_roaming(self.destination_number)):
-                processed = 1
-                log.info(
-                    'Destination number %s is roaming'
-                    % self.destination_number)
-                self.context.roaming('called')
-        except NumberingException as e:
-            log.error(e)
-            # TODO: play message of destination number
-            # unauthorized to receive call
-            self.session.hangup()
+            try:
+                if (self._n.is_number_roaming(self.destination_number)):
+                    processed = 1
+                    log.info(
+                        'Destination number %s is roaming'
+                        % self.destination_number)
+                    self.context.roaming('called')
+            except NumberingException as e:
+                log.error(e)
+                # TODO: play message of destination number
+                # unauthorized to receive call
+                self.session.hangup()
 
-        # check if destination number is an international call.
-        # prefix with + or 00
-        if (
-            self.destination_number[0] == '+' or (
-                re.search(r'^00', self.destination_number) is not None)
-        ) and processed == 0:
-            log.debug('Called number is an international call or national')
-            processed = 1
-            log.debug(
-                'Called number is an external number '
-                'send call to OUTBOUND context')
-            self.auth_context('outbound')
+            # check if destination number is an international call.
+            # prefix with + or 00
+            if (
+                self.destination_number[0] == '+' or (
+                    re.search(r'^00', self.destination_number) is not None)
+            ) and processed == 0:
+                log.debug('Called number is an international call or national')
+                processed = 1
+                log.debug(
+                    'Called number is an external number '
+                    'send call to OUTBOUND context')
+                self.auth_context('outbound')
 
         if processed == 0:
             try:

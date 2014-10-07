@@ -59,3 +59,7 @@ voip_cli = "525512345678"
 notice_msg = 'Favor de pagar su cooperacion mensual de 30 pesos. Gracias.' 
 reminder_msg = 'Recuerda: su servicio sera desactivado si no paga su cuota antes del 7 de cada mes. Gracias.' 
 deactivate_msg = 'Su servicio ha sido desactivado hasta que haga su cooperacion mensual.'
+
+# Emergency number
+emergency_shortcode = "911"
+emergency_contact = "12345678901"
