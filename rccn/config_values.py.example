@@ -61,5 +61,4 @@ reminder_msg = 'Recuerda: su servicio sera desactivado si no paga su cuota antes
 deactivate_msg = 'Su servicio ha sido desactivado hasta que haga su cooperacion mensual.'
 
 # Emergency number
-emergency_shortcode = "911"
 emergency_contact = "12345678901"

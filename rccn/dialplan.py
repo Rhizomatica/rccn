@@ -101,9 +101,7 @@ class Dialplan:
         processed = 0
 
         # emergency call check
-        if (
-            emergency_shortcode != '' and emergency_contact != ''
-        ) and self.destination_number == emergency_shortcode:
+        if emergency_contact != '' and self.destination_number == 'emergency':
             log.info(
                     'Emergency call send call to emergency contact %s'
                     % emergency_contact)
