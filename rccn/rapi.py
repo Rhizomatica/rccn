@@ -76,10 +76,10 @@ class SubscriberRESTService:
         try:
             sub = Subscriber()
             num = sub.add(msisdn, name, balance)
-            if (num != msisdn):
-                data = {'status': 'success', 'error': ''}
-            else:
+            if num != msisdn:
                 data = {'status': 'success', 'error': num}
+            else:
+                data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
         api_log.info(data)
