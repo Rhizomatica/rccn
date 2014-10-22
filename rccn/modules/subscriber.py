@@ -264,7 +264,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=%(msisdn)s' % {'msisdn': msisdn})
+            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=%(msisdn)s' % {'msisdn': config['internal_prefix'] + msisdn})
             entry = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             if len(entry) <= 0:
