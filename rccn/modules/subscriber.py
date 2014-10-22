@@ -283,7 +283,7 @@ class Subscriber:
                 newexti = int(msisdn) + 1
                 newext = str(newexti)
                 if not self._check_subscriber_exists(newext):
-                    self._authorize_subscriber_in_local_hlr(newext, config['internal_prefix'] + newext, name)
+                    self._authorize_subscriber_in_local_hlr(msisdn, config['internal_prefix'] + newext, name)
                     return newext
         except:
             raise SubscriberException('Error in getting new msisdn for existing subscriber')
