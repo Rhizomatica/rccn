@@ -260,7 +260,7 @@ class Subscriber:
         self._provision_in_distributed_hlr(imsi, subscriber_number)
         return msisdn
 
-    def _check_subscriber_exists(msisdn):
+    def _check_subscriber_exists(self, msisdn):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
@@ -273,7 +273,7 @@ class Subscriber:
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
-    def _get_new_msisdn(msisdn, name):
+    def _get_new_msisdn(self, msisdn, name):
         try:
             while True:
                 # if last ext available reset to 0
