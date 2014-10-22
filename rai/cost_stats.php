@@ -33,8 +33,8 @@ print_menu('statistics');
 
 			?>
 
-			Total pesos spent on calls: <b><?=$total_cost?></b> | Total pesos on credits: <b><?=$total_credits?></b> | Average call cost: <b><?=$avg_call_cost?></b><br/><br/>
-			Top 10 destinations and pesos spent<br/><br/>
+			Total spent on calls: <b><?=$total_cost?></b> | Total on credits: <b><?=$total_credits?></b> | Average call cost: <b><?=$avg_call_cost?></b><br/><br/>
+			Top 10 destinations and cost<br/><br/>
 			<div style="text-align:left; border: 1px solid #bbb; padding: 5px; width: 400px;">
 			<?php
 				try {

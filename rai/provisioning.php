@@ -87,9 +87,13 @@ function print_form($post_data,$errors) {
 					$sub = new Subscriber();
 					try {
 						$sub->set("",$callerid,$firstname,1,$amount,"");
-						$sub->create();
+						$ret = $sub->create();
 						echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
-						echo "<span style='font-size: 20px;'>"._("Subscriber number").": <b>$callerid</b> "._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
+						if ($ret != "") {
+							echo "<span style='font-size: 20px;'>"._("Subscriber already exists! New subscriber number").": <b>$$ret</b>"._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
+						} else {
+							echo "<span style='font-size: 20px;'>"._("Subscriber number").": <b>$callerid</b> "._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
+						}
 						echo "<a href='provisioning.php'><button class='b1'>"._("Go Back")."</button></a>";
 					} catch (SubscriberException $e) {
 						echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";

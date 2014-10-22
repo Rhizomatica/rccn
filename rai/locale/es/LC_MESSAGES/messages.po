@@ -276,6 +276,9 @@ msgstr "Aprovisionado con éxito con un saldo inicial de"
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr "ERROR EN EL PROVISIÓNAR EL ABONADO"
 
+msgid "Subscriber already exists! New subscriber number"
+msgstr "El usuario ya existe! Numero de usuario nuevo"
+
 # CDR page
 #: cdr.php:29
 msgid "Calls Details Records"

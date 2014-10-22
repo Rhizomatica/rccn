@@ -16,7 +16,7 @@ class AccessManager
 		$this->lang = $lang;
 		if ($this->checkPwd($username,$password)) {
 			$this->initializeSession();
-			header('Location: index.php');
+			header('Location: subscribers.php');
 		} else {
 			header('Location: login.php');
 		}

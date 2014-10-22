@@ -248,9 +248,45 @@ class Subscriber:
         imsi = self._get_imsi(msisdn)
         subscriber_number = config['internal_prefix'] + msisdn
 
-        self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
+        # check if subscriber already exists
+        if self._check_subscriber_exists(msisdn):
+            # get a new extension
+            msisdn = self._get_new_msisdn(msisdn, name)
+            subscriber_number = config['internal_prefix'] + msisdn
+        else:
+            self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
+    
         self._provision_in_database(subscriber_number, name, balance)
         self._provision_in_distributed_hlr(imsi, subscriber_number)
+        return msisdn
+
+    def _check_subscriber_exists(msisdn):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute('SELECT extension FROM subscriber where imsi=%(imsi)s' % {'msisdn': msisdn})
+            entry = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            if len(entry) <= 0:
+                return False
+            return True
+        except sqlite3.Error as e:
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
+    def _get_new_msisdn(msisdn, name):
+        try:
+            while True:
+                # if last ext available reset to 0
+                if msisdn == 99999:
+                    msisdn = 00000
+                # increment msisdn of one and check if exists.
+                newext = str(int(msisdn) + 1)
+                if not self._check_subscriber_exists(newext):
+                    self._authorize_subscriber_in_local_hlr(newext, config['internal_prefix'] + newext, name)
+                    return newext
+        except:
+            raise SubscriberException('Error in getting new msisdn for existing subscriber')
+            
 
     def update(self, msisdn, name, number):
         imsi = self._get_imsi(msisdn)

@@ -75,8 +75,11 @@ class SubscriberRESTService:
         api_log.info('%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s"' % (request.getHost().host, self.path, msisdn, name, balance))
         try:
             sub = Subscriber()
-            sub.add(msisdn, name, balance)
-            data = {'status': 'success', 'error': ''}
+            num = sub.add(msisdn, name, balance)
+            if (num != msisdn):
+                data = {'status': 'success', 'error': ''}
+            else:
+                data = {'status': 'success', 'error': num}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
         api_log.info(data)

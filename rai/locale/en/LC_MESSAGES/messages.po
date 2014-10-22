@@ -276,6 +276,9 @@ msgstr ""
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr ""
 
+msgid "Subscriber already exists! New subscriber number"
+msgstr ""
+
 # CDR page
 #: cdr.php:29
 msgid "Calls Details Records"

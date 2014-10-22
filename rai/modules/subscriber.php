@@ -83,7 +83,15 @@ class Subscriber
 		$data = $response->body;
 		if ($data->status == 'failed') {
 			throw new SubscriberException($data->error);
+		} else {
+			if ($data->status == 'success' && $data->error != '') {
+				# the extension already existed, we got a new one
+				return $data->error;
+			} else {
+				return "";
+			}
 		}
+		
 	}
 
 	public function edit() {
