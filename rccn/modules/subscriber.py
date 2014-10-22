@@ -264,7 +264,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('SELECT extension FROM subscriber where imsi=%(imsi)s' % {'msisdn': msisdn})
+            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=%(msisdn)s' % {'msisdn': msisdn})
             entry = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             if len(entry) <= 0:
@@ -279,8 +279,9 @@ class Subscriber:
                 # if last ext available reset to 0
                 if msisdn == 99999:
                     msisdn = 00000
-                # increment msisdn of one and check if exists.
-                newext = str(int(msisdn) + 1)
+                # increment msisdn of one and check if exists
+                newexti = int(msisdn) + 1
+                newext = str(newexti)
                 if not self._check_subscriber_exists(newext):
                     self._authorize_subscriber_in_local_hlr(newext, config['internal_prefix'] + newext, name)
                     return newext
