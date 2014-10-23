@@ -131,7 +131,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select id, extension from subscriber where lenght(extension) = 5 AND extension != ?", [(config['smsc'])])
+            sq_hlr_cursor.execute("select id, extension from subscriber where length(extension) = 5 AND extension != ?", [(config['smsc'])])
             extensions = sq_hlr_cursor.fetchall()
             if extensions == []:
                 raise SubscriberException('No extensions found')
