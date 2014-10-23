@@ -115,7 +115,7 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
-   def get_all_unauthorized(self):
+    def get_all_unauthorized(self):
         try:
             cur = db_conn.cursor()
             cur.execute('SELECT * FROM subscribers WHERE authorized = 0')
@@ -128,7 +128,7 @@ class Subscriber:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get_all_5digits(self):
-       try:
+        try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             sq_hlr_cursor.execute("select id, extension from subscriber where len(extension) = 5 AND extension != ?", [(config['smsc'])])
@@ -138,7 +138,6 @@ class Subscriber:
             else:
                 sq_hlr.close()
                 return extensions
-
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
