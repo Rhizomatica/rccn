@@ -712,3 +712,21 @@ msgstr "Llamadas totales diarias"
 #: stats/total_minutes.php:63
 msgid "Daily Total Minutes"
 msgstr "Minutos totales diarios"
+
+msgid "Bulk send all not paid subscription"
+msgstr ""
+
+msgid "Send SMS to all subscribers that didn't pay the subscription"
+msgstr ""
+
+msgid "Bulk send all not authorized"
+msgstr ""
+
+msgid "Send SMS to all subscribers that are unauthorized"
+msgstr ""
+
+msgid "Bulk send all not registered subscribers"
+msgstr ""
+
+msgid "Send SMS to all subscribers with 5 digit extension"
+msgstr ""

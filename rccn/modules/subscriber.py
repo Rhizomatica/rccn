@@ -102,7 +102,47 @@ class Subscriber:
                 raise SubscriberException('PG_HLR No subscribers found')
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
-    
+
+    def get_all_notpaid(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT * FROM subscribers WHERE subscription_status = 1')
+            if cur.rowcount > 0:
+                sub = cur.fetchall()
+                return sub
+            else:
+                raise SubscriberException('PG_HLR No subscribers found')
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+
+   def get_all_unauthorized(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT * FROM subscribers WHERE authorized = 0')
+            if cur.rowcount > 0:
+                sub = cur.fetchall()
+                return sub
+            else:
+                raise SubscriberException('PG_HLR No subscribers found')
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+
+    def get_all_5digits(self):
+       try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select id, extension from subscriber where len(extension) = 5 AND extension != ?", [(config['smsc'])])
+            extensions = sq_hlr_cursor.fetchall()
+            if extensions == []:
+                raise SubscriberException('No extensions found')
+            else:
+                sq_hlr.close()
+                return extensions
+
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+ 
 
     def get_all_connected(self):
         try:

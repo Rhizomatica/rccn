@@ -204,7 +204,7 @@ class SMS:
     def roaming(self, subject):
         
         self.numbering = Numbering()
-	self.subscriber = Subscriber()
+        self.subscriber = Subscriber()
 
         if subject == 'caller':
             # calling number is roaming 
@@ -284,17 +284,25 @@ class SMS:
         cmd = 'subscriber extension %s sms sender extension %s send %s' % (num, config['smsc'], text)
         vty.command(cmd)
 
-    def broadcast_to_all_subscribers(self, text):
+    def broadcast_to_all_subscribers(self, text, btype):
         sub = Subscriber()
-        subscribers_list = sub.get_all()
+        if btype == 'all':
+            subscribers_list = sub.get_all()
+        elif btype == 'notpaid':
+            subscribers_list = sub.get_all_notpaid()
+        elif btype == 'unauthorized':
+            subscribers_list = sub.get_all_unauthorized()
+        elif btype == 'extension':
+            subscribers_list = sub.get_all_5digits()
+
         for mysub in subscribers_list:
             self.send(config['smsc'], mysub[1], text)
             sms_log.debug('Broadcast message sent to %s' % mysub[1])
             time.sleep(1)
 
-    def send_broadcast(self, text):
+    def send_broadcast(self, text, btype):
         sms_log.info('Send broadcast SMS to all subscribers. text: %s' % text)
-        t = Thread(target=self.broadcast_to_all_subscribers, args=(text,))
+        t = Thread(target=self.broadcast_to_all_subscribers, args=(text, btype, ))
         t.start()
 
     

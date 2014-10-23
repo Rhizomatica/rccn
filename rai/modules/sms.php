@@ -23,8 +23,8 @@ class SMS
                 }
 	}
 
-        public function send_broadcast($text) {
-                $data = array("text" => $text);
+        public function send_broadcast($text, $btype) {
+                $data = array("text" => $text, "btype" => $btype);
                 try {
                         $response = \Httpful\Request::post($this->path."/send_broadcast")->body($data)->sendsJson()->send();
                 } catch (Httpful\Exception\ConnectionErrorException $e) {
