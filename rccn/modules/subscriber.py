@@ -106,7 +106,7 @@ class Subscriber:
     def get_all_notpaid(self):
         try:
             cur = db_conn.cursor()
-            cur.execute('SELECT * FROM subscribers WHERE subscription_status = 1')
+            cur.execute('SELECT * FROM subscribers WHERE subscription_status = 0')
             if cur.rowcount > 0:
                 sub = cur.fetchall()
                 return sub
