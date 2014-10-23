@@ -34,23 +34,18 @@ function print_form($post_data,$errors) {
 				<span class="small"><?=_("Recipient of the SMS message")?></span>
 				</label>
 				<input type="text" name="number" id="number" value="<?=$number?>"/>
+			
+                                <label><?=_("All registered")?></label>
+                                <input type="checkbox" name="bulk_send" id="bulk_send" value="all"/><br/>
 
-				<label><?=_("Bulk send all registered")?>
-				<span class="small"><?=_("Send SMS to all registered subscribers")?></span>
-				</label>
-				<input type="checkbox" name="bulk_send" id="bulk_send" value="all"/><br/>
-   		                <label><?=_("Bulk send all not paid subscription")?>
-                                <span class="small"><?=_("Send SMS to all subscribers that didn't pay the subscription")?></span>
-                                </label>
-                                <input type="checkbox" name="bulk_send" id="bulk_send" value="notpaid"/><br/>
-	                        <label><?=_("Bulk send all not authorized")?>
-                                <span class="small"><?=_("Send SMS to all subscribers that are unauthorized")?></span>
-                                </label>
-                                <input type="checkbox" name="bulk_send" id="bulk_send" value="unauthorized"/><br/>
-	                        <label><?=_("Bulk send all not registered subscribers")?>
-                                <span class="small"><?=_("Send SMS to all subscribers with 5 digit extension")?></span>
-                                </label>
+                                <label><?=_("All not registered (5 digits)")?></label>
                                 <input type="checkbox" name="bulk_send" id="bulk_send" value="extension"/><br/>
+
+                                <label><?=_("All subscription not paid")?></label>
+                                <input type="checkbox" name="bulk_send" id="bulk_send" value="notpaid"/><br/>
+
+                                <label><?=_("All not authorized")?></label>
+                                <input type="checkbox" name="bulk_send" id="bulk_send" value="unauthorized"/><br/>
 				
 				<button type="submit" name="send_sms"><?=_("Send SMS")?></button>
 				<div class="spacer"></div>

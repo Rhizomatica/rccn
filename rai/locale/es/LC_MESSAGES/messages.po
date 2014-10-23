@@ -713,20 +713,14 @@ msgstr "Llamadas totales diarias"
 msgid "Daily Total Minutes"
 msgstr "Minutos totales diarios"
 
-msgid "Bulk send all not paid subscription"
+msgid "All registered"
 msgstr ""
 
-msgid "Send SMS to all subscribers that didn't pay the subscription"
+msgid "All not registered (5 digits)"
 msgstr ""
 
-msgid "Bulk send all not authorized"
+msgid "All subscription not paid"
 msgstr ""
 
-msgid "Send SMS to all subscribers that are unauthorized"
-msgstr ""
-
-msgid "Bulk send all not registered subscribers"
-msgstr ""
-
-msgid "Send SMS to all subscribers with 5 digit extension"
+msgid "All not authorized"
 msgstr ""
