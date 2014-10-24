@@ -518,7 +518,6 @@ class Subscriber:
         vty.command(cmd)
 
     def _provision_in_database(self, msisdn, name, balance):
-    now = int(time.time())
         try:
             cur = db_conn.cursor()
             cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
