@@ -380,22 +380,13 @@ class Subscriber:
         try:
             cur = db_conn.cursor()
             cur.execute('DELETE FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
                 raise SubscriberException('PG_HLR No subscriber found') 
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
-
-        try:
-            cur = db_conn.cursor()
-            cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
-            if cur.rowcount > 0:
-                db_conn.commit()
-            else:
-                raise SubscriberException('PG_HLR No subscriber found hlr table') 
-        except psycopg2.DatabaseError, e:
-            raise SubscriberException('PG_HLR error deleting subscriber in hlr table: %s' % e)
 
         self._delete_in_distributed_hlr(msisdn)
 
@@ -527,11 +518,12 @@ class Subscriber:
         vty.command(cmd)
 
     def _provision_in_database(self, msisdn, name, balance):
+    now = int(time.time())
         try:
             cur = db_conn.cursor()
             cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
             {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance))})
-            cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1)',
+            cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
             {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
@@ -554,7 +546,7 @@ class Subscriber:
         try:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
-            for key in subscriber:
+            for key in subscriber.results:
                 rk_hlr.get(key).delete()
 
         except riak.RiakError as e:
@@ -568,7 +560,7 @@ if __name__ == '__main__':
     #sub.set_balance('68820110010',3.86)
     try:
         sub.add('49987', 'Test', 100)
-	#sub.delete('66666249987')
+    #sub.delete('66666249987')
         #sub.edit('68820137511','Antanz_edit',3.86)
         #sub.authorized('68820137511',0)
         #print sub.get_all_connected()
