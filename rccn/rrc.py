@@ -43,11 +43,22 @@ def update_list(subscribers, welcome=False):
     for msisdn,imsi in subscribers:
         try:
             number =  numbering.get_msisdn_from_imsi(imsi)
-            sub.update(msisdn, "roaming number", number)
+
+            # check if subscriber pg_hlr[current_bts] != rk_hlr[current_bts]
+            pg_hlr_current_bts = numbering.get_current_bts(number)
+            rk_hlr_current_bts = numbering.get_current_bts_distributed_hlr(str(imsi))
+
+            if pg_hlr_current_bts != rk_hlr_current_bts:
+                # update subscriber location
+                roaming_log.info('Subscriber %s in roaming, update location' % number)
+                sub.update(msisdn, "roaming number", number)
+            else:
+                roaming_log.info('Subscriber %s still roaming, no need to update location' % number)
 
             if welcome:
+                roaming_log.info('Send roaming welcome message to %s' % number)
                 send_welcome_sms(number)
-            roaming_log.info("Subscriber %s in roaming" % number)
+
 
         except NumberingException as e:
             roaming_log.debug("Couldn't retrieve msisdn from the imsi: %s" % e)
