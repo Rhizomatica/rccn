@@ -82,6 +82,7 @@ def update_local_subscribers():
             roaming_log.info("Couldn't retrieve the msisdn from imsi %s: %s" % (imsi, e))
             continue
         try:
+            roaming_log.info('Subscriber %s is back at home_bts, update location' % msisdn)
             sub.update_location(imsi, msisdn)
         except SubscriberException as e:
             roaming_log.error("An error ocurred updating the location of %s: %s" % (imsi, e))
