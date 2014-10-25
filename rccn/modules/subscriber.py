@@ -296,11 +296,11 @@ class Subscriber:
             raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
 
     def set_lac(self, imsi, lac):
-       try:
-           sq_hlr_cursor.execute('UPDATE Subscriber set lac=? where imsi=?', (imsi, lac))
-           sq_hlr.commit()
+        try:
+            sq_hlr_cursor.execute('UPDATE Subscriber set lac=? where imsi=?', (imsi, lac))
+            sq_hlr.commit()
         except sqlite3.Error as e:
-           raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
+            raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
 
     def add(self, msisdn, name, balance):
         imsi = self._get_imsi(msisdn)
