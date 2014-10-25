@@ -60,7 +60,7 @@ def update_list(subscribers, welcome=False):
                     send_welcome_sms(number)
                 else:
                     # update only location and not the timestamp in rk_hlr
-                    self.update_location(imsi, number, False)
+                    sub.update_location(imsi, number, False)
                     roaming_log.info('Subscriber %s is roaming' % number)
 
 
