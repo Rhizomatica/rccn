@@ -53,11 +53,15 @@ def update_list(subscribers, welcome=False):
                 roaming_log.info('Subscriber %s in roaming, update location' % number)
                 sub.update(msisdn, "roaming number", number)
             else:
-                roaming_log.info('Subscriber %s still roaming, no need to update location' % number)
-
-            if welcome:
-                roaming_log.info('Send roaming welcome message to %s' % number)
-                send_welcome_sms(number)
+                if welcome:
+                    roaming_log.info('Subscriber %s in roaming, update location' % number)
+                    sub.update(msisdn, "roaming number", number)
+                    roaming_log.info('Send roaming welcome message to %s' % number)
+                    send_welcome_sms(number)
+                else:
+                    # update only location and not the timestamp in rk_hlr
+                    self.update(msisdn, "roaming number", number, False)
+                    roaming_log.info('Subscriber %s is roaming' % number)
 
 
         except NumberingException as e:

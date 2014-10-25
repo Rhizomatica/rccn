@@ -340,21 +340,27 @@ class Subscriber:
             raise SubscriberException('Error in getting new msisdn for existing subscriber')
             
 
-    def update(self, msisdn, name, number):
+    def update(self, msisdn, name, number, ts_update=True):
         imsi = self._get_imsi(msisdn)
-        self._authorize_subscriber_in_local_hlr(msisdn, number, name)
-        self.update_location(imsi, number)
+        if ts_update:
+            self._authorize_subscriber_in_local_hlr(msisdn, number, name)
+            self.update_location(imsi, number)
+        else:
+            self.update_location(imsi, number)
 
-    def update_location(self, imsi, msisdn):
+    def update_location(self, imsi, msisdn, ts_update):
         try:
-            now = int(time.time())
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
             subscriber.data['current_bts'] = config['local_ip']
-            subscriber.data['updated'] = now
-            subscriber.indexes = set([('modified_int', now)])
+            if ts_update:
+                now = int(time.time())
+                subscriber.data['updated'] = now
+                subscriber.indexes = set([('modified_int', now)])
             subscriber.store()
-            self._update_location_pghlr(subscriber)
+    
+            if ts_update:    
+                self._update_location_pghlr(subscriber)
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
