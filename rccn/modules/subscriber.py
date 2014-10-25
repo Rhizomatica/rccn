@@ -297,6 +297,8 @@ class Subscriber:
 
     def set_lac(self, imsi, lac):
         try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
             sq_hlr_cursor.execute('UPDATE Subscriber set lac=? where imsi=?', (imsi, lac))
             sq_hlr.commit()
         except sqlite3.Error as e:
