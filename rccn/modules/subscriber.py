@@ -197,8 +197,7 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
-
-   def get_all_inactive_roaming(self):
+    def get_all_inactive_roaming(self):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
@@ -209,7 +208,6 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-
 
     def get_all_roaming(self):
         try:
