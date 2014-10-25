@@ -444,11 +444,13 @@ class Subscriber:
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
         
         try:
+            now = int(time.time())
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
             if len(subscriber.results) != 0:
                 subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
                 subscriber.data['authorized'] = auth
+                subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])]) 
                 subscriber.store()
             else:
                 raise NumberingException('RK_DB subscriber %s not found' % msisdn)
