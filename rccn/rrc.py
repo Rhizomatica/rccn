@@ -55,12 +55,12 @@ def update_list(subscribers, welcome=False):
             else:
                 if welcome:
                     roaming_log.info('Subscriber %s in roaming, update location' % number)
-                    sub.update(msisdn, "roaming number", number, True)
+                    sub.update(msisdn, "roaming number", number)
                     roaming_log.info('Send roaming welcome message to %s' % number)
                     send_welcome_sms(number)
                 else:
                     # update only location and not the timestamp in rk_hlr
-                    self.update(msisdn, "roaming number", number, False)
+                    self.update_location(imsi, number, False)
                     roaming_log.info('Subscriber %s is roaming' % number)
 
 
@@ -87,7 +87,7 @@ def update_local_subscribers():
             continue
         try:
             roaming_log.info('Subscriber %s is back at home_bts, update location' % msisdn)
-            sub.update_location(imsi, msisdn)
+            sub.update_location(imsi, msisdn, True)
         except SubscriberException as e:
             roaming_log.error("An error ocurred updating the location of %s: %s" % (imsi, e))
 
