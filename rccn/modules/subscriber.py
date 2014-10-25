@@ -450,6 +450,7 @@ class Subscriber:
             if len(subscriber.results) != 0:
                 subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
                 subscriber.data['authorized'] = auth
+                subscriber.data['updated'] = now
                 subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])]) 
                 subscriber.store()
             else:
