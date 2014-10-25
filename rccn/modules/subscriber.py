@@ -353,7 +353,7 @@ class Subscriber:
             if ts_update:
                 now = int(time.time())
                 subscriber.data['updated'] = now
-                subscriber.indexes = set([('modified_int', now)])
+                subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])])
             subscriber.store()
     
             if ts_update:    
