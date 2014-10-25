@@ -88,7 +88,7 @@ class SubscriberRESTService:
     # put subscriber offline
     @route('/offline', Http.PUT)
     def put(self, request, imsi=''):
-        api_log.info('%s - [PUT] %s/offline Data: imsi:"%s"' % (request.getHost().host, self.path, imsi)
+        api_log.info('%s - [PUT] %s/offline Data: imsi:"%s"' % (request.getHost().host, self.path, imsi))
         try:
             sub = Subscriber()
             sub.set_lac(imsi, 0)
