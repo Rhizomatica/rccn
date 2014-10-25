@@ -344,9 +344,9 @@ class Subscriber:
         imsi = self._get_imsi(msisdn)
         if ts_update:
             self._authorize_subscriber_in_local_hlr(msisdn, number, name)
-            self.update_location(imsi, number)
+            self.update_location(imsi, number, ts_update)
         else:
-            self.update_location(imsi, number)
+            self.update_location(imsi, number, ts_update)
 
     def update_location(self, imsi, msisdn, ts_update):
         try:

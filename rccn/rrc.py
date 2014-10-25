@@ -55,7 +55,7 @@ def update_list(subscribers, welcome=False):
             else:
                 if welcome:
                     roaming_log.info('Subscriber %s in roaming, update location' % number)
-                    sub.update(msisdn, "roaming number", number)
+                    sub.update(msisdn, "roaming number", number, True)
                     roaming_log.info('Send roaming welcome message to %s' % number)
                     send_welcome_sms(number)
                 else:
