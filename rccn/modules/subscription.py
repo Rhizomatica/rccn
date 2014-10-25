@@ -67,6 +67,7 @@ class Subscription:
     def deactivate_subscriptions(self, msg):
         try:
             sms = SMS()
+            sub = Subscriber()
             cur = db_conn.cursor()
             cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
             count = cur.rowcount
@@ -75,17 +76,12 @@ class Subscription:
                 subscribers_list = cur.fetchall()
                 for mysub in subscribers_list:
                     self.logger.debug('Send SMS that account is deactivated to %s' % mysub[0])
-                    sms.send_immediate(mysub[0], msg)
-                
-                try:
-                    cur = db_conn.cursor()
-                    cur.execute('UPDATE subscribers SET authorized=0 WHERE subscription_status=0')
-                    count = cur.rowcount
-                    if count > 0:
-                        db_conn.commit()
-                        self.logger.info('Subscription deactivated for %d subscribers' % count)
-                except psycopg2.DatabaseError as e:
-                    raise SubscriptionException('PG_HLR error in deactivating subscriptions: %s' % e)
+                    sms.send(config['smsc'],mysub[0], msg)
+                    # disable subscriber
+                    try:
+                        sub.authorized(mysub[0], 0)
+                    except SubscriberException as e:
+                        raise SubscriptionException('PG_HLR error in deactivating subscription: %s' % e)
             else:
                 self.logger.info('No subscribers need to be deactivate')
         except psycopg2.DatabaseError as e:
@@ -104,7 +100,7 @@ class Subscription:
 
         for mysub in subscribers_list:
             self.logger.debug("Send sms to %s %s" % (mysub[1], msg))
-            sms.send_immediate(mysub[1], msg)
+            sms.send(config['smsc'],mysub[1], msg)
 
     def send_subscription_fee_reminder(self, msg):
         try:
@@ -116,4 +112,4 @@ class Subscription:
         
         for mysub in subscribers_list:
             self.logger.debug("Send sms to %s %s" % (mysub[0], msg))
-            sms.send_immediate(mysub[0], msg) 
+            sms.send(config['smsc'],mysub[0], msg)
