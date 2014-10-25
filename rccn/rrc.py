@@ -88,15 +88,11 @@ def update_local_subscribers():
             roaming_log.error("An error ocurred updating the location of %s: %s" % (imsi, e))
 
 def purge_inactive_subscribers():
-    """
-    Purge all inactive roaming subscribers
-    """
     sub = Subscriber()
     try:
         inactive = sub.get_all_inactive_roaming()
     except SubscriberException as e:
-        roaming_log.error(
-            "An error ocurred getting the list of inactive: %s" % e)
+        roaming_log.error("An error ocurred getting the list of inactive: %s" % e)
         return
 
     for msisdn in inactive:
@@ -104,8 +100,7 @@ def purge_inactive_subscribers():
             sub.purge(msisdn)
             roaming_log.info("Roaming Subscriber %s purged" % msisdn)
         except SubscriberException as e:
-            purger_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
-
+            roaming_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
 
 if __name__ == '__main__':
     update_foreign_subscribers()
