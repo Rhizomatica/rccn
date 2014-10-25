@@ -116,13 +116,15 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('PG_HLR error checking if number is in roaming:' % e)
 
-    def get_current_bts_distributed_hlr(self, imsi):
+
+    def get_bts_distributed_hlr(self, imsi, bts):
         try:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(imsi, timeout=RIAK_TIMEOUT)
-            return subscriber.data['current_bts']
+            return subscriber.data[bts]
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
+
 
     def get_site_ip(self, destination_number):
         siteprefix = destination_number[:6]

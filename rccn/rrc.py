@@ -1,6 +1,7 @@
 ############################################################################
 #
 # Copyright (C) 2014 Ruben Pollan <meskio@sindominio.net>
+# Copyright (C) 2014 tele <tele@rhizomatica.org>
 #
 # RCCN is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero Public License as published by
@@ -46,7 +47,7 @@ def update_list(subscribers, welcome=False):
 
             # check if subscriber pg_hlr[current_bts] != rk_hlr[current_bts]
             pg_hlr_current_bts = numbering.get_current_bts(number)
-            rk_hlr_current_bts = numbering.get_current_bts_distributed_hlr(str(imsi))
+            rk_hlr_current_bts = numbering.get_bts_distributed_hlr(str(imsi), 'current_bts')
 
             if pg_hlr_current_bts != rk_hlr_current_bts:
                 # update subscriber location
@@ -58,6 +59,15 @@ def update_list(subscribers, welcome=False):
                     sub.update(msisdn, "roaming number", number)
                     roaming_log.info('Send roaming welcome message to %s' % number)
                     send_welcome_sms(number)
+                    # update location to 0 in home bts
+                    rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
+                    try:
+                        values = {'imsi': imsi}
+                        data = urllib.urlencode(values)
+                        res = urllib.urlopen('http://%s:8085/subscriber/offline' % server, data).read()
+                    except IOError:
+                        roaming_log.error('Error connect to site %s to update lac for %s' % server)
+
                 else:
                     # update only location and not the timestamp in rk_hlr
                     sub.update_location(imsi, number, False)
