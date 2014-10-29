@@ -714,13 +714,13 @@ msgid "Daily Total Minutes"
 msgstr "Minutos totales diarios"
 
 msgid "All registered"
-msgstr ""
+msgstr "Todos los usuarios"
 
 msgid "All not registered (5 digits)"
-msgstr ""
+msgstr "Todos los usuarios no registrados (5 digitos)"
 
 msgid "All subscription not paid"
-msgstr ""
+msgstr "Todos los que no han pagado"
 
 msgid "All not authorized"
-msgstr ""
+msgstr "Todos los que no estan autorizados"
