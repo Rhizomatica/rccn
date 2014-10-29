@@ -61,20 +61,20 @@ def update_list(subscribers, welcome=False):
                     roaming_log.info('Send roaming welcome message to %s' % number)
                     send_welcome_sms(number)
                     # update location to 0 in home bts
-                    rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
-                    try:
-                        values = '{"imsi": "%s"}' % imsi
-                        opener = urllib2.build_opener(urllib2.HTTPHandler)
-                        request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_home_bts, data=values)
-                        request.add_header('Content-Type', 'application/json')
-                        request.get_method = lambda: 'PUT'
-                        res = opener.open(request).read()
-                        if 'success' in res:
-                                roaming_log.info('LAC successfully updated on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
-                        else:
-                                roaming_log.error('Updating LAC on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
-                    except IOError:
-                        roaming_log.error('Error connect to site %s to update LAC for %s' % server)
+                    #rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
+                    #try:
+                    #    values = '{"imsi": "%s"}' % imsi
+                    #    opener = urllib2.build_opener(urllib2.HTTPHandler)
+                    #    request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_home_bts, data=values)
+                    #    request.add_header('Content-Type', 'application/json')
+                    #    request.get_method = lambda: 'PUT'
+                    #    res = opener.open(request).read()
+                    #    if 'success' in res:
+                    #            roaming_log.info('LAC successfully updated on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
+                    #    else:
+                    #            roaming_log.error('Updating LAC on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
+                    #except IOError:
+                    #    roaming_log.error('Error connect to site %s to update LAC for %s' % server)
 
                 else:
                     # update only location and not the timestamp in rk_hlr
