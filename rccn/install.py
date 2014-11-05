@@ -169,7 +169,7 @@ try:
          'charge_internal_rate': to_decimal(charge_internal_rate),
          'charge_internal_rate_type': charge_internal_rate_type,
          'charge_inbound_calls': charge_inbound_calls,
-         'charge_inbound_rate': decimal(charge_inbound_rate),
+         'charge_inbound_rate': to_decimal(charge_inbound_rate),
          'charge_inbound_rate_type': charge_inbound_rate_type,
          'smsc_shortcode': smsc_shortcode,
          'sms_sender_unauthorized': sms_sender_unauthorized,
