@@ -19,12 +19,33 @@ function print_form($post_data,$errors) {
 	$callerid = ($_POST['callerid'] != '') ? $_POST['callerid'] : '';
 	$amount = ($_POST['amount'] != '') ? $_POST['amount'] : '0';
 
+	
+
 ?>
+
+
+
 			<div id="stylized" class="myform">
 				<form id="form" name="form" method="post" action="provisioning.php">
 				<h1><?= _("Provision a new subscriber") ?></h1><br/>
+<?php
+				// get imsi
+				$imsi = shell_exec("/usr/local/bin/get_imsi.py");
+				if (isset($imsi) && strlen($imsi) == 16) {
+					echo "&nbsp;&nbsp;Got IMSI: $imsi";
+				} else {
+					echo "&nbsp;&nbsp;Error getting IMSI please retry";
+				}
 
+				$sub = new Subscriber();
+                                try {
+                                	$ext = $sub->get_extension($imsi);
+				} catch (SubscriberException $e) { 
+					echo "&nbsp;&nbsp;Error getting Subscriber extension";
+				}
 
+?>
+				<br/>
 				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
                                 <label><?= _("Name") ?>
                                 <span class="small"><?= _("Subscriber Name") ?></span>
@@ -34,7 +55,7 @@ function print_form($post_data,$errors) {
 				<label><?= _("Subscriber number") ?>
 				<span class="small"><?= _("Subscriber number") ?></span>
 				</label>
-				<input type="text" name="callerid" id="callerid" value="<?=$callerid?>"/>
+				<input type="text" name="callerid" id="callerid" value="<?=$ext?>"/>
 
 				<label><?= _("Initial Balance") ?>
 				<span class="small"><?= _("Amount to add") ?></span>

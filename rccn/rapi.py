@@ -68,6 +68,18 @@ class SubscriberRESTService:
             api_log.info(data)
 
         return data
+
+    # get msisdn
+    @route('/extension/<imsi>')
+    def extension(self, request, imsi):
+	api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, imsi))
+	try:
+		sub =Subscriber()
+		data = json.dumps(sub.get_local_extension(imsi), cls=PGEncoder)
+	except SubscriberException as e:
+		data = {'status': 'failed', 'error': str(e)}
+	return data
+
  
     # add new subscriber
     @route('/', Http.POST)

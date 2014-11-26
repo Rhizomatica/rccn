@@ -91,6 +91,21 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
+    def get_local_extension(self, imsi):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select extension from subscriber where imsi=%(imsi)s" % {'imsi': imsi})
+            connected = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            if len(connected) <= 0:
+                raise SubscriberException('imsi %s not found' % imsi)
+            return connected[0]
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
+
     def get_all(self):
         try:
             cur = db_conn.cursor()
@@ -299,7 +314,10 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('UPDATE Subscriber set lac=? where imsi=?', (imsi, lac))
+            print 'Update lac %s %s' % (imsi, lac)
+            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', (imsi, lac))
+            sq_hlr.commit()
+            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', (imsi, lac))
             sq_hlr.commit()
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
