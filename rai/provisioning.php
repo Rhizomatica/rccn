@@ -30,7 +30,7 @@ function print_form($post_data,$errors) {
 				<h1><?= _("Provision a new subscriber") ?></h1><br/>
 <?php
 				// get imsi
-				$imsi = shell_exec("/usr/local/bin/get_imsi.py");
+				$imsi = shell_exec("/var/rhizomatica/bin/get_imsi.py");
 				if (isset($imsi) && strlen($imsi) == 16) {
 					echo "&nbsp;&nbsp;Got IMSI: $imsi";
 				} else {
