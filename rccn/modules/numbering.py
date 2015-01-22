@@ -110,7 +110,7 @@ class Numbering:
             if subscriber != None:
                 return subscriber['current_bts']
             else:
-                raise NumberingException('PG_DB subscriber not found' % (number))
+                raise NumberingException('PG_DB subscriber not found: %s' % number)
             return False
 
         except psycopg2.DatabaseError as e:
