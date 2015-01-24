@@ -40,8 +40,9 @@ def purge_inactive_subscribers():
 
     for msisdn in inactive:
         try:
-            sub.purge(msisdn)
-            purger_log.info("Subscriber %s purged" % msisdn)
+            if msisdn != 10000:
+                sub.purge(msisdn)
+                purger_log.info("Subscriber %s purged" % msisdn)
         except SubscriberException as e:
             purger_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
 
