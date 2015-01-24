@@ -335,7 +335,7 @@ class Subscriber:
             self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
     
         self._provision_in_database(subscriber_number, name, balance)
-        self._provision_in_distributed_hlr(imsi, subscriber_number)
+        #self._provision_in_distributed_hlr(imsi, subscriber_number)
         return msisdn
 
     def _check_subscriber_exists(self, msisdn):
@@ -470,23 +470,23 @@ class Subscriber:
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
         
-        try:
-            now = int(time.time())
-            rk_hlr = riak_client.bucket('hlr')
-            subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
-            if len(subscriber.results) != 0:
-                subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
-                subscriber.data['authorized'] = auth
-                subscriber.data['updated'] = now
-                subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])]) 
-                subscriber.store()
-            else:
-                raise NumberingException('RK_DB subscriber %s not found' % msisdn)
+        #try:
+        #    now = int(time.time())
+        #    rk_hlr = riak_client.bucket('hlr')
+        #    subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
+        #    if len(subscriber.results) != 0:
+        #        subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
+        #        subscriber.data['authorized'] = auth
+        #        subscriber.data['updated'] = now
+        #        subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])]) 
+        #        subscriber.store()
+        #    else:
+        #        raise NumberingException('RK_DB subscriber %s not found' % msisdn)
 
-        except riak.RiakError as e:
-            raise SubscriberException('RK_HLR error: %s' % e)
-        except socket.error:
-            raise SubscriberException('RK_HLR error: unable to connect')
+        #except riak.RiakError as e:
+        #    raise SubscriberException('RK_HLR error: %s' % e)
+        #except socket.error:
+        #    raise SubscriberException('RK_HLR error: unable to connect')
 
 
 
