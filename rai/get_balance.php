@@ -1,4 +1,4 @@
 <?php
-	exec("/usr/local/bin/funds.sh", $balance);
+	exec("/var/rhizomatica/bin/get_account_balance.sh", $balance);
 	echo $balance[0];
 ?>

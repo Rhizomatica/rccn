@@ -67,11 +67,10 @@ class Reseller
 		return $entries;
 	}
 		
-
 	public function create() {
 		$reseller = array("msisdn" => $this->msisdn, "pin" => $this->pin, "balance" => $this->balance);
 		try {
-			$response = \Httpful\Request::post($this->path)->body($reseller)->sendsJson()->send();
+			$response = \Httpful\Request::post($this->path."/".$this->msisdn)->body($reseller)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
 			throw new ResellerException($e->getMessage());
 		}
