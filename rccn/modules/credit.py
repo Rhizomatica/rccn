@@ -26,6 +26,7 @@ from config import *
 
 from reseller import Reseller, ResellerException
 from subscriber import Subscriber, SubscriberException 
+from sms import SMS, SMSException
 
 class CreditException(Exception):
     pass
@@ -34,6 +35,7 @@ class Credit:
 
     def add(self, msisdn, credit):
         sub = Subscriber()
+        sms = SMS();
         try:
             mysub = sub.get(msisdn)
         except SubscriberException as e:
@@ -46,6 +48,7 @@ class Credit:
         try:
             cur = db_conn.cursor()
             cur.execute('UPDATE subscribers SET balance=%(new_balance)s WHERE msisdn=%(msisdn)s', {'new_balance': Decimal(str(new_balance)), 'msisdn': msisdn})
+            sms.send(config['smsc'], msisdn, sms_credit_added % (credit, new_balance))
         except psycopg2.DatabaseError as e:
             raise CreditException('PG_HLR error updating subscriber balance: %s' % e)
 

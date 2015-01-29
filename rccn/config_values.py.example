@@ -36,6 +36,7 @@ smsc_shortcode = "10000"
 sms_sender_unauthorized = 'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.'
 sms_destination_unauthorized = 'Este usuario no se ha registrado. Él no va a recibir su mensaje.'
 sms_welcome_roaming = 'Bienvenido a la red de telefonia movil comunitaria de %s. Ya puedes realizar llamadas y enviar mensajes.' % site_name
+sms_credit_added = 'La cantidad de %s pesos fue abonado con exito a su cuenta. Su balance actual es %s pesos'
 
 # web administration
 rai_admin_user = "admin"
