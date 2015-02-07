@@ -16,7 +16,7 @@ class Subscriber
 	public $balance = "";
 	public $activation_date = "";
 
-	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="") {
+	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="") {
 		$this->id = $id;
 		$this->msisdn = $msisdn;
 		$this->name = $name;
@@ -24,6 +24,7 @@ class Subscriber
 		$this->balance = $balance;
 		$this->activation_date = $activation_date;
 		$this->subscription_status = $subscription_status;
+		$this->location = $location;
 	}
 
 	public function get($msisdn) {
@@ -94,7 +95,7 @@ class Subscriber
 		
 
 	public function create() {
-		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance);
+		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "location" => $this->location);
 		try {
 			$response = \Httpful\Request::post($this->path)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {

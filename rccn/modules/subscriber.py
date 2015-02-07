@@ -322,7 +322,7 @@ class Subscriber:
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
 
-    def add(self, msisdn, name, balance):
+    def add(self, msisdn, name, balance, location=''):
         imsi = self._get_imsi(msisdn)
         subscriber_number = config['internal_prefix'] + msisdn
 
@@ -334,7 +334,7 @@ class Subscriber:
         else:
             self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
     
-        self._provision_in_database(subscriber_number, name, balance)
+        self._provision_in_database(subscriber_number, name, balance, location)
         #self._provision_in_distributed_hlr(imsi, subscriber_number)
         return msisdn
 
@@ -505,7 +505,7 @@ class Subscriber:
 
 
 
-    def edit(self, msisdn, name, balance):
+    def edit(self, msisdn, name, balance, location=''):
         # edit subscriber data in the SQ_HLR
         #try:
         #   sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -524,11 +524,20 @@ class Subscriber:
         try:
             cur = db_conn.cursor()
             if balance != "":
-                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s WHERE msisdn=%(msisdn2)s', 
-                {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn})
+		if location != "":
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s,location=%(location)s WHERE msisdn=%(msisdn2)s', 
+        	        {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn, 'location': location})
+		else:
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s WHERE msisdn=%(msisdn2)s', 
+        	        {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn})
+			
             else:
-                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s WHERE msisdn=%(msisdn2)s', 
-                {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn})
+		if location != "":
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,location=%(location)s WHERE msisdn=%(msisdn2)s', 
+        	        {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn, 'location': location})
+		else:
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s WHERE msisdn=%(msisdn2)s', 
+        	        {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn})
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
@@ -562,11 +571,11 @@ class Subscriber:
         cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
         vty.command(cmd)
 
-    def _provision_in_database(self, msisdn, name, balance):
+    def _provision_in_database(self, msisdn, name, balance, location=''):
         try:
             cur = db_conn.cursor()
-            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1)', 
-            {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance))})
+            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status,location) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s)', 
+            {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'location': location})
             cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
             {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
             db_conn.commit()

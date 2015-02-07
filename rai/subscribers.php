@@ -22,7 +22,7 @@
                                         "aaSorting": [[ 0, "desc" ]],
                                         "aoColumnDefs": [
                                            {
-                                                "aTargets": [7],
+                                                "aTargets": [8],
                                                 "mData": null,
                                                 "mRender": function (data, type, full) {
                                                     sub = full[4].match(/\d\d\d\d\d\d\d\d\d\d\d/);
@@ -83,6 +83,7 @@
 			<th align='left' width='12%'><?= _("Number") ?></th>
 			<th align='left'><?= _("Name") ?></th>
 			<th align='left'><?= _("Balance") ?></th>
+			<th align='left'><?= _("Location") ?></th>
 			<th align='left'><?= _("Actions") ?></th>
 		</tr>
 	</thead>
@@ -100,6 +101,7 @@
                         <th align='left' width='12%'><?= _("Number") ?></th>
                         <th align='left'><?= _("Name") ?></th>
                         <th align='left'><?= _("Balance") ?></th>
+			<th align='left'><?= _("Location") ?></th>
                         <th align='left'><?= _("Actions") ?></th>
 		</tr>
 	</tfoot>

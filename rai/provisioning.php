@@ -18,13 +18,11 @@ function print_form($post_data,$errors) {
 	$firstname = ($_POST['firstname'] != '') ? $_POST['firstname'] : '';
 	$callerid = ($_POST['callerid'] != '') ? $_POST['callerid'] : '';
 	$amount = ($_POST['amount'] != '') ? $_POST['amount'] : '0';
+	$location = ($_POST['location'] != '') ? $_POST['location'] : '';
 
 	
 
 ?>
-
-
-
 			<div id="stylized" class="myform">
 				<form id="form" name="form" method="post" action="provisioning.php">
 				<h1><?= _("Provision a new subscriber") ?></h1><br/>
@@ -57,6 +55,11 @@ function print_form($post_data,$errors) {
 				</label>
 				<input type="text" name="callerid" id="callerid" value="<?=$ext?>"/>
 
+				<label><?= _("Location") ?>
+				<span class="small"><?= _("Subscriber location") ?></span>
+				</label>
+				<input type="text" name="location" id="location" value="<?=$location?>"/>
+				
 				<label><?= _("Initial Balance") ?>
 				<span class="small"><?= _("Amount to add") ?></span>
 				</label>
@@ -75,6 +78,7 @@ function print_form($post_data,$errors) {
 					$firstname = $_POST['firstname'];
 					$callerid = $_POST['callerid'];
 					$amount = $_POST['amount'];
+					$location = $_POST['location'];
 
 					if ($firstname == "") {
 						$error_txt .= _("Name is empty")."<br/>";
@@ -85,6 +89,9 @@ function print_form($post_data,$errors) {
 					if ($amount == "") {
 						$error_txt .= _("Initial balance is empty")."<br/>";
 					}
+					//if ($location == "") {
+					//	$error_txt .= _("Location is empty");
+					//}
 				} 
 
 				if (isset($_POST['add_subscriber']) && $error_txt != "") {
@@ -95,6 +102,7 @@ function print_form($post_data,$errors) {
 					$firstname = $_POST['firstname'];
                                         $callerid = $_POST['callerid'];
                                         $amount = $_POST['amount'];
+					$location = $_POST['location'];
 
 					// get internal prefix
 					$site = new Configuration();
@@ -107,7 +115,7 @@ function print_form($post_data,$errors) {
 					
 					$sub = new Subscriber();
 					try {
-						$sub->set("",$callerid,$firstname,1,$amount,"");
+						$sub->set("",$callerid,$firstname,1,$amount,"", $location);
 						$ret = $sub->create();
 						echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
 						if ($ret != "") {

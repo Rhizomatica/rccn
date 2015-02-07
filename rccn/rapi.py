@@ -83,11 +83,11 @@ class SubscriberRESTService:
  
     # add new subscriber
     @route('/', Http.POST)
-    def post(self, request, msisdn, name, balance):
-        api_log.info('%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s"' % (request.getHost().host, self.path, msisdn, name, balance))
+    def post(self, request, msisdn, name, balance, location=''):
+        api_log.info('%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s"' % (request.getHost().host, self.path, msisdn, name, balance, location))
         try:
             sub = Subscriber()
-            num = sub.add(msisdn, name, balance)
+            num = sub.add(msisdn, name, balance, location)
             if num != msisdn:
                 data = {'status': 'success', 'error': num}
             else:
@@ -113,9 +113,9 @@ class SubscriberRESTService:
 
     # edit subscriber
     @route('/<msisdn>', Http.PUT)
-    def put(self, request, msisdn='', name='', balance='', authorized='', subscription_status=''):
-        api_log.info('%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" subscription_status:"%s"' % (request.getHost().host, self.path, 
-        msisdn, name, balance, authorized, subscription_status))
+    def put(self, request, msisdn='', name='', balance='', authorized='', subscription_status='', location=''):
+        api_log.info('%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" subscription_status:"%s" location:"%s"' % (request.getHost().host, self.path, 
+        msisdn, name, balance, authorized, subscription_status, location))
         try:
             sub = Subscriber()
             if  authorized != '':
@@ -123,7 +123,7 @@ class SubscriberRESTService:
             if subscription_status != '':
                 sub.subscription(msisdn, subscription_status)
             if msisdn != '' and name != '' or balance != '':
-                sub.edit(msisdn, name, balance)
+                sub.edit(msisdn, name, balance, location)
             data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
