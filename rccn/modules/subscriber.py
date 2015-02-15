@@ -325,7 +325,7 @@ class Subscriber:
     def add(self, msisdn, name, balance, location=''):
         if len(msisdn) == 16:
             # lookup extension by imsi
-            msisdn = self._get_extension(msisdn)
+            extension = self._get_extension(msisdn)
             imsi = self._get_imsi(extension)
         else:
             imsi = self._get_imsi(msisdn)
