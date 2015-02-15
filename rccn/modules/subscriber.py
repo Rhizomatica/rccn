@@ -325,7 +325,7 @@ class Subscriber:
     def add(self, msisdn, name, balance, location=''):
         if len(msisdn) == 16:
             # lookup extension by imsi
-            extension = self._get_extension(msisdn)
+            extension = self.get_local_extension(msisdn)
             imsi = self._get_imsi(extension)
         else:
             imsi = self._get_imsi(msisdn)
@@ -563,19 +563,6 @@ class Subscriber:
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
         return str(imsi)
-
-    def _get_extension(self, imsi):
-        try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('select extension,imsi from subscriber where imsi=?', [(imsi)])
-            extension = sq_hlr_cursor.fetchone()
-            if  extension == None:
-                raise SubscriberException('Extension not found in the HLR')
-            ext = extension[0]
-        except sqlite3.Error as e:
-            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-        return str(ext)
 
     def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):
         appstring = 'OpenBSC'
