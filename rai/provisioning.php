@@ -121,7 +121,7 @@ function print_form($post_data,$errors) {
 					$firstname = $_POST['firstname'];
                                         $callerid = $_POST['callerid'];
                                         $amount = $_POST['amount'];
-					$location = isset($_POST['location']) ? $_POST['location'] : "";
+					$location = $_POST['location'];
 
 					// get internal prefix
 					$site = new Configuration();
@@ -134,7 +134,7 @@ function print_form($post_data,$errors) {
 					
 					$sub = new Subscriber();
 					try {
-						$sub->set("",$callerid,$firstname,1,$amount,"", $location);
+						$sub->set("",$callerid,$firstname,1,$amount,"", "", $location);
 						$ret = $sub->create();
 						echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
 						if ($ret != "") {

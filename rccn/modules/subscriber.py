@@ -96,7 +96,7 @@ class Subscriber:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             sq_hlr_cursor.execute("select extension from subscriber where imsi=%(imsi)s" % {'imsi': imsi})
-            connected = sq_hlr_cursor.fetchall()
+            connected = sq_hlr_cursor.fetchone()
             sq_hlr.close()
             if len(connected) <= 0:
                 raise SubscriberException('imsi %s not found' % imsi)
@@ -315,9 +315,9 @@ class Subscriber:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             print 'Update lac %s %s' % (imsi, lac)
-            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', (imsi, lac))
+            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', [(imsi, lac)])
             sq_hlr.commit()
-            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', (imsi, lac))
+            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', [(imsi, lac)])
             sq_hlr.commit()
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
@@ -332,7 +332,6 @@ class Subscriber:
             imsi = self._get_imsi(msisdn)
 
         subscriber_number = config['internal_prefix'] + msisdn
-
         # check if subscriber already exists
         if self._check_subscriber_exists(msisdn):
             # get a new extension
@@ -349,14 +348,14 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=%(msisdn)s' % {'msisdn': config['internal_prefix'] + msisdn})
+            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=?', [(config['internal_prefix'] + msisdn)])
             entry = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             if len(entry) <= 0:
                 return False
             return True
         except sqlite3.Error as e:
-            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+            raise SubscriberException('SQ_HLR error sub: %s' % e.args[0])
 
     def _get_new_msisdn(self, msisdn, name):
         try:
@@ -512,7 +511,7 @@ class Subscriber:
 
 
 
-    def edit(self, msisdn, name, balance, location=''):
+    def edit(self, msisdn, name, balance, location):
         # edit subscriber data in the SQ_HLR
         #try:
         #   sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -619,7 +618,7 @@ if __name__ == '__main__':
     sub = Subscriber()
     #sub.set_balance('68820110010',3.86)
     try:
-        sub.add('49987', 'Test', 100)
+        sub.add('334020348444451', 'Test', 100, 'Pporcodio')
     #sub.delete('66666249987')
         #sub.edit('68820137511','Antanz_edit',3.86)
         #sub.authorized('68820137511',0)

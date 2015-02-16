@@ -33,7 +33,7 @@ padding-bottom:10px;
 display:block;
 font-weight:bold;
 text-align:right;
-width:200px;
+width:230px;
 float:left;
 }
 #stylized .small{
@@ -44,7 +44,7 @@ font-weight:normal;
 text-align:right;
 width:200px;
 }
-#stylized input, select{
+#stylized input, #stylized select {
 float:left;
 display: block;
 font-size:12px;
@@ -52,6 +52,10 @@ padding:4px 2px;
 border:solid 1px #aacfe4;
 width:200px;
 margin:5px 0 20px 10px;
+}
+
+#stylized input[type='checkbox'] {
+	width: 210px;
 }
 
 #stylized button{

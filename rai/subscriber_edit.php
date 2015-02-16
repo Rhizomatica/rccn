@@ -1,6 +1,7 @@
 <? 
 
 require('modules/subscriber.php');
+require('modules/configuration.php');
 $no_title = 1;
 require('include/header.php');
 
@@ -14,14 +15,21 @@ function print_form($post_data,$errors) {
 	try {
 		$msisdn = $_GET['id'];
 		$sub->get($_GET['id']);
-		$name = $sub->name;
-		$callerid = $sub->msisdn;
-
+		$name = ($_POST['firstname'] != '') ? $_POST['firstname'] : $sub->name;
+		$callerid = ($_POST['callerid'] != '') ? $_POST['callerid'] : $sub->msisdn;
+		$location = ($_POST['location'] != '') ? $_POST['location'] : $sub->location;
 	} catch (PDOException $e) {
 		echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
 		echo "<span style='font-size: 20px; color: red;'>"._("ERROR GETTING SUBSCRIBER INFO!").$e->getMessage()." </span><br/><br/><br/><br/>";
 		echo "<a href='provisioning.php'><button class='b1'>Go Back</button></a>";
 
+	}
+
+	try {
+		$loc = new Configuration();
+		$locations = $loc->getLocations();
+	} catch (ConfigurationException $e) {
+		echo "&nbsp;&nbsp;Error getting locations";
 	}
 
 ?>
@@ -43,11 +51,32 @@ function print_form($post_data,$errors) {
 				</label>
 				<input type="text" name="callerid" id="callerid" value="<?=$callerid?>"/>
 				
+<?php
+                                if (count($locations) > 1) {
+?>
+                                <label><?= _("Location") ?>
+                                <span class="small"><?= _("Subscriber location") ?></span>
+                                </label>
+<?php
+                                        echo "<select name='location' id='location'>";
+                                        foreach ($locations as $rloc) {
+						if ($location == $rloc->name) {
+	                                                echo "<option value='".$rloc->name."' selected='selected'>".$rloc->name."</option>";
+						} else {
+							echo "<option value='".$rloc->name."'>".$rloc->name."</option>";
+						}
+                                        }
+                                        echo "</select>";
+                                }
+?>
+
+
+
 				<label><?= _("Subscription Paid") ?>
 				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
-				</label>
+				</label><br/><br/>
 				<? $checked = ($sub->subscription_status == 0) ? '' : 'checked=checked'; ?>
-				<input type="checkbox" name="subscription_status" id="subscription_status" value="1" <?=$checked?>/>
+				<input type="checkbox" name="subscription_status" id="subscription_status" value="1" <?=$checked?>/><br/>
 				
 				<label><?= _("Authorized") ?>
 				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
@@ -70,6 +99,7 @@ function print_form($post_data,$errors) {
 					$firstname = $_POST['firstname'];
 					$callerid = $_POST['callerid'];
 					$authorized = $_POST['authorized'];
+					$location = $_POST['location'];
 
 					if ($firstname == "") {
 						$error_txt .= _("Name is empty")."<br/>";
@@ -87,9 +117,9 @@ function print_form($post_data,$errors) {
 					try {
 						#$sub->get($_POST['msisdn']);
 						if ($_POST['authorized'] == 1) {
-							$sub->set("",$callerid,$firstname,1,"","");
+							$sub->set("",$callerid,$firstname,1,"","","",$location);
 						} else {
-							$sub->set("",$callerid,$firstname,0,"","");
+							$sub->set("",$callerid,$firstname,0,"","","",$location);
 						}
 						if ($_POST['subscription_status'] == 1) {
 							$sub->subscription_status = 1;
