@@ -70,7 +70,7 @@ function print_form($post_data,$errors) {
 <?php
 				if (count($locations) > 1) {
 ?>
-				<label><?= _("Location") ?>&nbsp;&nbsp;
+				<label><?= _("Location") ?>
 				<span class="small"><?= _("Subscriber location") ?></span>
 				</label>
 <?php

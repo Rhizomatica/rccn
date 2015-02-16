@@ -44,7 +44,7 @@ font-weight:normal;
 text-align:right;
 width:200px;
 }
-#stylized input{
+#stylized input, select{
 float:left;
 display: block;
 font-size:12px;
