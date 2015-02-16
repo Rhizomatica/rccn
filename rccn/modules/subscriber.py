@@ -326,8 +326,9 @@ class Subscriber:
         if len(msisdn) == 15:
             # lookup extension by imsi
             extension = self.get_local_extension(msisdn)
-            imsi = self._get_imsi(extension)
-        else:
+            imsi = msisdn
+            msisdn = extension
+   	else:
             imsi = self._get_imsi(msisdn)
 
         subscriber_number = config['internal_prefix'] + msisdn
