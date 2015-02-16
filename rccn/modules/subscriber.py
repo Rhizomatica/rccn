@@ -323,7 +323,7 @@ class Subscriber:
             raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
 
     def add(self, msisdn, name, balance, location=''):
-        if len(msisdn) == 16:
+        if len(msisdn) == 15:
             # lookup extension by imsi
             extension = self.get_local_extension(msisdn)
             imsi = self._get_imsi(extension)
