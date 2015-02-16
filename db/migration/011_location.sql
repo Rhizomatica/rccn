@@ -13,7 +13,6 @@ create table subscribers (
 );
 INSERT INTO subscribers(id,msisdn,name,authorized,balance,created) SELECT id,msisdn,name,authorized,balance,created FROM sub;
 DROP TABLE sub;
-DROP TABLE sites;
 CREATE TABLE locations (
 	id		serial primary key,
 	name		varchar not null
