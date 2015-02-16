@@ -105,8 +105,8 @@ function print_form($post_data,$errors) {
 					if ($firstname == "") {
 						$error_txt .= _("Name is empty")."<br/>";
 					}
-					if ($callerid == "" || strlen($callerid) > 5 || strlen($callerid) < 5) {
-						$error_txt .= _("Subscriber number is invalid")."<br/>";
+					if ($callerid == "") {
+						$error_txt .= _("Subscriber number is empty")."<br/>";
 					}
 					if ($amount == "") {
 						$error_txt .= _("Initial balance is empty")."<br/>";
