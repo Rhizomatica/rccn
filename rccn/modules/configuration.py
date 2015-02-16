@@ -53,7 +53,7 @@ class Configuration:
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM locations')
-            locations = cur.fetchone()
+            locations = cur.fetchall()
             if locations != None:
                 return locations
 	    else:

@@ -28,7 +28,7 @@ function print_form($post_data,$errors) {
 				<h1><?= _("Provision a new subscriber") ?></h1><br/>
 <?php
 				// get imsi
-				$imsi = shell_exec("/var/rhizomatica/bin/get_imsi.py");
+				/*$imsi = shell_exec("/var/rhizomatica/bin/get_imsi.py");
 				if (isset($imsi) && strlen($imsi) == 16) {
 					echo "&nbsp;&nbsp;Got IMSI: $imsi";
 				} else {
@@ -40,7 +40,7 @@ function print_form($post_data,$errors) {
                                 	$ext = $sub->get_extension($imsi);
 				} catch (SubscriberException $e) { 
 					echo "&nbsp;&nbsp;Error getting Subscriber extension";
-				}
+				}*/
 
 
                                 try {
@@ -70,15 +70,17 @@ function print_form($post_data,$errors) {
 <?php
 				if (count($locations) > 1) {
 ?>
-				<label><?= _("Location") ?>
+				<label><?= _("Location") ?>&nbsp;&nbsp;
 				<span class="small"><?= _("Subscriber location") ?></span>
 				</label>
 <?php
+					echo "<select name='location' id='location'>";
 					foreach ($locations as $rloc) {
-						echo "<select name='location' id='location'>";
-						echo "<option value='".$rloc[1]."'>".$rloc[1]."</option>";
+						echo "<option value='".$rloc->name."'>".$rloc->name."</option>";
 					}
+					echo "</select>";
 				}
+				
 ?>
 				<label><?= _("Initial Balance") ?>
 				<span class="small"><?= _("Amount to add") ?></span>
