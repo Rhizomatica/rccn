@@ -42,7 +42,19 @@ function print_form($post_data,$errors) {
 					echo "&nbsp;&nbsp;Error getting Subscriber extension";
 				}
 
+
+                                try {
+					$loc = new Configuration();
+					$locations = $loc->getLocations();
+				
+				} catch (ConfigurationException $e) {
+					echo "&nbsp;&nbsp;Error getting locations";
+				}
+
+
 ?>
+
+
 				<br/>
 				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
                                 <label><?= _("Name") ?>
@@ -55,11 +67,19 @@ function print_form($post_data,$errors) {
 				</label>
 				<input type="text" name="callerid" id="callerid" value="<?=$ext?>"/>
 
+<?php
+				if (count($locations) > 1) {
+?>
 				<label><?= _("Location") ?>
 				<span class="small"><?= _("Subscriber location") ?></span>
 				</label>
-				<input type="text" name="location" id="location" value="<?=$location?>"/>
-				
+<?php
+					foreach ($locations as $rloc) {
+						echo "<select name='location' id='location'>";
+						echo "<option value='".$rloc[1]."'>".$rloc[1]."</option>";
+					}
+				}
+?>
 				<label><?= _("Initial Balance") ?>
 				<span class="small"><?= _("Amount to add") ?></span>
 				</label>
@@ -89,9 +109,6 @@ function print_form($post_data,$errors) {
 					if ($amount == "") {
 						$error_txt .= _("Initial balance is empty")."<br/>";
 					}
-					//if ($location == "") {
-					//	$error_txt .= _("Location is empty");
-					//}
 				} 
 
 				if (isset($_POST['add_subscriber']) && $error_txt != "") {
@@ -102,7 +119,7 @@ function print_form($post_data,$errors) {
 					$firstname = $_POST['firstname'];
                                         $callerid = $_POST['callerid'];
                                         $amount = $_POST['amount'];
-					$location = $_POST['location'];
+					$location = isset($_POST['location']) ? $_POST['location'] : "";
 
 					// get internal prefix
 					$site = new Configuration();

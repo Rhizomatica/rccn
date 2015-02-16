@@ -469,6 +469,18 @@ class ConfigurationRESTService:
         api_log.info(data)
         return data
 
+    @route('/locations', Http.GET)
+    def locations(self, request):
+        api_log.info('%s - [GET] %s/locations' % (request.getHost().host, self.path))
+        try:
+            config = Configuration()
+            data = json.dumps(config.get_site_config(), cls=PGEncoder)
+        except ConfigurationException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        
+        api_log.info(data)
+        return data
+    
     @route('/config', Http.GET)
     def config(self, request):
         api_log.info('%s - [GET] %s/config' % (request.getHost().host, self.path))
@@ -480,6 +492,8 @@ class ConfigurationRESTService:
         
         api_log.info(data)
         return data
+
+    
 
 class RccnAPI(Daemonizer):
     def __init__(self):

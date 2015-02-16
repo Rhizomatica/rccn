@@ -37,8 +37,8 @@ class Configuration:
             if site_conf != None:
                 return site_conf
         except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error getting site info: %s' % e)    
-    
+            raise ConfigurationException('Database error getting site info: %s' % e)
+
     def get_site_config(self):
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -48,6 +48,18 @@ class Configuration:
                 return site_conf
         except psycopg2.DatabaseError as e:
             raise ConfigurationException('Database error getting site config: %s' % e)
+    
+    def get_locations(self):
+        try:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT * FROM locations')
+            locations = cur.fetchone()
+            if locations != None:
+                return locations
+	    else:
+		return ""
+        except psycopg2.DatabaseError as e:
+            raise ConfigurationException('Database error getting locations: %s' % e)
     
     def get_local_calls_limit(self):
         try:

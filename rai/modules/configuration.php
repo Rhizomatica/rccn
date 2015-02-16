@@ -42,6 +42,23 @@ class Configuration
 		}
 	}
 
+        public function getLocations() {
+                try {
+                        $response = \Httpful\Request::get($this->path."/locations")->expectsJson()->send();
+                        $data = $response->body;
+                } catch (Httpful\Exception\ConnectionErrorException $e) {
+                        throw new SubscriberException($e->getMessage());
+                }
+
+                if (!is_array((array) $data)) {
+                        if ($data->status == 'failed') {
+                                throw new SubscriberException($data->error);
+                        }
+                } else {
+                        return $data;
+                }
+        }
+
 
 }
 
