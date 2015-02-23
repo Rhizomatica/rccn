@@ -104,6 +104,9 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+	except TypeError as e:
+	    sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: number not found')
 
 
     def get_all(self):
@@ -618,8 +621,8 @@ if __name__ == '__main__':
     sub = Subscriber()
     #sub.set_balance('68820110010',3.86)
     try:
-        sub.add('334020348444451', 'Test', 100, 'Pporcodio')
-    #sub.delete('66666249987')
+        sub.add('123456789012345', 'Test', 100, 'Myloc')
+        #sub.delete('66666249987')
         #sub.edit('68820137511','Antanz_edit',3.86)
         #sub.authorized('68820137511',0)
         #print sub.get_all_connected()

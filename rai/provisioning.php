@@ -111,6 +111,9 @@ function print_form($post_data,$errors) {
 					if ($amount == "") {
 						$error_txt .= _("Initial balance is empty")."<br/>";
 					}
+					if (strlen($callerid) != 5 && strlen($callerid) != 15) {
+						$error_txt .= _("Invalid number")."<br/>";
+					}
 				} 
 
 				if (isset($_POST['add_subscriber']) && $error_txt != "") {
