@@ -11,7 +11,7 @@ create table subscribers (
 	location	varchar,
         created         timestamp default current_timestamp
 );
-INSERT INTO subscribers(id,msisdn,name,authorized,balance,created) SELECT id,msisdn,name,authorized,balance,created FROM sub;
+INSERT INTO subscribers(id,msisdn,name,authorized,balance,subscription_status,subscription_date,created) SELECT id,msisdn,name,authorized,balance,subscription_status,subscription_date,created FROM sub;
 DROP TABLE sub;
 CREATE TABLE locations (
 	id		serial primary key,
