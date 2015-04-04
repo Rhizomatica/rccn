@@ -80,13 +80,9 @@ function print_form($post_data,$errors) {
 					}
 					echo "</select>";
 				}
-				
+					
 ?>
-				<label><?= _("Initial Balance") ?>
-				<span class="small"><?= _("Amount to add") ?></span>
-				</label>
-				<input type="text" name="amount" id="amount" value="<?=$amount?>"/><br/>
-			
+				<br/>
 				<button type="submit" name="add_subscriber"><?= _("Add") ?></button>
 				<div class="spacer"></div>
 				</form>
@@ -99,7 +95,6 @@ function print_form($post_data,$errors) {
 					// form pressed verify if any data is missing
 					$firstname = $_POST['firstname'];
 					$callerid = $_POST['callerid'];
-					$amount = $_POST['amount'];
 					$location = $_POST['location'];
 
 					if ($firstname == "") {
@@ -107,9 +102,6 @@ function print_form($post_data,$errors) {
 					}
 					if ($callerid == "") {
 						$error_txt .= _("Subscriber number is empty")."<br/>";
-					}
-					if ($amount == "") {
-						$error_txt .= _("Initial balance is empty")."<br/>";
 					}
 					if (strlen($callerid) != 5 && strlen($callerid) != 15) {
 						$error_txt .= _("Invalid number")."<br/>";
@@ -123,7 +115,6 @@ function print_form($post_data,$errors) {
 		                        
 					$firstname = $_POST['firstname'];
                                         $callerid = $_POST['callerid'];
-                                        $amount = $_POST['amount'];
 					$location = $_POST['location'];
 
 					// get internal prefix
@@ -134,7 +125,7 @@ function print_form($post_data,$errors) {
 					$new_num = "$internalprefix$callerid";
 				
 					echo "<center>";
-					
+					$amount = 0;
 					$sub = new Subscriber();
 					try {
 						$sub->set("",$callerid,$firstname,1,$amount,"", "", $location);
