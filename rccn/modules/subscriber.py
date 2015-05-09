@@ -333,8 +333,8 @@ class Subscriber:
             msisdn = extension
    	else:
             imsi = self._get_imsi(msisdn)
-
-        subscriber_number = config['internal_prefix'] + msisdn
+        
+	subscriber_number = config['internal_prefix'] + msisdn
         # check if subscriber already exists
         if self._check_subscriber_exists(msisdn):
             # get a new extension
@@ -416,16 +416,17 @@ class Subscriber:
 
 
     def delete(self, msisdn):
-        imsi = self._get_imsi(msisdn)
-
         subscriber_number = msisdn[-5:]
         appstring = 'OpenBSC'
         appport = 4242
-        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
-        cmd = 'enable'
-        vty.command(cmd)
-        cmd = 'subscriber extension %s extension %s' % (msisdn, subscriber_number)
-        vty.command(cmd)
+        try:
+            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+            cmd = 'enable'
+            vty.command(cmd)
+            cmd = 'subscriber extension %s extension %s' % (msisdn, subscriber_number)
+            vty.command(cmd)
+        except:
+	    pass    
 
         # PG_HLR delete subscriber 
         try:
@@ -433,11 +434,9 @@ class Subscriber:
             cur.execute('DELETE FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
             cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
             if cur.rowcount > 0:
-                db_conn.commit()
-            else:
-                raise SubscriberException('PG_HLR No subscriber found') 
-        except psycopg2.DatabaseError, e:
-            raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
+               db_conn.commit()
+        except psycopg2.DatabaseError as e:
+	    pass
 
         self._delete_in_distributed_hlr(msisdn)
 
