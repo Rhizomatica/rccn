@@ -583,7 +583,7 @@ class Subscriber:
         try:
             cur = db_conn.cursor()
             cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status,location) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s)', 
-            {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'location': location})
+            {'msisdn': msisdn, 'name': unidecode(name), 'balance': Decimal(str(balance)), 'location': location})
             cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
             {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
             db_conn.commit()
