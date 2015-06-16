@@ -1,4 +1,9 @@
 rai/include/database.php
+rai/graphs
+rccn/config_values.py
+rccn/log/*
+rrd/*
+rrd/graphs/*
 *.pyc
 *.log
 *.swp
