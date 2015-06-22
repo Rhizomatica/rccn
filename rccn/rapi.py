@@ -22,7 +22,6 @@
 
 from corepost import Response, NotFoundException, AlreadyExistsException
 from corepost.web import RESTResource, route, Http 
-from daemonizer import Daemonizer
 from config import *
 
 class SubscriberRESTService:
@@ -493,18 +492,11 @@ class ConfigurationRESTService:
         api_log.info(data)
         return data
 
-    
 
-class RccnAPI(Daemonizer):
-    def __init__(self):
-        Daemonizer.__init__(self)
+def run_rapi():
+    api_log.info('Starting up RCCN API manager')
+    app = RESTResource((SubscriberRESTService(), ResellerRESTService(), CreditRESTService(), StatisticsRESTService(), SMSRESTService(), ConfigurationRESTService()))
+    app.run(8085)
 
-    def main_loop(self):
-        api_log.info('Starting up RCCN API manager')
-        app = RESTResource((SubscriberRESTService(), ResellerRESTService(), CreditRESTService(), 
-        StatisticsRESTService(), SMSRESTService(), ConfigurationRESTService()))
-        app.run(8085)
-
-if __name__ == '__main__':
-    rccn_api_manager = RccnAPI()
-    rccn_api_manager.process_command_line(sys.argv)
+if __name__ == "__main__":
+    run_rapi()
