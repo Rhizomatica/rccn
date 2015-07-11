@@ -337,14 +337,24 @@ class Subscriber:
 	subscriber_number = config['internal_prefix'] + msisdn
         # check if subscriber already exists
         if self._check_subscriber_exists(msisdn):
-            # get a new extension
-            msisdn = self._get_new_msisdn(msisdn, name)
-            subscriber_number = config['internal_prefix'] + msisdn
+            try:
+                # get a new extension
+                msisdn = self._get_new_msisdn(msisdn, name)
+                subscriber_number = config['internal_prefix'] + msisdn
+                self._provision_in_database(subscriber_number, name, balance, location)
+            except:
+                # revert back the change on SQ_HLR
+                self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
+                raise SubscriberException('PG_HLR/SQ_HLR Error provisioning new number %s, please try again' % msisdn)
         else:
-            self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
-    
-        self._provision_in_database(subscriber_number, name, balance, location)
-        #self._provision_in_distributed_hlr(imsi, subscriber_number)
+            try:
+                self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
+                self._provision_in_database(subscriber_number, name, balance, location)
+            except:
+                # revert back the change on SQ_HLR
+                self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
+                raise SubscriberException('PG_HLR/SQ_HLR Error provisioning the number %s, please try again' % msisdn)
+                
         return msisdn
 
     def _check_subscriber_exists(self, msisdn):
@@ -370,7 +380,10 @@ class Subscriber:
                 newexti = int(msisdn) + 1
                 newext = str(newexti)
                 if not self._check_subscriber_exists(newext):
-                    self._authorize_subscriber_in_local_hlr(msisdn, config['internal_prefix'] + newext, name)
+                    try:
+                        self._authorize_subscriber_in_local_hlr(msisdn, config['internal_prefix'] + newext, name)
+                    except:
+                        raise SubscriberException('SQ_HLR error adding new extension %s to the db' % newext)
                     return newext
         except:
             raise SubscriberException('Error in getting new msisdn for existing subscriber')
@@ -474,8 +487,10 @@ class Subscriber:
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
+                db_conn.rollback()
                 raise SubscriberException('PG_HLR Subscriber not found')
         except psycopg2.DatabaseError as e:
+            db_conn.rollback()
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
         
         #try:
@@ -567,17 +582,20 @@ class Subscriber:
         return str(imsi)
 
     def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):
-        appstring = 'OpenBSC'
-        appport = 4242
-        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
-        cmd = 'enable'
-        vty.command(cmd)
-        cmd = 'subscriber extension %s extension %s' % (msisdn, new_msisdn)
-        vty.command(cmd)
-        cmd = 'subscriber extension %s authorized 1' % new_msisdn
-        vty.command(cmd)
-        cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
-        vty.command(cmd)
+        try:
+            appstring = 'OpenBSC'
+            appport = 4242
+            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+            cmd = 'enable'
+            vty.command(cmd)
+            cmd = 'subscriber extension %s extension %s' % (msisdn, new_msisdn)
+            vty.command(cmd)
+            cmd = 'subscriber extension %s authorized 1' % new_msisdn
+            vty.command(cmd)
+            cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
+            vty.command(cmd)
+        except:
+            raise SubscriberException('SQ_HLR error provisioning the subscriber')
 
     def _provision_in_database(self, msisdn, name, balance, location=''):
         try:
@@ -588,6 +606,7 @@ class Subscriber:
             {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
+            db_conn.rollback()
             raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
 
     def _provision_in_distributed_hlr(self, imsi, msisdn):
