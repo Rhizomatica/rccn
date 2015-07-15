@@ -1,4 +1,6 @@
 BEGIN;
+UPDATE meta SET value='11' WHERE key='db_revision';
+
 ALTER TABLE subscribers RENAME TO sub;
 create table subscribers (
         id              serial primary key,
