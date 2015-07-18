@@ -28,7 +28,7 @@ from config_values import site_name, vpn_ip_address, postcode, pbxcode, network_
 
 prefix = postcode + pbxcode
 
-riak_client = riak.RiakClient(pb_port=8087, protocol='pbc')
+riak_client = riak.RiakClient(host=vpn_ip_address, pb_port=8087, protocol='pbc')
 
 sq_hlr = sqlite3.connect(sq_hlr_path)
 sq_hlr_cursor = sq_hlr.cursor()
@@ -40,18 +40,26 @@ print 'Create site'
 rk_site = riak_client.bucket('sites')
 rk_site.set_property('last_write_wins', 1)
 rk_site.set_property('allow_mult', 0)
+rk_site.set_property('n_val', 3)
+rk_site.set_property('r', 1)
+rk_site.set_property('w', 1)
+rk_site.set_property('dw', 1)
 rk_site.new(prefix, data={"site_name": site_name, "postcode": postcode, "pbxcode": pbxcode, "network_name": network_name, "ip_address": vpn_ip_address}).store()
 
 rk_hlr = riak_client.bucket('hlr')
 rk_hlr.set_property('last_write_wins', 1)
 rk_hlr.set_property('allow_mult', 0)
+rk_hlr.set_property('n_val', 3)
+rk_hlr.set_property('r', 1)
+rk_hlr.set_property('w', 1)
+rk_hlr.set_property('dw', 1)
 
 for sub in subscribers:
     imsi = str(sub[3])
     msisdn = sub[5]
     authorized = sub[6]
-    
-    now = int(time.time())  
+
+    now = int(time.time())
 
     print 'Provisioning imsi[%s] msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] on distributed HLR' % (imsi, msisdn, vpn_ip_address, vpn_ip_address, authorized)
     dhlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": vpn_ip_address, "current_bts": vpn_ip_address, "authorized": authorized, "updated": now})

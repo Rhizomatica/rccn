@@ -126,11 +126,11 @@ try:
     cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute('SELECT * from site')
     site_conf = cur.fetchone()
-    
+
     config['site_name'] = site_conf['site_name']
     config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
     config['local_ip'] = site_conf['ip_address']
-    
+
     # load SMS shortcode into global config
     cur.execute('SELECT smsc_shortcode,sms_sender_unauthorized,sms_destination_unauthorized FROM configuration')
     smsc = cur.fetchone()
@@ -144,7 +144,7 @@ except psycopg2.DatabaseError as e:
 #riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
 # use protocol buffers
 try:
-    riak_client = riak.RiakClient(pb_port=8087, protocol='pbc', RETRY_COUNT=1)
+    riak_client = riak.RiakClient(host=vpn_ip_address, pb_port=8087, protocol='pbc', RETRY_COUNT=1)
 except socket.error(111, 'Connection refused'):
     log.error('RK_HLR error: unable to connect')
 
