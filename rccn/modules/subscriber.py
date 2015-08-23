@@ -346,19 +346,19 @@ class Subscriber:
                 msisdn = self._get_new_msisdn(msisdn, name)
                 subscriber_number = config['internal_prefix'] + msisdn
                 self._provision_in_database(subscriber_number, name, balance, location)
-            except:
+            except SubscriberException as e:
                 # revert back the change on SQ_HLR
                 self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
-                raise SubscriberException('PG_HLR/SQ_HLR Error provisioning new number %s, please try again' % msisdn)
+                raise SubscriberException('Error provisioning new number %s, please try again. ERROR: %s' % (msisdn, str(e)))
         else:
             try:
                 self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
                 self._provision_in_database(subscriber_number, name, balance, location)
-            except:
+            except SubscriberException as e:
                 # revert back the change on SQ_HLR
                 self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
-                raise SubscriberException('PG_HLR/SQ_HLR Error provisioning the number %s, please try again' % msisdn)
-
+                raise SubscriberException('Error provisioning the number %s, please try again. ERROR: %s' % (msisdn, str(e)))
+                
         return msisdn
 
     def _check_subscriber_exists(self, msisdn):
