@@ -113,14 +113,14 @@ class Dialplan:
                 last = emg_numbers[-1]
                 for emg in emg_numbers:
                     if emg == last:
-                        dial_str += 'sofia/internal/sip:'+emg+'@127.0.0.1:5050'
+                        dial_str += 'sofia/internal/sip:'+emg+'@172.16.0.1:5050'
                     else:
-                        dial_str += 'sofia/internal/sip:'+emg+'@127.0.0.1:5050,'
+                        dial_str += 'sofia/internal/sip:'+emg+'@172.16.0.1:5050,'
             else:
-                dial_str = 'sofia/internal/sip:'+emergency_contact+'@127.0.0.1:5050'
+                dial_str = 'sofia/internal/sip:'+emergency_contact+'@172.16.0.1:5050'
             
             self.session.setVariable('context','EMERGENCY')
-            self.session.execute('bridge', "{absolute_codec_string='PCMA'}"+dial_str)
+            self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
             
         # check if destination number is an incoming call
         # lookup dest number in DID table.
