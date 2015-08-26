@@ -1,0 +1,37 @@
+#map { 
+	height: 600px;
+	background: ash;
+}
+
+.bts{
+	background-color:yellow;
+	border: red thick dashed;
+}
+.up, .down {
+	-moz-border-radius: 50%;
+	-webkit-border-radius: 50%;
+	border-radius: 50%; /* future proofing */
+	-khtml-border-radius: 50%; /* for old Konqueror browsers */
+	padding:5px;
+}
+.up{
+	border: green thin solid;
+}
+
+.down{
+	border: red thick dashed;
+}
+#outsideWorld{
+	position: absolute;
+	top: 1em;
+	right: 1em;
+}
+#outsideWorld div{
+	display: inline-block;
+	font-size: .7em;
+	width: 5em;
+	height: 5em;
+	text-align: center;
+	vertical-align: middle;
+	margin: 1em;
+}s
