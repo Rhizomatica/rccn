@@ -3,7 +3,7 @@ jQuery(document).ready(function($) {
     var status = "maybe",
         lats = [],
         longs = [],
-        type, ip, geo, status, deviceIcon, marker, stats, zoom, //keep vars global
+        type, ip, geo, status, deviceIcon, marker, stats, zoom, popUpText, //keep vars global
 
         btsIcon = L.icon({
             iconUrl: 'img/bts.png',
@@ -41,7 +41,7 @@ jQuery(document).ready(function($) {
     var map = L.map('map').setView([ 17.066409, -96.729473], 2);
 
     // get json data
-    var network = $.getJSON("netmap.json", function(data) {}).fail(function() {
+    var network = $.getJSON("js/netmap.json", function(data) {}).fail(function() {
         console.log("Can't find any devices???");
     });
 
@@ -68,7 +68,7 @@ jQuery(document).ready(function($) {
                 ip = net[key].ip,
                 geo = net[key].geo;
 
-                // use the opportunity to make arrays of boundaries for later
+                // use the opportunity to make arrays of boundaries for map resizing
                 lats.push(net[key].geo[0]);
                 longs.push(net[key].geo[1]);
 
@@ -86,8 +86,6 @@ jQuery(document).ready(function($) {
             smallestLat = Math.min.apply(Math, lats) - zoom,
             largestLon = Math.max.apply(Math, longs) + zoom,
             smallestLon = Math.min.apply(Math, longs) - zoom;
-        console.log("largestLat: " + largestLat + " smallestLat: " + smallestLat + " largestLon: " + largestLon + " smallestLon: " + smallestLon);
-
 
         var southWest = L.latLng(smallestLat, smallestLon),
             northEast = L.latLng(largestLat, largestLon),
@@ -110,11 +108,19 @@ jQuery(document).ready(function($) {
                 //make an iconout of the type var
                 deviceIcon = eval(type.concat("Icon"));
 
+                // traducir cosas
+                switch(status){
+                    case 'up': popUpText = 'En línea :)';
+                    break;
+                    case 'down': popUpText = 'desconectado :(';
+                    break;
+                }
+
                 marker = L.marker(geo, {
                     icon: deviceIcon
                 }, {
                     title: ip
-                }).addTo(map).bindPopup(type + " <br>" + ip + "<br> This is " + status);
+                }).addTo(map).bindPopup(type + " <br>" + ip + "<br> Estatus: " + popUpText);
 
                 $(marker._icon).addClass(status);
 
@@ -123,6 +129,7 @@ jQuery(document).ready(function($) {
             })
             .fail(function() {
                 console.log("failaed to ajjjaaxx");
+                $("#outsideWorld").prepend("<h1 class=\"error\">error: gran fracasado en encontrar la red</h1>");
             });
     }
 

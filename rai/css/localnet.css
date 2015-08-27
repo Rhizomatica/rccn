@@ -3,10 +3,10 @@
 	background: ash;
 }
 
-.bts{
+/*.bts{
 	background-color:yellow;
 	border: red thick dashed;
-}
+}*/
 .up, .down {
 	-moz-border-radius: 50%;
 	-webkit-border-radius: 50%;
@@ -19,19 +19,67 @@
 }
 
 .down{
-	border: red thick dashed;
+	border: red thin solid;
 }
 #outsideWorld{
 	position: absolute;
-	top: 1em;
+	top: 120px;
 	right: 1em;
 }
 #outsideWorld div{
 	display: inline-block;
 	font-size: .7em;
-	width: 5em;
-	height: 5em;
+	width: 7.5em;
+	height: 7.5em;
 	text-align: center;
 	vertical-align: middle;
 	margin: 1em;
-}s
+   	background-color:#D6E3C6;
+   	color: #000000;
+}
+
+#outsideWorld div p{
+	margin-top: 1em
+}
+
+#legend{
+	position: absolute;
+	bottom:0;
+	right: 1em;
+	color: #585858;
+	background-color: #D6E3C6;
+	padding:.5em 1em;
+	font-size: .7em;
+	width: 15em;
+}
+
+#legend div{
+	display: inline-block;
+	width: .5em;
+	height: .5em;
+	margin-right:10px;
+	text-align: center;
+	vertical-align: middle;
+}
+#legend td{
+	line-height: 2.5em;
+	vertical-align: middle;
+	border-bottom: thin dashed #CCCCCC;
+}
+#legend img{
+	width: 2em;
+	height: 2em;
+}
+
+.leaflet-popup-content{
+	color: #000000;
+}
+
+#map h1.error{
+	display: block;
+	z-index: 999;
+}
+
+nav ul{
+    margin-bottom: 0;
+}
