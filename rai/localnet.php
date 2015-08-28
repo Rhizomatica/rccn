@@ -10,14 +10,6 @@ print_menu('platform');
 
 <div id="map"></div>
 <div id="outsideWorld"></div>
-<!-- <div id="legend">
-	<strong>Leyenda:</strong>
-	<p><div class="up"></div>En Linea</p>
-	<p><div class="down"></div> Desconectado</p>
-	<p><img src="img/bts.png" alt="BTS"> BTS</p>
-	<p><img src="img/link.png" alt="enlace"> Enlace</p>
-	<p><img src="img/bsc.png" alt="BSC"> BSC</p>
-</div> -->
 
 <table id="legend">
 	<thead>
