@@ -41,7 +41,7 @@ jQuery(document).ready(function($) {
     var map = L.map('map').setView([ 17.066409, -96.729473], 2);
 
     // get json data
-    var network = $.getJSON("js/netmap.json", function(data) {}).fail(function() {
+    var network = $.getJSON("js/localnet.json", function(data) {}).fail(function() {
         console.log("Can't find any devices???");
     });
 
