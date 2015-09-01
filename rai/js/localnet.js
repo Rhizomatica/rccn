@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function(){     
 
     var status = "maybe",
         lats = [],
@@ -22,20 +22,7 @@ jQuery(document).ready(function($) {
             iconSize: [45, 45], // size of the icon
             iconAnchor: [0, 10], // point of the icon which will correspond to marker's location
             popupAnchor: [5, -5] // point from which the popup should open relative to the iconAnchor
-        }),
-
-        // standard things to check
-        standardChecks = {
-            "Servidor": "10.23.0.2",
-            "VOIP": "169.132.196.11",
-            "Google": "8.8.8.8"
-        };
-
-    for (var key in standardChecks) {
-        ip = standardChecks[key];
-
-        pingIt(ip, key);
-    }
+        });
 
     // set up the initial map
     var map = L.map('map').setView([ 17.066409, -96.729473], 2);
@@ -47,8 +34,6 @@ jQuery(document).ready(function($) {
 
     // when done getting json make a map
     network.done(function(net) {
-
-        // do this: http://stackoverflow.com/questions/17277686/leaflet-js-center-the-map-on-a-group-of-markers
 
         // get the tiles from mapBox
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -131,19 +116,6 @@ jQuery(document).ready(function($) {
                 console.log("failaed to ajjjaaxx");
                 $("#outsideWorld").prepend("<h1 class=\"error\">error: gran fracasado en encontrar la red</h1>");
             });
-    }
-
-    function pingIt(ip, key) {
-        $.ajax({
-            method: "POST",
-            url: "ping.php",
-            data: {
-                ip
-            }
-        }).done(function(status) {
-            console.log("key: " + key + " ip: " + ip + " status: " + status);
-            $("#outsideWorld").append('<div class="' + status + '"><p>' + key + '<br/>' + ip + '</p></div>');
-        });
     }
 
 });
