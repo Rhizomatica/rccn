@@ -1,12 +1,12 @@
 <?php
 
-// require_once('modules/access_manager.php');
+require_once('modules/access_manager.php');
 	
-// $access = new AccessManager();
-// $filename = basename($_SERVER['PHP_SELF']);
-// if ($filename != "login.php") {
-// 	$access->checkAuth();
-// }
+$access = new AccessManager();
+$filename = basename($_SERVER['PHP_SELF']);
+if ($filename != "login.php") {
+	$access->checkAuth();
+}
 
 
 $language = $_SESSION['lang'];
