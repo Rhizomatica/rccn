@@ -22,7 +22,18 @@ jQuery(document).ready(function(){
             iconSize: [45, 45], // size of the icon
             iconAnchor: [0, 10], // point of the icon which will correspond to marker's location
             popupAnchor: [5, -5] // point from which the popup should open relative to the iconAnchor
-        });
+        }),
+    // place the legend properly if big window
+    contentHeight = $("#container").height(),
+    legendHeight =$("table#legend").height(),
+    legendOffset = contentHeight-legendHeight-15,
+    windowHeight = $(window).height();
+
+    $(window).on("load resize",function(){
+        if (windowHeight > contentHeight) {
+                 $("#legend").css("top",legendOffset);
+        }
+    });
 
     // set up the initial map
     var map = L.map('map').setView([ 17.066409, -96.729473], 2);
