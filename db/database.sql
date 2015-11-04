@@ -3,7 +3,7 @@ CREATE TABLE meta (
 	key varchar not null,
 	value varchar not null
 );
-INSERT INTO meta(key,value) VALUES ('db_revision','11');
+INSERT INTO meta(key,value) VALUES ('db_revision','12');
 INSERT INTO meta(key,value) VALUES ('hlr_sync', '0');
 
 CREATE TABLE cdr (

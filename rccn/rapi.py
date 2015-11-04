@@ -22,6 +22,7 @@
 
 from corepost import Response, NotFoundException, AlreadyExistsException
 from corepost.web import RESTResource, route, Http 
+from daemonizer import Daemonizer
 from config import *
 
 class SubscriberRESTService:
@@ -268,8 +269,8 @@ class SMSRESTService:
 
     @route('/', Http.POST)
     def receive(self, request, source, destination, charset, coding, text):
-        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s"' % (request.getHost().host, self.path, source,
-        destination, charset, coding))
+        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s" text:"%s"' % (request.getHost().host, self.path, source,
+        destination, charset, coding, text))
         try:
             sms = SMS()
             sms.receive(source, destination, text, charset, coding)
@@ -282,7 +283,7 @@ class SMSRESTService:
 
     @route('/send', Http.POST)
     def send(self, request, source, destination, text):
-        api_log.info('%s - [POST] %s/send Data: source:"%s" destination:"%s"' % (request.getHost().host, self.path, source, destination))
+        api_log.info('%s - [POST] %s/send Data: source:"%s" destination:"%s" text:"%s"' % (request.getHost().host, self.path, source, destination, text))
         try:
             sms = SMS()
             sms.send(source, destination, text)
@@ -491,7 +492,6 @@ class ConfigurationRESTService:
         
         api_log.info(data)
         return data
-
 
 def run_rapi():
     api_log.info('Starting up RCCN API manager')
