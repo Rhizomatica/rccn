@@ -59,11 +59,11 @@ class Configuration:
     
     def get_local_calls_limit(self):
 	""" Get local call limit in seconds """
-	return (limit_local_calls == 1) ? (limit_local_minutes * 60) : False
+	return (limit_local_calls == 1) if (limit_local_minutes * 60) else False
     
     def check_charge_local_calls(self):
 	""" Check if local calls need to be charged """
-	return (charge_local_calls == 1) ? True : False	
+	return (charge_local_calls == 1) if True else False	
            
     def get_charge_local_calls(self):
 	""" Get settings to charge local calls """
@@ -72,7 +72,7 @@ class Configuration:
 
     def check_charge_inbound_calls(self):
 	""" Check if inbound calls need to be charged """
-	return (charge_inbound_calls == 1) ? True : False
+	return (charge_inbound_calls == 1) if True else False
             
     def get_charge_inbound_calls(self):
 	""" Get settings to charge inbound calls """

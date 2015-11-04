@@ -29,7 +29,7 @@ class NumberingException(Exception):
 class Numbering:
     
     def is_number_did(self, destination_number):
-	return (voip_did != "") ? True : False
+	return (voip_did != "") if True else False
 
     def is_number_local(self, destination_number):
         # check if extension if yes add site_prefix
@@ -126,7 +126,7 @@ class Numbering:
             raise NumberingException('RK_DB Error no IP found for site %s' % site)
 
     def get_callerid(self):
-	return (voip_cli != "") ? voip_cli : None
+	return (voip_cli != "") if voip_cli else None
 
     def get_did_subscriber(self, destination_number):
         try:
