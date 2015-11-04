@@ -22,7 +22,6 @@
 
 from corepost import Response, NotFoundException, AlreadyExistsException
 from corepost.web import RESTResource, route, Http 
-from daemonizer import Daemonizer
 from config import *
 
 class SubscriberRESTService:
