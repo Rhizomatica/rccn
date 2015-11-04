@@ -29,7 +29,7 @@ class NumberingException(Exception):
 class Numbering:
     
     def is_number_did(self, destination_number):
-	return (voip_did != "") if True else False
+	return (voip_did == destination_number) if True else False
 
     def is_number_local(self, destination_number):
         # check if extension if yes add site_prefix

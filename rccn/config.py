@@ -126,9 +126,9 @@ def play_announcement_and_hangup_call(session, ann):
     :param ann: Filename of the announcement to be played
     :type ann: str
     """
-    self.session.answer()
-    self.session.execute('playback', '%s' % ann)
-    self.session.hangup()
+    session.answer()
+    session.execute('playback', '%s' % ann)
+    session.hangup()
 
 # initialize DB handler
 db_conn = None
