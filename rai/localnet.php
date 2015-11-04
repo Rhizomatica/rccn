@@ -6,8 +6,6 @@ print_menu('platform');
  $VProxy = exec('grep "voip_proxy" /var/rhizomatica/rccn/config_values.py');
  $VoipProxy = preg_match('/".*?"/', $VProxy, $matches);
  $VoipIP=trim(($matches[0]), '"');
-// $VoipIP = "169.132.196.11"; for testing
-
 ?>
 
 <link rel="stylesheet" href="css/leaflet.css" />
