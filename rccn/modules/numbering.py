@@ -29,22 +29,12 @@ class NumberingException(Exception):
 class Numbering:
     
     def is_number_did(self, destination_number):
-        try:
-            cur = db_conn.cursor()
-            cur.execute("SELECT phonenumber FROM dids WHERE phonenumber=%(number)s", {'number': destination_number})
-            did = cur.fetchone()
-            #log.debug("Value of did var: %s" % did)
-            if did != None:
-                return True
-            else:
-                return False
-        except psycopg2.DatabaseError as e:
-            raise NumberingException('Database error checking DID: %s' % e)
+	return (voip_did != "") ? True : False
 
     def is_number_local(self, destination_number):
-        # check if extension if yes add internal_prefix
+        # check if extension if yes add site_prefix
         if len(destination_number) == 5:
-            destination_number = config['internal_prefix'] + destination_number
+            destination_number = site_prefix + destination_number
 
         try:
             cur = db_conn.cursor()
@@ -53,7 +43,7 @@ class Numbering:
             if dest != None:
                 destn = dest[0]
                 # check if number is local to the site
-                if destn[:6] == config['internal_prefix']:
+                if destn[:6] == site_prefix:
                     return True
             else:
                 return False
@@ -63,7 +53,7 @@ class Numbering:
 
     def is_number_internal(self, destination_number):
         siteprefix = destination_number[:6]
-        if siteprefix == config['internal_prefix']:
+        if siteprefix == site_prefix:
             return False
         sites = riak_client.bucket('sites')
         if sites.get(siteprefix).exists == True:
@@ -136,17 +126,7 @@ class Numbering:
             raise NumberingException('RK_DB Error no IP found for site %s' % site)
 
     def get_callerid(self):
-        try:
-            cur = db_conn.cursor()
-            # to still be decided the logic of dids
-            cur.execute('select callerid from dids,providers where providers.id = dids.provider_id and providers.active = 1 order by dids.id asc limit 1')
-            callerid = cur.fetchone()
-            if callerid != None:
-                return callerid[0]
-            else:
-                return None
-        except psycopg2.DatabaseError as e:
-            raise NumberingException('Database error getting CallerID: %s' % e)
+	return (voip_cli != "") ? voip_cli : None
 
     def get_did_subscriber(self, destination_number):
         try:
@@ -157,19 +137,6 @@ class Numbering:
                 return dest[0]
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error getting subscriber number associated to the DID: %s' % e)
-
-    def get_gateway(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('select provider_name from providers where active = 1')
-            gw = cur.fetchone()
-            if gw != None:
-                return gw[0]
-            else:
-                return None
-        except psycopg2.DatabaseError, e:
-            raise NumberingException('Database error getting the Gateway: %s' % e)
-
 
 if __name__ == '__main__':
 	num = Numbering()

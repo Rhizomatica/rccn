@@ -28,15 +28,19 @@ class Dialplan:
     """
     Logic to assign the call to the right context
     """
-    NOT_CREDIT_ENOUGH = '002_saldo_insuficiente.gsm'
-    WRONG_NUMBER = '007_el_numero_no_es_corecto.gsm'
 
     def __init__(self, session):
-        """ init """
-        self.session = session
+        """  
+	Initialize dialplan and load modules
 
-        self.destination_number = self.session.getVariable(
-            'destination_number')
+	:param session: Freeswitch session handler
+	"""
+        self.session = session
+        
+	# the processing is async we need a flag
+	self.processed = 0
+
+        self.destination_number = self.session.getVariable('destination_number')
         self.calling_number = self.session.getVariable('caller_id_number')
 
         self.subscriber = Subscriber()
@@ -50,17 +54,6 @@ class Dialplan:
                    self.billing, self.configuration]
 
         self.context = Context(session, modules)
-
-    def play_announcement(self, ann):
-        """
-        Play an announcement and hangup call.
-
-        :param ann: Filename of the announcement to be played
-        :type ann: str
-        """
-        self.session.answer()
-        self.session.execute('playback', '%s' % ann)
-        self.session.hangup()
 
     def auth_context(self, mycontext):
         """
@@ -82,30 +75,20 @@ class Dialplan:
                 self.session.setVariable('context', mycontext.upper())
                 log.info('Subscriber is not registered or authorized to call')
                 # subscriber not authorized to call
-                # TODO: register announcement of subscriber
-                # not authorized to call
-                self.play_announcement(self.NOT_CREDIT_ENOUGH)
+                play_announcement_and_hangup_call(self.session, ann_subscriber_is_not_authorized)
         except SubscriberException as e:
             log.error(e)
             # play announcement error
-            # TODO: register announcement of general error
-            self.play_announcement(self.NOT_CREDIT_ENOUGH)
+            play_announcement_and_hangup_call(self.session, ann_general_error)
 
-    def lookup(self):
+    def emergency_check(self):
         """
-        Dialplan processing to route call to the right context
+        Check if the call is for the emergency number
         """
-        # TODO split this monster function.
-
-        # the processing is async we need a flag
-        processed = 0
-
-        # emergency call check
         if emergency_contact != '' and self.destination_number == 'emergency':
-            log.info(
-                    'Emergency call send call to emergency contact %s'
-                    % emergency_contact)
-            processed = 1
+            log.info('Emergency call send call to emergency contact %s' % emergency_contact)
+            self.processed = 1
+    
             # check if emergency_contacts is a list of numbers
             dial_str = ''
             if ',' in emergency_contact:
@@ -113,68 +96,84 @@ class Dialplan:
                 last = emg_numbers[-1]
                 for emg in emg_numbers:
                     if emg == last:
-                        dial_str += 'sofia/internal/sip:'+emg+'@172.16.0.1:5050'
+                        dial_str += 'sofia/internal/sip:'+emg+'@127.0.0.1:5050'
                     else:
-                        dial_str += 'sofia/internal/sip:'+emg+'@172.16.0.1:5050,'
+                        dial_str += 'sofia/internal/sip:'+emg+'@127.0.0.1:5050,'
             else:
-                dial_str = 'sofia/internal/sip:'+emergency_contact+'@172.16.0.1:5050'
+                dial_str = 'sofia/internal/sip:'+emergency_contact+'@127.0.0.1:5050'
             
-            self.session.setVariable('context','EMERGENCY')
-            self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
-            
-        # check if destination number is an incoming call
-        # lookup dest number in DID table.
-        if processed == 0:
-            try:
-                if (self._n.is_number_did(self.destination_number)):
-                    log.info('Called number is a DID')
-                    log.debug('Execute context INBOUND call')
-                    processed = 1
-                    # send call to IVR execute context
-                    self.session.setVariable('inbound_loop', '0')
-                    self.context.inbound()
-            except NumberingException as e:
-                log.error(e)
+                self.session.setVariable('context','EMERGENCY')
+                self.session.execute('bridge', "{absolute_codec_string='PCMA'}"+dial_str)
 
-            # check if calling number or destination number is a roaming subscriber
-            log.info('Check if calling/called number is roaming')
-            try:
-                if (self._n.is_number_roaming(self.calling_number)):
-                    processed = 1
-                    log.info('Calling number %s is roaming' % self.calling_number)
-                    self.context.roaming('caller')
-            except NumberingException as e:
-                log.error(e)
-                # TODO: play message of calling number is not authorized to call
-                self.session.hangup()
+    def inbound_check(self):
+        """
+        Check if the called number is the DID
+        """
+        try:
+            if (self._n.is_number_did(self.destination_number)):
+                log.info('Called number is a DID')
+                log.debug('Execute context INBOUND call')
+                self.processed = 1
+                # send call to IVR execute context
+                self.session.setVariable('inbound_loop', '0')
+                self.context.inbound()
+        except NumberingException as e:
+            log.error(e)
 
-            try:
-                if (self._n.is_number_roaming(self.destination_number)):
-                    processed = 1
-                    log.info(
-                        'Destination number %s is roaming'
-                        % self.destination_number)
-                    self.context.roaming('called')
-            except NumberingException as e:
-                log.error(e)
-                # TODO: play message of destination number
-                # unauthorized to receive call
-                self.session.hangup()
+    def roaming_check(self):
+        # check if calling number or destination number is a roaming subscriber
+        log.info('Check if calling/called number is roaming')
+        try:
+            if (self._n.is_number_roaming(self.calling_number)):
+                self.processed = 1
+                log.info('Calling number %s is roaming' % self.calling_number)
+                self.context.roaming('caller')
+        except NumberingException as e:
+            log.error(e)
+            # roaming number is not authorized to call
+            play_announcement_and_hangup_call(self.session, ann_subscriber_is_not_authorized)
 
+        try:
+            if (self._n.is_number_roaming(self.destination_number)):
+                self.processed = 1
+                log.info('Destination number %s is roaming' % self.destination_number)
+                self.context.roaming('called')
+        except NumberingException as e:
+            log.error(e)
+            # unauthorized to receive call
+            play_announcement_and_hangup_call(self.session, ann_destination_subscriber_not_authorized)
+
+    def international_call_check(self):
+        # prefix with + or 00
+        if (
+            self.destination_number[0] == '+' or (
+            re.search(r'^00', self.destination_number) is not None)
+        ) and self.processed == 0:
+            log.debug('Called number is an international call or national')
+            self.processed = 1
+            log.debug('Called number is an external number send call to OUTBOUND context')
+            self.auth_context('outbound')
+
+    def lookup(self):
+        """
+        Dialplan processing to route call to the right context
+        """
+
+        # emergency call check
+	self.emergency_check()        
+    
+        if self.processed == 0:
+
+            # lookup dest number to see if it's a DID
+            self.inbound_check()
+
+            # roaming check
+            self.roaming_check()
+			
             # check if destination number is an international call.
-            # prefix with + or 00
-            if (
-                self.destination_number[0] == '+' or (
-                    re.search(r'^00', self.destination_number) is not None)
-            ) and processed == 0:
-                log.debug('Called number is an international call or national')
-                processed = 1
-                log.debug(
-                    'Called number is an external number '
-                    'send call to OUTBOUND context')
-                self.auth_context('outbound')
+            self.international_call_check()
 
-        if processed == 0:
+        if self.processed == 0:
             try:
                 log.info('Check if called number is local')
                 dest = self.destination_number
@@ -183,13 +182,12 @@ class Dialplan:
 
                 if is_local_number and is_right_len(dest):
                     log.info('Called number is a local number')
-                    processed = 1
-                    # check if calling number is another site
+                    self.processed = 1
 
+                    # check if calling number is another site
                     callin = self.calling_number
                     is_internal_number = self._n.is_number_internal(callin)
                     if is_internal_number and is_right_len(callin):
-
                         # check if dest number is authorized to receive call
                         # if self.subscriber.is_authorized(
                         # self.calling_number,0):
@@ -199,10 +197,8 @@ class Dialplan:
                                 'Internal call send number to LOCAL context')
                             self.context.local()
                         else:
-                            log.info(
-                                'Destination subscriber is '
-                                'unauthorized to receive calls')
-                            # self.play_announcement(
+                            log.info('Destination subscriber is unauthorized to receive calls')
+                            # play_announcement_and_hangup_call(self.session, 
                             # '002_saldo_insuficiente.gsm')
                             self.session.hangup()
                     else:
@@ -218,7 +214,7 @@ class Dialplan:
                     # check if called number is an extension
                     log.debug('Check if called number is an extension')
                     if self.destination_number in extensions_list:
-                        processed = 1
+                        self.processed = 1
                         log.info(
                             'Called number is an extension, '
                             'execute extension handler')
@@ -242,7 +238,7 @@ class Dialplan:
                                 'Called number is a full number '
                                 'for another site send call to '
                                 'INTERNAL context')
-                            processed = 1
+                            self.processed = 1
                             self.auth_context('internal')
                         else:
                             # the number called must be wrong
@@ -250,7 +246,7 @@ class Dialplan:
                             log.info(
                                 'Wrong number, play announcement of '
                                 'invalid number format')
-                            processed = 1
-                            self.play_announcement(self.WRONG_NUMBER)
+                            self.processed = 1
+                            play_announcement_and_hangup_call(self.session, ann_wrong_number)
             except NumberingException as e:
                 log.error(e)

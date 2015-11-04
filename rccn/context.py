@@ -51,8 +51,7 @@ class Context:
             current_subscriber_balance = Decimal(self.subscriber.get_balance(subscriber_number))
         except SubscriberException as e:
             log.error(e)
-            # play announcement and hangup call
-            # TODO: announcement of general error
+	    play_announcement_and_hangup_call(self.session, ann_general_error)
 
         log.debug('Current subscriber balance: %.2f' % current_subscriber_balance)
         if current_subscriber_balance > Decimal('0.00'):
@@ -69,9 +68,9 @@ class Context:
 
             self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % total_call_duration)
             if total_call_duration > 60:
-                self.session.execute('set', 'execute_on_answer_2=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' % mid_announcement)
+                self.session.execute('set', 'execute_on_answer_2=sched_broadcast +%s playback::%s' % (mid_announcement, ann_credit_is_about_to_finish))
             
-            self.session.execute('set', 'execute_on_answer_3=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' % (total_call_duration - 3))
+            self.session.execute('set', 'execute_on_answer_3=sched_broadcast +%s playback::%s' % ((total_call_duration - 3), ann_credit_finished))
 
             # set correct caller id based on the active provider
             try:
@@ -88,24 +87,18 @@ class Context:
                 self.session.setVariable('effective_caller_id_number', 'Unknown')
                 self.session.setVariable('effective_caller_id_name', 'Unknown')
             try:
-                gw = self.numbering.get_gateway()
-                if gw == None:
-                    log.error('Error in getting the Gateway to use for the call')
+                gw = voip_provider_name
                 log.debug('Use gateway: %s' % gw)
             except NumberingException as e:
                 log.error(e)
                 # playback error and hangup call
-                # TODO: announcement of general error
-                self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
-                self.session.hangup()
+		play_announcement_and_hangup_call(self.session, ann_general_error)
                 
             self.session.execute('bridge', "{absolute_codec_string='G729',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
         else:
             log.debug('Subscriber doesn\'t have enough balance to make a call')
             # play announcement not enough credit and hangup call
-            self.session.answer()
-            self.session.execute('playback', '002_saldo_insuficiente.gsm')
-            self.session.hangup()
+	    play_announcement_and_hangup_call(self.session, ann_not_enough_credit)
 
     def local(self):
         """ Local context. Calls within the same BSC """
@@ -117,26 +110,19 @@ class Context:
             self.session.setVariable('context', 'LOCAL')
        
         # check if local call has to be billed
-        try:
-            if self.configuration.check_charge_local_calls() == 1:
-                log.info('LOCAL call will be billed')
-                self.session.setVariable('billing', '1')
-        except ConfigurationException as e:
-                log.error(e)
+        if self.configuration.check_charge_local_calls() == True:
+           log.info('LOCAL call will be billed')
+           self.session.setVariable('billing', '1')
  
         # check if the call duration has to be limited
-        try:
-            limit = self.configuration.get_local_calls_limit()
-            if limit != False:
-                if limit[0] == 1:
-                    log.info('Limit call duration to: %s seconds' % limit[1])
-                    self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
-        except ConfigurationException as e:
-            log.error(e)
+        limit = self.configuration.get_local_calls_limit()
+        if limit != False:
+           log.info('Limit call duration to: %s seconds' % limit)
+           self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit)
                         
         # check subscriber balance if charge local call is configured
         log.info('Send call to LCR')
-        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+        self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
         # in case of no answer send call to voicemail
         #log.info('No answer, send call to voicemail')
         #self.session.execute('set','default_language=en')
@@ -159,27 +145,26 @@ class Context:
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
                     log.info('Send call to internal subscriber %s' % subscriber_number)
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+subscriber_number+'@127.0.0.1:5050')
                 else:
                     log.info('Subscriber %s doesn\'t exists or is not authorized' % subscriber_number)
             except SubscriberException as e:
                 log.error(e)
                 # internal error
-                # TODO: announcement of general error
-                self.session.execute('playback','007_el_numero_no_es_corecto.gsm')
+		play_announcement_and_hangup_call(self.session, ann_general_error)
         else:
             # do not answer the call if the call has already being answered
             if self.session.getVariable('inbound_loop') != 1:
                 self.session.answer()
             log.debug('Playback welcome message')
             log.debug('Collect DTMF to call internal number')
-            dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm", "007_el_numero_no_es_corecto.gsm", "\\d+")
+            dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", ann_welcome, "007_el_numero_no_es_corecto.gsm", "\\d+")
             log.debug('Collecting digits: %s' % dest_num)
 
             # check if destination subscriber is roaming
             try:
                 if len(dest_num) == 5:
-                    self.destination_number = config['internal_prefix']+dest_num
+                    self.destination_number = site_prefix+dest_num
                 elif len(dest_num) == 11:
                     self.destination_number = dest_num
                 if self.numbering.is_number_roaming(self.destination_number):
@@ -187,37 +172,33 @@ class Context:
                     self.roaming('inbound')
             except NumberingException as e:
                 log.error(e)
-                # TODO: play message of destination number unauthorized to receive call
-                self.session.hangup()
+                # play message of destination number unauthorized to receive call
+		play_announcement_and_hangup_call(self.session, ann_destination_subscriber_not_authorized)
 
             try:
                 if self.subscriber.is_authorized(dest_num, 1) and (len(dest_num) == 11 or len(dest_num) == 5):
                     # check if the inbound call has to be billed
-                    try:
-                        if self.configuration.check_charge_inbound_calls() == 1:
-                            log.info('INBOUND call will be billed')
-                            self.session.setVariable('billing', '1')
-                    except ConfigurationException as e:
-                        log.error(e)
+                    if self.configuration.check_charge_inbound_calls() == True:
+                       log.info('INBOUND call will be billed')
+                       self.session.setVariable('billing', '1')
                     
                     # if number is extension add internal prefix
                     if len(dest_num) == 5:
-                        dest_num = config['internal_prefix'] + dest_num
+                        dest_num = site_prefix + dest_num
                     log.info('Send call to internal subscriber %s' % dest_num)
                     self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
                     self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
     
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+dest_num+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+dest_num+'@127.0.0.1:5050')
                 else:
                     log.info('Subscriber %s doesn\'t exists' % dest_num)
-                    self.session.execute('playback','007_el_numero_no_es_corecto.gsm')
+                    self.session.execute('playback', ann_wrong_number)
                     self.session.setVariable('inbound_loop', '1')
                     #self.inbound()
             except SubscriberException as e:
+                # general error
                 log.error(e)
-                # general error playback busy tone
-                self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
-                self.session.hangup()
+		play_announcement_and_hangup_call(self.session, ann_general_error)
 
     def internal(self):
         """ Internal context. Calls for another site routed using internal VPN """
@@ -228,7 +209,6 @@ class Context:
             self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
         except NumberingException as e:
             log.error(e)
-
 
     def roaming(self, roaming_subject):
         """ Roaming context. Calls from and to subscribers that are currently roaming """
@@ -243,9 +223,9 @@ class Context:
                     log.info('Called number is roaming send call to current_bts: %s' % site_ip)
                     self.session.setVariable('context','ROAMING_INTERNAL')
                     # if current_bts is the same as local site, send the call to the local LCR
-                    if site_ip == config['local_ip']:
+                    if site_ip == vpn_ip_address:
                         log.info('Currentbts same as local site send call to LCR')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                        self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
                     else:
                         self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
                 except NumberingException as e:
@@ -257,22 +237,17 @@ class Context:
 
                     if self.subscriber.is_authorized(self.destination_number, 0):
                         # check if the call duration has to be limited
-                        try:
-                            limit = self.configuration.get_local_calls_limit()
-                            if limit != False:
-                                if limit[0] == 1:
-                                    log.info('Limit call duration to: %s seconds' % limit[1])
-                                    self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
-                        except ConfigurationException as e:
-                            log.error(e)
+                        limit = self.configuration.get_local_calls_limit()
+                        if limit != False:
+                           log.info('Limit call duration to: %s seconds' % limit)
+                           self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit)
         
                         log.info('Send call to LCR')
                         self.session.setVariable('context','ROAMING_LOCAL')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                        self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
                     else:
                         # local destination subscriber unauthorized
-                        # TODO: play message destination unauthorized to receive call
-                        self.session.hangup()
+			play_announcement_and_hangup_call(self.session, ann_destination_subscriber_unauthorized)
                 else:
                     # number is not local, check if number is internal
                     if self.numbering.is_number_internal(self.destination_number) and len(self.destination_number) == 11:
@@ -291,7 +266,7 @@ class Context:
                             calling = self.session.getVariable('caller_id_number')
                             site_ip = self.numbering.get_site_ip(calling)
                             # check if home_bts is same as local site, if yes send call to local context outbound
-                            if site_ip == config['local_ip']:
+                            if site_ip == vpn_ip_address:
                                 log.info('Caller is roaming and calling outside, send call to voip provider')
                                 self.outbound()
                             else:
@@ -300,16 +275,16 @@ class Context:
                                 self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
                         else:
                             # called number must be wrong, hangup call
-                            self.session.hangup()
+			    play_announcement_and_hangup_call(self.session, ann_wrong_number)
         elif roaming_subject == 'called':
             # the destination number is roaming send call to current_bts of subscriber
             try:
                 site_ip = self.numbering.get_current_bts(self.destination_number)
                 # if current bts is local site send call to local LCR
-                if site_ip == config['local_ip']:
+                if site_ip == vpn_ip_address:
                     log.info('Called number is roaming on our site send call to LCR')
                     self.session.setVariable('context','ROAMING_LOCAL')
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='PCMA'}sofia/internal/sip:"+str(self.destination_number)+'@127.0.0.1:5050')
                 else:
                     log.info('Called number is roaming send call to current_bts: %s' % site_ip)
                     self.session.setVariable('context','ROAMING_INTERNAL')
@@ -319,7 +294,7 @@ class Context:
         elif roaming_subject == 'inbound':
                 try:
                     site_ip = self.numbering.get_current_bts(self.destination_number)
-                    if site_ip != config['local_ip']:
+                    if site_ip != vpn_ip_address:
                         log.info('INBOUND Called number is roaming send call to current_bts: %s' % site_ip)
                         self.session.setVariable('context','ROAMING_INBOUND')
                         self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')

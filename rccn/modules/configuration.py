@@ -28,28 +28,24 @@ class ConfigurationException(Exception):
     pass
 
 class Configuration:
+    """ Configuration module """
 
     def get_site(self):
-        try:
-            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute('SELECT * from site')
-            site_conf = cur.fetchone()
-            if site_conf != None:
-                return site_conf
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error getting site info: %s' % e)
+	""" Get site information """
+	return {'site_name': site_name, 'postcode': postcode, 'pbxcode': pbxcode,
+		'network_name': network_name, 'ip_address': vpn_ip_address}
 
     def get_site_config(self):
-        try:
-            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute('SELECT * from configuration')
-            site_conf = cur.fetchone()
-            if site_conf != None:
-                return site_conf
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error getting site config: %s' % e)
+	""" Get site settings """
+	return {'limit_local_calls': limit_local_calls, 'limit_local_minutes': limit_local_minutes,
+		'charge_local_calls': charge_local_calls, 'charge_local_rate': charge_local_rate,
+		'charge_local_rate_type': charge_local_rate_type, 'charge_internal_calls': charge_internal_calls,
+		'charge_internal_rate': charge_internal_rate, 'charge_internal_rate_type': charge_internal_rate_type,
+		'charge_inbound_calls': charge_inbound_calls, 'charge_inbound_rate': charge_inbound_rate,
+		'charge_inbound_rate_type': charge_inbound_rate_type}
     
     def get_locations(self):
+	""" Get list of locations """
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM locations')
@@ -62,62 +58,23 @@ class Configuration:
             raise ConfigurationException('Database error getting locations: %s' % e)
     
     def get_local_calls_limit(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT limit_local_calls,limit_local_minutes FROM configuration')
-            limit = cur.fetchone()
-            if limit != None:
-                return (limit[0], limit[1] * 60)
-            else:
-                return False
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error checking for local calls limit: %s' % e)
-
+	""" Get local call limit in seconds """
+	return (limit_local_calls == 1) ? (limit_local_minutes * 60) : False
     
     def check_charge_local_calls(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT charge_local_calls FROM configuration')
-            charge = cur.fetchone()
-            if charge != None:
-                return charge[0]
-            else:
-                return False
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error checking for charge local calls: %s' % e)
+	""" Check if local calls need to be charged """
+	return (charge_local_calls == 1) ? True : False	
            
     def get_charge_local_calls(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT charge_local_rate,charge_local_rate_type FROM configuration')
-            charge = cur.fetchone()
-            if charge != None:
-                return charge
-            else:
-                raise ConfigurationException('No configuration for for charging local calls')
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error getting info charging local calls: %s' % e)
+	""" Get settings to charge local calls """
+	return {'charge_local_rate': charge_local_rate, 
+        	'charge_local_rate_type': charge}
 
     def check_charge_inbound_calls(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT charge_inbound_calls FROM configuration')
-            charge = cur.fetchone()
-            if charge != None:
-                return charge[0]
-            else:
-                return False
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error checking for charge inbound calls: %s' % e)
+	""" Check if inbound calls need to be charged """
+	return (charge_inbound_calls == 1) ? True : False
             
     def get_charge_inbound_calls(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT charge_inbound_rate,charge_inbound_rate_type FROM configuration')
-            charge = cur.fetchone()
-            if charge != None:
-                return charge
-            else:
-                raise ConfigurationException('No configuration found for charging inbound calls')
-        except psycopg2.DatabaseError as e:
-            raise ConfigurationException('Database error getting info for charging inbound calls: %s' % e)
+	""" Get settings to charge inbound calls """
+	return {'charge_inbound_rate': charge_inbound_rate, 
+		'charge_inbound_rate_type': charge_inbound_rate_type}

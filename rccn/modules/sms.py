@@ -59,7 +59,7 @@ class SMS:
         self.destination = destination
         self.text = text
 
-        sms_log.info('Received SMS: %s %s' % (source, destination))
+        sms_log.info('Received SMS: %s %s %s' % (source, destination, text))
         # SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
         try:
@@ -76,7 +76,7 @@ class SMS:
             except NumberingException as e:
                 sms_log.info('Sender unauthorized send notification message')
                 self.context = 'SMS_UNAUTH'
-                self.send(config['smsc'], source, config['sms_source_unauthorized'])
+                self.send(smsc, source, sms_sender_unauthorized)
                 return
 
             try:
@@ -87,7 +87,7 @@ class SMS:
             except NumberingException as e:
                 sms_log.info('Destination unauthorized send notification message')
                 self.context = 'SMS_UNAUTH'
-                self.send(config['smsc'], source, config['sms_destination_unauthorized'])
+                self.send(smsc, source, sms_destination_unauthorized)
                 return
 
             try:
@@ -105,7 +105,7 @@ class SMS:
             if not source_authorized and not self.numbering.is_number_internal(source):
                 sms_log.info('Sender unauthorized send notification message')
                 self.context = 'SMS_UNAUTH'
-                self.send(config['smsc'], source, config['sms_source_unauthorized'])
+                self.send(smsc, source, sms_sender_unauthorized)
                 return
 
             if self.numbering.is_number_local(destination):
@@ -138,10 +138,10 @@ class SMS:
                                 self.context = 'SMS_UNAUTH'
                                 if not source_authorized:
                                     sms_log.info('Sender unauthorized send notification message')
-                                    self.send(config['smsc'], source, config['sms_source_unauthorized'])
+                                    self.send(smsc, source, sms_sender_unauthorized)
                                 else:
                                     sms_log.info('Destination unauthorized inform sender with a notification message')
-                                    self.send(config['smsc'], source, config['sms_destination_unauthorized'])
+                                    self.send(smsc, source, sms_destination_unauthorized)
 
                 except SubscriberException as e:
                     raise SMSException('Receive SMS error: %s' % e)
@@ -175,11 +175,11 @@ class SMS:
         except NumberingException as e:
             raise SMSException('Receive SMS Error: %s' % e)
     
-    def send(self, source, destination, text, server=config['local_ip']):
+    def send(self, source, destination, text, server=vpn_ip_address):
         enc_text = urllib.urlencode({'text': text })
-        if server == config['local_ip']:
+        if server == vpn_ip_address:
             try:
-                sms_log.info('Send SMS: %s %s' % (source, destination))
+                sms_log.info('Send SMS: %s %s %s' % (source, destination, text))
                 res = urllib.urlopen(
                     "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                     % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
@@ -191,7 +191,7 @@ class SMS:
                 raise SMSException('Error connecting to Kannel to send SMS')
         else:
             try:
-                sms_log.info('Send SMS to %s: %s %s' % (server, source, destination))
+                sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
                 values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text }
                 data = urllib.urlencode(values)
                 res = urllib.urlopen('http://%s:8085/sms' % server, data).read()
@@ -214,7 +214,7 @@ class SMS:
                 try:
                     current_bts = self.numbering.get_current_bts(self.destination)
                     sms_log.info('Destination number is roaming send SMS to current_bts: %s' % current_bts)
-                    if current_bts == config['local_ip']:
+                    if current_bts == vpn_ip_address:
                         log.info('Current bts same as local site send call to local Kannel')
                         self.context = 'SMS_ROAMING_LOCAL'
                         self.send(self.source, self.destination, self.text)
@@ -236,7 +236,7 @@ class SMS:
                     else:
                         # destination cannot receive SMS inform source
                         self.context = 'SMS_ROAMING_UNAUTH'
-                        self.receive(config['smsc'], source, config['sms_destination_unauthorized'], self.charset, self.coding)
+                        self.receive(smsc, source, sms_destination_unauthorized, self.charset, self.coding)
                 else:
                     # number is not local check if number is internal
                     if self.numbering.is_number_internal(self.destination) and len(self.destination) == 11:
@@ -253,7 +253,7 @@ class SMS:
             # the destination is roaming send call to current_bts
             try:
                 current_bts = self.numbering.get_current_bts(self.destination)
-                if current_bts == config['local_ip']:
+                if current_bts == vpn_ip_address:
                     sms_log.info('Destination is roaming on our site send SMS to local kannel')
                     self.context = 'SMS_ROAMING_LOCAL'
                     self.send(self.source, self.destination, self.text)
@@ -281,7 +281,7 @@ class SMS:
         appstring = 'OpenBSC'
         appport = 4242
         vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
-        cmd = 'subscriber extension %s sms sender extension %s send %s' % (num, config['smsc'], text)
+        cmd = 'subscriber extension %s sms sender extension %s send %s' % (num, smsc, text)
         vty.command(cmd)
 
     def broadcast_to_all_subscribers(self, text, btype):
@@ -296,7 +296,7 @@ class SMS:
             subscribers_list = sub.get_all_5digits()
 
         for mysub in subscribers_list:
-            self.send(config['smsc'], mysub[1], text)
+            self.send(smsc, mysub[1], text)
             sms_log.debug('Broadcast message sent to %s' % mysub[1])
             time.sleep(1)
 

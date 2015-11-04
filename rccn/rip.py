@@ -17,13 +17,12 @@
 #
 ############################################################################
 """
-rhizomatica inactive purger
+Rhizomatica Inactive Purger
 """
 
 from config import *
 
 DAYS_INACTIVE = 7
-
 
 def purge_inactive_subscribers():
     """
@@ -40,12 +39,10 @@ def purge_inactive_subscribers():
 
     for msisdn in inactive:
         try:
-            if msisdn != 10000:
-                sub.purge(msisdn)
-                purger_log.info("Subscriber %s purged" % msisdn)
+            sub.purge(msisdn)
+            purger_log.info("Subscriber %s purged" % msisdn)
         except SubscriberException as e:
             purger_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
-
 
 if __name__ == '__main__':
     purge_inactive_subscribers()

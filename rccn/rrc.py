@@ -18,7 +18,7 @@
 #
 ############################################################################
 """
-rhizomatica roaming checker
+Rhizomatica Roaming Checker
 """
 
 from config import *
@@ -75,7 +75,6 @@ def update_list(subscribers, welcome=False):
                     #            roaming_log.error('Updating LAC on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
                     #except IOError:
                     #    roaming_log.error('Error connect to site %s to update LAC for %s' % server)
-
                 else:
                     # update only location and not the timestamp in rk_hlr
                     sub.update_location(imsi, number, False)

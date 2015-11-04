@@ -26,7 +26,6 @@ import json
 import os
 import sys
 import subprocess
-from decimal import Decimal
 
 import psycopg2
 import psycopg2.extras
@@ -81,105 +80,6 @@ riak_add_cmd = (
 os.system(riak_add_cmd)
 print 'Done'
 
-print('Adding Site Info to PGSQL... ').ljust(40),
-try:
-    cur = db_conn.cursor()
-    cur.execute(
-        "INSERT INTO site"
-        "(site_name,postcode,pbxcode,network_name,ip_address) "
-        "VALUES(%(site_name)s,%(postcode)s,"
-        "%(pbxcode)s,%(network_name)s,%(ip_address)s)",
-        {'site_name': site_name,
-         'postcode': postcode,
-         'pbxcode': pbxcode,
-         'network_name': network_name,
-         'ip_address': vpn_ip_address})
-    db_conn.commit()
-except psycopg2.DatabaseError as e:
-    print 'Database error insert site: %s' % e
-    sys.exit(1)
-print 'Done'
-
-print('Adding VoIP configuration to PGSQL... ').ljust(40),
-try:
-    cur = db_conn.cursor()
-    cur.execute(
-        "INSERT INTO providers"
-        "(provider_name,username,fromuser,password,proxy,active) "
-        "VALUES("
-        "%(provider_name)s,%(username)s,%(fromuser)s,"
-        "%(password)s,%(proxy)s,1)",
-        {'provider_name': voip_provider_name,
-         'username': voip_username,
-         'fromuser': voip_fromuser,
-         'password': voip_password,
-         'proxy': voip_proxy})
-    db_conn.commit()
-except psycopg2.DatabaseError as e:
-    print 'Database error adding VoIP provider configuration : %s' % e
-    sys.exit(1)
-try:
-    cur = db_conn.cursor()
-    cur.execute(
-        'INSERT INTO dids(provider_id,phonenumber,callerid) '
-        'VALUES(%(provider_id)s,%(phonenumber)s,%(callerid)s)',
-        {'provider_id': 1,
-         'phonenumber': voip_did,
-         'callerid': voip_cli,
-         'password': voip_password,
-         'proxy': voip_proxy})
-    db_conn.commit()
-except psycopg2.DatabaseError as e:
-    print 'Database error adding VoIP DID configuration: %s' % e
-    sys.exit(1)
-print 'Done'
-
-
-def to_decimal(thing):
-    """
-    Convenience function that extracts decimal from a string.
-    If the passed thing evaluates to False (ie, it is an empty string)
-    it returns None. Otherwise it returns a decimal number.
-    """
-    if not thing:
-        return None
-    return Decimal(str(thing))
-
-print('Adding Site configuration to PGSQL... ').ljust(40),
-try:
-    cur = db_conn.cursor()
-    sql = (
-        "INSERT INTO configuration "
-        "VALUES(%(limit_local_calls)s,%(limit_local_minutes)s,"
-        "%(charge_local_calls)s,%(charge_local_rate)s,"
-        "%(charge_local_rate_type)s,%(charge_internal_calls)s,"
-        "%(charge_internal_rate)s,%(charge_internal_rate_type)s,"
-        "%(charge_inbound_calls)s,%(charge_inbound_rate)s,"
-        "%(charge_inbound_rate_type)s,%(smsc_shortcode)s,"
-        "%(sms_sender_unauthorized)s,%(sms_destination_unauthorized)s)"
-    )
-    cur.execute(
-        sql,
-        {'limit_local_calls': limit_local_calls,
-         'limit_local_minutes': limit_local_minutes,
-         'charge_local_calls': charge_local_calls,
-         'charge_local_rate': to_decimal(charge_local_rate),
-         'charge_local_rate_type': charge_local_rate_type,
-         'charge_internal_calls': charge_internal_calls,
-         'charge_internal_rate': to_decimal(charge_internal_rate),
-         'charge_internal_rate_type': charge_internal_rate_type,
-         'charge_inbound_calls': charge_inbound_calls,
-         'charge_inbound_rate': to_decimal(charge_inbound_rate),
-         'charge_inbound_rate_type': charge_inbound_rate_type,
-         'smsc_shortcode': smsc_shortcode,
-         'sms_sender_unauthorized': sms_sender_unauthorized,
-         'sms_destination_unauthorized': sms_destination_unauthorized})
-    db_conn.commit()
-except psycopg2.DatabaseError as e:
-    print 'Database error adding Site configuration: %s' % e
-    sys.exit(1)
-print 'Done'
-
 print('Creating SMSC shortcode on HLR').ljust(40),
 try:
     sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -195,7 +95,6 @@ except sqlite3.Error as e:
     print 'Database error adding SMSC shortcode: %s' % e
     sys.exit(1)
 print 'Done'
-
 
 print('Creating RAI admin password... ').ljust(40),
 rai_pwd = subprocess.check_output(

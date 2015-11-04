@@ -76,7 +76,7 @@ class Subscription:
                 subscribers_list = cur.fetchall()
                 for mysub in subscribers_list:
                     self.logger.debug('Send SMS that account is deactivated to %s' % mysub[0])
-                    sms.send(config['smsc'],mysub[0], msg)
+                    sms.send(smsc,mysub[0], msg)
                     # disable subscriber
                     try:
                         sub.authorized(mysub[0], 0)
@@ -100,7 +100,7 @@ class Subscription:
 
         for mysub in subscribers_list:
             self.logger.debug("Send sms to %s %s" % (mysub[1], msg))
-            sms.send(config['smsc'],mysub[1], msg)
+            sms.send(smsc,mysub[1], msg)
 
     def send_subscription_fee_reminder(self, msg):
         try:
@@ -112,4 +112,4 @@ class Subscription:
         
         for mysub in subscribers_list:
             self.logger.debug("Send sms to %s %s" % (mysub[0], msg))
-            sms.send(config['smsc'],mysub[0], msg)
+            sms.send(smsc,mysub[0], msg)

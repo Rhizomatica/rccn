@@ -117,34 +117,34 @@ for f in files:
     ext_name = file_name.split('_')[1]
     extensions_list.append(ext_name)
 
+def play_announcement_and_hangup_call(session, ann):
+    """
+    Play an announcement and hangup call.
+        
+    :param session: FS session
+    :type session: object
+    :param ann: Filename of the announcement to be played
+    :type ann: str
+    """
+    self.session.answer()
+    self.session.execute('playback', '%s' % ann)
+    self.session.hangup()
 
 # initialize DB handler
 db_conn = None
 config = {}
 try:
     db_conn = psycopg2.connect(database=pgsql_db, user=pgsql_user, password=pgsql_pwd, host=pgsql_host)
-    cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute('SELECT * from site')
-    site_conf = cur.fetchone()
-
-    config['site_name'] = site_conf['site_name']
-    config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
-    config['local_ip'] = site_conf['ip_address']
-
-    # load SMS shortcode into global config
-    cur.execute('SELECT smsc_shortcode,sms_sender_unauthorized,sms_destination_unauthorized FROM configuration')
-    smsc = cur.fetchone()
-    config['smsc'] = smsc[0]
-    config['sms_source_unauthorized'] = smsc[1]
-    config['sms_destination_unauthorized'] = smsc[2]
 except psycopg2.DatabaseError as e:
     log.error('Database connection error %s' % e)
+
+site_prefix = postcode+pbxcode
 
 # Connect to riak
 #riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
 # use protocol buffers
 try:
-    riak_client = riak.RiakClient(host=vpn_ip_address, pb_port=8087, protocol='pbc', RETRY_COUNT=1)
+    riak_client = riak.RiakClient(pb_port=8087, protocol='pbc', RETRY_COUNT=1)
 except socket.error(111, 'Connection refused'):
     log.error('RK_HLR error: unable to connect')
 

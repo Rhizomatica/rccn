@@ -154,9 +154,9 @@ class Billing:
                 bill_log.info('Call B-leg was connected. Bill subscriber %s' % subscriber)
                 try:
                     charge_info = configuration.get_charge_inbound_calls()
-                    if charge_info[1] == 'call':
-                        bill_log.info('Charge type: per call, Cost: %s' % charge_info[0])
-                        call_cost = charge_info[0]
+                    if charge_info['charge_local_rate_type'] == 'call':
+                        bill_log.info('Charge type: per call, Cost: %s' % charge_info['charge_local_rate'])
+                        call_cost = charge_info['charge_local_rate']
                         try:
                             sub = Subscriber()
                             previous_balance = sub.get_balance(subscriber)
@@ -166,10 +166,10 @@ class Billing:
                             bill_log.info('Billing %s completed successfully' % subscriber)
                         except SubscriberException as e:
                             bill_log.error('Error during billing the subscriber: %s' % e)
-                    elif charge_info[1] == 'min':
-                        bill_log.info('Charge type rate per min, cost per min: %s' % charge_info[0])
+                    elif charge_info['charge_local_rate_type'] == 'min':
+                        bill_log.info('Charge type rate per min, cost per min: %s' % charge_info['charge_local_rate'])
                         # BUG: Cannot get b-leg billsec from FS. Use the billsec of a-leg instead
-                        call_cost = self.get_call_cost(duration, charge_info[0])
+                        call_cost = self.get_call_cost(duration, charge_info['charge_local_rate'])
                         bill_log.info('Call duration %s sec Call cost: %s' % (duration, call_cost))
                         try:
                             sub = Subscriber()

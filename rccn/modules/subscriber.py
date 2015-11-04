@@ -8,7 +8,7 @@
 # it under the terms of the GNU Affero Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-#
+# 
 # RCCN is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -32,7 +32,7 @@ class Subscriber:
     def get_balance(self, subscriber_number):
         # check if extension if yes add internal_prefix
         if len(subscriber_number) == 5:
-            subscriber_number = config['internal_prefix']+subscriber_number
+            subscriber_number = site_prefix+subscriber_number
 
         try:
             cur = db_conn.cursor()
@@ -48,7 +48,7 @@ class Subscriber:
     def set_balance(self, subscriber_number, balance):
         # check if extension if yes add internal_prefix
         if len(subscriber_number) == 5:
-            subscriber_number = config['internal_prefix']+subscriber_number
+            subscriber_number = site_prefix+subscriber_number
         try:
             cur = db_conn.cursor()
             cur.execute("UPDATE subscribers SET balance=%(balance)s WHERE msisdn=%(number)s", {'balance': Decimal(str(balance)), 'number': subscriber_number})
@@ -62,11 +62,11 @@ class Subscriber:
         # auth type 1 check subscriber with checking extension
         try:
             cur = db_conn.cursor()
-
+            
             if auth_type == 1:
                 # check if extension if yes add internal_prefix used to find the subscriber by the extension
                 if len(subscriber_number) == 5:
-                    subscriber_number = config['internal_prefix']+subscriber_number
+                    subscriber_number = site_prefix+subscriber_number
 
             cur.execute("SELECT msisdn FROM subscribers WHERE msisdn=%(number)s AND authorized=1", {'number': subscriber_number})
             sub = cur.fetchone()
@@ -104,9 +104,6 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-	except TypeError as e:
-	    sq_hlr.close()
-            raise SubscriberException('SQ_HLR error: number not found')
 
 
     def get_all(self):
@@ -149,7 +146,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select id, extension from subscriber where length(extension) = 5 AND extension != ?", [(config['smsc'])])
+            sq_hlr_cursor.execute("select id, extension from subscriber where length(extension) = 5 AND extension != ?", [(smsc)])
             extensions = sq_hlr_cursor.fetchall()
             if extensions == []:
                 raise SubscriberException('No extensions found')
@@ -159,13 +156,13 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-
+ 
 
     def get_all_connected(self):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension from subscriber where extension like ? and lac > 0", [(config['internal_prefix']+'%')])
+            sq_hlr_cursor.execute("select extension from subscriber where extension like ? and lac > 0", [(site_prefix+'%')])
             connected = sq_hlr_cursor.fetchall()
             if connected == []:
                 raise SubscriberException('No connected subscribers found')
@@ -194,7 +191,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension,imsi from subscriber where length(extension) = 11 and extension not like '%s%%' and lac > 0" % config['internal_prefix'])
+            sq_hlr_cursor.execute("select extension,imsi from subscriber where length(extension) = 11 and extension not like '%s%%' and lac > 0" % site_prefix)
             foreign = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return foreign
@@ -206,7 +203,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension not like \"%(prefix)s%%\") and extension != %(smsc)s and updated < date('now', '-%(days)s days')" % {'days': days, 'smsc': config['smsc'], 'prefix': config['internal_prefix']})
+            sq_hlr_cursor.execute("select extension from subscriber where (length(extension) = 5 or extension not like \"%(prefix)s%%\") and extension != %(smsc)s and updated < date('now', '-%(days)s days')" % {'days': days, 'smsc': smsc, 'prefix': site_prefix})
             inactive = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return inactive
@@ -219,7 +216,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension from subscriber where length(extension) = 11 and extension not like '%s%%' and lac = 0" % config['internal_prefix'])
+            sq_hlr_cursor.execute("select extension from subscriber where length(extension) = 11 and extension not like '%s%%' and lac = 0" % site_prefix)
             inactive = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return inactive
@@ -231,25 +228,21 @@ class Subscriber:
         try:
             results = riak_client.add('hlr').map(
                 """
-            function(value, keyData, arg) {
-                if (value.values[0].metadata["X-Riak-Deleted"] === undefined) {
-                    var data = Riak.mapValuesJson(value)[0];
-                    if ((data.home_bts == "%s") && (data.current_bts != data.home_bts)) {
-                        return [value.key];
-                    } else {
-                        return [];
-                    }
-                } else {
-                    return [];
+                function(value, keyData, arg) {
+                     var data = Riak.mapValuesJson(value)[0];
+                     if ((data.home_bts == "%s") &&
+                         (data.current_bts != data.home_bts))
+                       return [value.key];
+                     else
+                       return [];
                 }
-            }
-                """ % config['local_ip']
-                ).run(timeout=600000)
+                """ % vpn_ip_address
+                ).run()
             if not results:
                 return []
             return results
         except riak.RiakError as e:
-            raise SubscriberException('RK_HLR error: %s' % e)
+            raise SubscriberException('RK_HLR error: %s' % e)            
         except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
@@ -338,34 +331,24 @@ class Subscriber:
    	else:
             imsi = self._get_imsi(msisdn)
 
-	subscriber_number = config['internal_prefix'] + msisdn
+        subscriber_number = site_prefix + msisdn
         # check if subscriber already exists
         if self._check_subscriber_exists(msisdn):
-            try:
-                # get a new extension
-                msisdn = self._get_new_msisdn(msisdn, name)
-                subscriber_number = config['internal_prefix'] + msisdn
-                self._provision_in_database(subscriber_number, name, balance, location)
-            except SubscriberException as e:
-                # revert back the change on SQ_HLR
-                self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
-                raise SubscriberException('Error provisioning new number %s, please try again. ERROR: %s' % (msisdn, str(e)))
+            # get a new extension
+            msisdn = self._get_new_msisdn(msisdn, name)
+            subscriber_number = site_prefix + msisdn
         else:
-            try:
-                self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
-                self._provision_in_database(subscriber_number, name, balance, location)
-            except SubscriberException as e:
-                # revert back the change on SQ_HLR
-                self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
-                raise SubscriberException('Error provisioning the number %s, please try again. ERROR: %s' % (msisdn, str(e)))
-                
+            self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
+    
+        self._provision_in_database(subscriber_number, name, balance, location)
+        #self._provision_in_distributed_hlr(imsi, subscriber_number)
         return msisdn
 
     def _check_subscriber_exists(self, msisdn):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=?', [(config['internal_prefix'] + msisdn)])
+            sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=?', [(site_prefix + msisdn)])
             entry = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             if len(entry) <= 0:
@@ -384,14 +367,11 @@ class Subscriber:
                 newexti = int(msisdn) + 1
                 newext = str(newexti)
                 if not self._check_subscriber_exists(newext):
-                    try:
-                        self._authorize_subscriber_in_local_hlr(msisdn, config['internal_prefix'] + newext, name)
-                    except:
-                        raise SubscriberException('SQ_HLR error adding new extension %s to the db' % newext)
+                    self._authorize_subscriber_in_local_hlr(msisdn, site_prefix + newext, name)
                     return newext
         except:
             raise SubscriberException('Error in getting new msisdn for existing subscriber')
-
+            
 
     def update(self, msisdn, name, number):
         imsi = self._get_imsi(msisdn)
@@ -402,14 +382,14 @@ class Subscriber:
         try:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
-            subscriber.data['current_bts'] = config['local_ip']
+            subscriber.data['current_bts'] = vpn_ip_address
             if ts_update:
                 now = int(time.time())
                 subscriber.data['updated'] = now
                 subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])])
             subscriber.store()
-
-            if ts_update:
+    
+            if ts_update:    
                 self._update_location_pghlr(subscriber)
 
         except riak.RiakError as e:
@@ -425,7 +405,7 @@ class Subscriber:
             update_date = datetime.datetime.fromtimestamp(subscriber.data['updated'])
             cur.execute('UPDATE hlr SET msisdn=%(msisdn)s, home_bts=%(home_bts)s, current_bts=%(current_bts)s, '
                         'authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
-            {'msisdn': subscriber.data['msisdn'], 'home_bts': subscriber.data['home_bts'], 'current_bts': subscriber.data['current_bts'],
+            {'msisdn': subscriber.data['msisdn'], 'home_bts': subscriber.data['home_bts'], 'current_bts': subscriber.data['current_bts'], 
             'authorized': subscriber.data['authorized'], 'updated': update_date})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
@@ -433,27 +413,28 @@ class Subscriber:
 
 
     def delete(self, msisdn):
+        imsi = self._get_imsi(msisdn)
+
         subscriber_number = msisdn[-5:]
         appstring = 'OpenBSC'
         appport = 4242
-        try:
-            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
-            cmd = 'enable'
-            vty.command(cmd)
-            cmd = 'subscriber extension %s extension %s' % (msisdn, subscriber_number)
-            vty.command(cmd)
-        except:
-	    pass
+        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+        cmd = 'enable'
+        vty.command(cmd)
+        cmd = 'subscriber extension %s extension %s' % (msisdn, subscriber_number)
+        vty.command(cmd)
 
-        # PG_HLR delete subscriber
+        # PG_HLR delete subscriber 
         try:
             cur = db_conn.cursor()
             cur.execute('DELETE FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
             cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
             if cur.rowcount > 0:
-               db_conn.commit()
-        except psycopg2.DatabaseError as e:
-	    pass
+                db_conn.commit()
+            else:
+                raise SubscriberException('PG_HLR No subscriber found') 
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error deleting subscriber: %s' % e)
 
         self._delete_in_distributed_hlr(msisdn)
 
@@ -469,7 +450,7 @@ class Subscriber:
 
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
-        # auth 1 subscriber enabled
+        # auth 1 subscriber enabled 
         # disable/enable subscriber on the HLR sqlite DB
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -491,12 +472,10 @@ class Subscriber:
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
-                db_conn.rollback()
                 raise SubscriberException('PG_HLR Subscriber not found')
         except psycopg2.DatabaseError as e:
-            db_conn.rollback()
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
-
+        
         #try:
         #    now = int(time.time())
         #    rk_hlr = riak_client.bucket('hlr')
@@ -505,7 +484,7 @@ class Subscriber:
         #        subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
         #        subscriber.data['authorized'] = auth
         #        subscriber.data['updated'] = now
-        #        subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])])
+        #        subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])]) 
         #        subscriber.store()
         #    else:
         #        raise NumberingException('RK_DB subscriber %s not found' % msisdn)
@@ -552,23 +531,23 @@ class Subscriber:
             cur = db_conn.cursor()
             if balance != "":
 		if location != "":
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s,location=%(location)s WHERE msisdn=%(msisdn2)s',
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s,location=%(location)s WHERE msisdn=%(msisdn2)s', 
         	        {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn, 'location': location})
 		else:
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s WHERE msisdn=%(msisdn2)s',
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s WHERE msisdn=%(msisdn2)s', 
         	        {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn})
-
+			
             else:
 		if location != "":
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,location=%(location)s WHERE msisdn=%(msisdn2)s',
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,location=%(location)s WHERE msisdn=%(msisdn2)s', 
         	        {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn, 'location': location})
 		else:
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s WHERE msisdn=%(msisdn2)s',
+	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s WHERE msisdn=%(msisdn2)s', 
         	        {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn})
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
-                raise SubscriberException('PG_HLR No subscriber found')
+                raise SubscriberException('PG_HLR No subscriber found') 
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error updating subscriber data: %s' % e)
 
@@ -586,38 +565,34 @@ class Subscriber:
         return str(imsi)
 
     def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):
-        try:
-            appstring = 'OpenBSC'
-            appport = 4242
-            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
-            cmd = 'enable'
-            vty.command(cmd)
-            cmd = 'subscriber extension %s extension %s' % (msisdn, new_msisdn)
-            vty.command(cmd)
-            cmd = 'subscriber extension %s authorized 1' % new_msisdn
-            vty.command(cmd)
-            cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
-            vty.command(cmd)
-        except:
-            raise SubscriberException('SQ_HLR error provisioning the subscriber')
+        appstring = 'OpenBSC'
+        appport = 4242
+        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+        cmd = 'enable'
+        vty.command(cmd)
+        cmd = 'subscriber extension %s extension %s' % (msisdn, new_msisdn)
+        vty.command(cmd)
+        cmd = 'subscriber extension %s authorized 1' % new_msisdn
+        vty.command(cmd)
+        cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
+        vty.command(cmd)
 
     def _provision_in_database(self, msisdn, name, balance, location=''):
         try:
             cur = db_conn.cursor()
-            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status,location) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s)',
-            {'msisdn': msisdn, 'name': unidecode(name), 'balance': Decimal(str(balance)), 'location': location})
+            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status,location) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s)', 
+            {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'location': location})
             cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
-            {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
+            {'msisdn': msisdn, 'home_bts': vpn_ip_address, 'current_bts': vpn_ip_address})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
-            db_conn.rollback()
             raise SubscriberException('PG_HLR error provisioning the subscriber: %s' % e)
 
     def _provision_in_distributed_hlr(self, imsi, msisdn):
         try:
             now = int(time.time())
             rk_hlr = riak_client.bucket('hlr')
-            distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": config['local_ip'], "authorized": 1, "updated": now})
+            distributed_hlr = rk_hlr.new(imsi, data={"msisdn": msisdn, "home_bts": vpn_ip_address, "current_bts": vpn_ip_address, "authorized": 1, "updated": now})
             distributed_hlr.add_index('msisdn_bin', msisdn)
             distributed_hlr.add_index('modified_int', now)
             distributed_hlr.store()
@@ -641,8 +616,16 @@ class Subscriber:
 
 if __name__ == '__main__':
     sub = Subscriber()
+    #sub.set_balance('68820110010',3.86)
     try:
-	subs = sub.get_all_roaming()
-	print subs
+        sub.add('334020348444451', 'Test', 100, 'Pporcodio')
+    #sub.delete('66666249987')
+        #sub.edit('68820137511','Antanz_edit',3.86)
+        #sub.authorized('68820137511',0)
+        #print sub.get_all_connected()
+        
+        #a = sub.get('68820137511')
+        #print a
+        #sub.delete('68820137511')
     except SubscriberException as e:
         print "Error: %s" % e

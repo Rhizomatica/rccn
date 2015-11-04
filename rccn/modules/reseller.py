@@ -36,7 +36,6 @@ class Reseller:
         self.balance = 0
         self.subscriber_balance = 0
 
-
     def get_all(self):
         try:
             cur = db_conn.cursor()
@@ -62,16 +61,7 @@ class Reseller:
             raise ResellerException('PG_HLR error getting reseller: %s' % e)
 
     def get_messages(self):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT * FROM resellers_configuration')
-            if cur.rowcount > 0:
-                messages = cur.fetchone()
-                return messages
-            else:
-                raise ResellerException('PG_HLR messages found')
-        except psycopg2.DatabaseError as e:
-            raise ResellerException('PG_HLR error getting reseller messages: %s' % e)
+	return reseller_messages
     
     def add(self, msisdn, pin, balance):
         # check if subscriber exists
@@ -115,25 +105,12 @@ class Reseller:
         except psycopg2.DatabaseError as e:
             raise ResellerException('PG_HLR error updating reseller data: %s' % e)
 
-    def edit_messages(self, mess1, mess2, mess3, mess4, mess5, mess6):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('UPDATE resellers_configuration SET message1=%(mess1)s,message2=%(mess2)s,message3=%(mess3)s,message4=%(mess4)s,message5=%(mess5)s,message6=%(mess6)s',
-            {'mess1': mess1, 'mess2': mess2, 'mess3': mess3, 'mess4': mess4, 'mess5': mess5, 'mess6': mess6})
-            if cur.rowcount > 0:
-                db_conn.commit()
-            else:
-                raise ResellerException('Error configuring notification messages')
-        except psycopg.DatabaseError as e:
-            raise ResellerException('Error updating reseller notification messages: %s' % e)
-            
 
     def validate_data(self, pin):
         res_log.debug('Check PIN length')
         if len(pin) > 4 or len(pin) < 4:
             raise ResellerException('PIN invalid length')
-    
-    
+        
         res_log.debug('Check if Reseller exists')
         # check if reseller exists in the database and the PIN is valid
         try:
@@ -172,18 +149,11 @@ class Reseller:
             raise ResellerException('Database error getting Reseller balance: %s' % e)
 
 
-    def get_message(self, id):
-        try:
-            cur = db_conn.cursor()
-            cur.execute('SELECT message'+str(id)+' FROM resellers_configuration')
-            message = cur.fetchone()
-            if message != None:
-                return message[0]
-            else:
-                return None
-        except psycopg2.DatabaseError as e:
-            return None
-
+    def get_message(self, msg):
+	if msg in reseller_messages:
+	    return reseller_messages[msg]
+	else:
+	    return None
     
     def check_balance(self, amount):
         self.balance = self.get_balance()
