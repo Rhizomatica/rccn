@@ -2,16 +2,33 @@
 # -*- coding: utf-8 -*-
 
 # Configuration settings
+
+# Paths
+# ==========================================
 rhizomatica_dir = '/var/rhizomatica'
 sq_hlr_path = '/var/lib/osmocom/hlr.sqlite3'
 
-# database
+# Database connection
+# ==========================================
 pgsql_db = 'rhizomatica'
 pgsql_user = 'rhizomatica'
 pgsql_pwd = 'yourpwd'
 pgsql_host = 'localhost'
 
-# SITE
+# Web administration 
+# ==========================================
+rai_admin_user = "admin"
+rai_admin_pwd = 'adminpwd'
+
+# Kannel connection
+# ==========================================
+kannel_server = '127.0.0.1'
+kannel_port = 14002
+kannel_username = 'rhizomatica'
+kannel_password = 'yourpwd'
+
+# Site information
+# ==========================================
 site_name = "Test"
 postcode = "12345"
 pbxcode = "1"
@@ -19,47 +36,83 @@ network_name = "TestNetwork"
 vpn_ip_address = "10.66.0.14"
 wan_ip_address = "192.168.1.99"
 
-# SITE settings
+# Site settings
+# ==========================================
 # rate type can be "call" or "min"
-limit_local_calls = 1    
+# charge can be 0 disabled, 1 active
+# limit local call 0 disabled, 1 active
+limit_local_calls = 1
+# total duration for the call, call hangup when limit is reached    
 limit_local_minutes = 5  
 charge_local_calls = 0   
-charge_local_rate = ""   
+charge_local_rate = ""
 charge_local_rate_type = ""
 charge_internal_calls = 0  
-charge_internal_rate = ""  
+charge_internal_rate = ""
 charge_internal_rate_type = ""
 charge_inbound_calls = 0
-charge_inbound_rate = ""          
-charge_inbound_rate_type = ""      
+charge_inbound_rate = ""     
+charge_inbound_rate_type = ""
 smsc_shortcode = "10000"
 sms_sender_unauthorized = 'Tu usuario no está autorizado en esta red. Por favor registre su teléfono.'
 sms_destination_unauthorized = 'Este usuario no se ha registrado. Él no va a recibir su mensaje.'
 sms_welcome_roaming = 'Bienvenido a la red de telefonia movil comunitaria de %s. Ya puedes realizar llamadas y enviar mensajes.' % site_name
 sms_credit_added = 'La cantidad de %s pesos fue abonado con exito a su cuenta. Su balance actual es %s pesos'
 
-# web administration
-rai_admin_user = "admin"
-rai_admin_pwd = 'adminpwd'
+# Subscription SMS notification
+# ==========================================
+notice_msg = 'Favor de pagar su cooperacion mensual de 30 pesos. Gracias.' 
+reminder_msg = 'Recuerda: su servicio sera desactivado si no paga su cuota antes del 7 de cada mes. Gracias.' 
+deactivate_msg = 'Su servicio ha sido desactivado hasta que haga su cooperacion mensual.'
 
-kannel_server = '127.0.0.1'
-kannel_port = 14002
-kannel_username = 'rhizomatica'
-kannel_password = 'yourpwd'
-
-# VOIP provider
+# VOIP provider settings
+# ==========================================
+# TODO: check which ciaby freeswitch file name generation
 voip_provider_name = "provider"
 voip_username = "1234567890"
 voip_fromuser = "1234567890"
 voip_password = "NewPass"
 voip_proxy = "1.1.1.1"
+# the DID is the user of the URI in the INVITE coming from the provider for incoming calls
 voip_did = "1234567890"
 voip_cli = "525512345678"
 
-# Subscription SMS notification
-notice_msg = 'Favor de pagar su cooperacion mensual de 30 pesos. Gracias.' 
-reminder_msg = 'Recuerda: su servicio sera desactivado si no paga su cuota antes del 7 de cada mes. Gracias.' 
-deactivate_msg = 'Su servicio ha sido desactivado hasta que haga su cooperacion mensual.'
-
-# Emergency number
+# Emergency number(s)
+# ==========================================
+# Input one or more numbers use as separator ','
+# if a list of numbers is defined RCCN will do parallel ringing to those numbers
+# example:  emergency_contact = "12345"
+#	    emergency_contact = "12345,54321"
 emergency_contact = "12345678901"
+
+# Resellers notification
+# ==========================================
+reseller_messages = {
+   'invalid_data': 'Invalid data',
+   'to_subscriber_not_enough_funds': 'Reseller does not have enough funds to add credit to your account',
+   'to_reseller_not_enough_funds': 'Not enough funds to add the credit requested',
+   'to_subscriber_transfer_successful': 'Amount of [amount] pesos successfully added to your account. New balance: [subscriber_balance]',
+   'to_reseller_transfer_successful': '[amount] pesos successfully transferred to [subscriber_msisdn]. Your current balance is: [reseller_balance]',
+   'general_error': 'General error credit could not be added'
+}
+	      
+# Announcements
+# ==========================================
+# welcome announcement played back when calling the DID
+ann_welcome = "001_bienvenidos.gsm"
+# play this announcement when the user doesn't have enough credit to make an outbound call
+ann_not_enough_credit = "002_saldo_insuficiente.gsm"
+# played back to the caller 1 minute before the credit is about to expire during an outbound call
+ann_credit_is_about_to_finish = "003_saldo_esta_por_agotarse.gsm"
+# played back when the user has finished the credit during an outbound call
+ann_credit_finished = "004_saldo_se_ha_agotado.gsm"
+# played back when the user calls extension 888 in order to get the current balance
+ann_current_balance = "006_mensaje_saldo_actual.gsm"
+# announcement for wrong dialed number
+ann_wrong_number = "007_el_numero_no_es_corecto.gsm"
+# subscriber is not authorized to make calls
+ann_subscriber_not_authorized = "008_subscriber_not_authorized.gsm"
+# destination number is not authorized to receive calls
+ann_destination_subscriber_not_authorized = "009_destination_subscriber_not_authorized.gsm"
+# general error (played back in case of database errors or if important information necessary to route the call failed)
+ann_general_error = "010_general_error.gsm"
