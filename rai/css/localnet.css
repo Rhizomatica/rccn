@@ -15,11 +15,11 @@
 	padding:5px;
 }
 .up{
-	border: green thin solid;
+	border: green 3px solid;
 }
 
 .down{
-	border: red thin solid;
+	border: red 5px solid;
 }
 #outsideWorld{
 	position: absolute;

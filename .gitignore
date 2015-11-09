@@ -8,3 +8,5 @@ rrd/graphs/*
 *.pyc
 *.log
 *.swp
+rai/js/localnet.json
+rai/include/header.php
