@@ -530,8 +530,8 @@ msgstr ""
 msgid "System Stats"
 msgstr ""
 
-#: include/menu.php:16
-msgid "Network Stats"
+#: include/menu.php:17
+msgid "Network Map"
 msgstr ""
 
 #: include/menu.php:21

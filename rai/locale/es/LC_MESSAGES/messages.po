@@ -535,6 +535,10 @@ msgstr "Estadísticas del Sistema"
 msgid "Network Stats"
 msgstr "Estadísticas de la Red"
 
+#: include/menu.php:17
+msgid "Network Map"
+msgstr "Mapa de la Red"
+
 #: include/menu.php:21
 msgid "Statistics"
 msgstr "Estadísticas"
