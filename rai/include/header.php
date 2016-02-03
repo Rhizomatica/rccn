@@ -26,8 +26,8 @@ header('Content-Type: text/html; charset=utf-8');
 <html>
         <head>
                 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-                
-                <title>RAI - Rhizomatica Administration Interface</title>
+
+                <title><?=_('RAI - Rhizomatica Administration Interface')?></title>
                 <style type="text/css" title="currentStyle">
                         @import "css/page.css";
                         @import "css/table.css";
@@ -37,13 +37,14 @@ header('Content-Type: text/html; charset=utf-8');
                 </style>
                 <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
-		<script type="text/javascript" language="javascript" src="js/jquery.dataTables.columnFilter.js"></script>
+                <script type="text/javascript" language="javascript" src="js/jquery.dataTables.columnFilter.js"></script>
                 <script type="text/javascript" language="javascript" src="js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+                <script type="text/javascript" language="javascript" src="js/rai.js"></script>
         </head>
         <body id="dt_example">
                 <div id="container">
 			<? if (!isset($no_title)) { ?>
                         <div class="full_width big">
-                                <img src="img/rhizomatica_logo_small.png" style="vertical-align: middle;" /> RAI - Rhizomatica Administration Interface
+                                <img src="img/rhizomatica_logo_small.png" style="vertical-align: middle;" /> <?=_('RAI - Rhizomatica Administration Interface')?>
                         </div>
 			<? } ?>

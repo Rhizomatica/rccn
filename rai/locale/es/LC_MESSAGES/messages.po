@@ -2,13 +2,13 @@
 # Copyright (C) 2014 Rhizomatica
 # This file is distributed under the same license as the Rhizomatica package.
 # Tele <tele@rhizomatica.org>, 2013.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-25 16:33-0600\n"
+"POT-Creation-Date: 2016-02-03 18:46+0000\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
 "Last-Translator: Ciaby <ciaby@rhizomatica.org>\n"
 "Language: es\n"
@@ -71,7 +71,6 @@ msgstr "Saldo"
 
 #: subscribers.php:86 subscribers.php:104 provisioning.php:73
 #: subscriber_edit.php:57
-#, fuzzy
 msgid "Location"
 msgstr "Ubicación"
 
@@ -85,7 +84,7 @@ msgstr "Acciones"
 msgid "Loading data from server"
 msgstr "Cargardo datos desde el servidor"
 
-#: resellers.php:43 include/menu.php:45
+#: resellers.php:43 include/menu.php:47
 msgid "Resellers"
 msgstr "Revendedores"
 
@@ -110,8 +109,8 @@ msgstr "¡Error al cargar la información!"
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 send_sms.php:84 send_sms.php:95
 #: send_sms.php:99 send_sms.php:107 send_sms.php:111 resellers_credit.php:83
-#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:148
-#: provisioning.php:152 resellers_provisioning.php:85
+#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:139
+#: provisioning.php:143 resellers_provisioning.php:85
 #: resellers_provisioning.php:89
 msgid "Go Back"
 msgstr "Regresar"
@@ -198,7 +197,7 @@ msgstr "Destino"
 msgid "Context"
 msgstr "Contexto"
 
-#: send_sms.php:25 send_sms.php:50 include/menu.php:68
+#: send_sms.php:25 send_sms.php:50 include/menu.php:70
 msgid "Send SMS"
 msgstr "Enviar SMS"
 
@@ -265,7 +264,7 @@ msgstr "Número de Recibo"
 
 #: credit_history.php:27 credit_history.php:42 credit.php:27 credit.php:28
 #: credit.php:32 credit.php:61 credit.php:64 provisioning.php:65
-#: provisioning.php:66 provisioning.php:146 subscriber_edit.php:49
+#: provisioning.php:66 provisioning.php:137 subscriber_edit.php:49
 #: subscriber_edit.php:50 subscriber_edit.php:132
 msgid "Subscriber number"
 msgstr "Teléfono del usuario"
@@ -351,7 +350,7 @@ msgstr "Total de llamadas mensuales"
 msgid "Month"
 msgstr "Mes"
 
-#: stats/total_calls.php:79 include/menu.php:24
+#: stats/total_calls.php:79 include/menu.php:26
 msgid "Calls"
 msgstr "Llamadas"
 
@@ -391,7 +390,7 @@ msgstr "Costo total del uso semanal"
 msgid "Monthly Total Cost Usage"
 msgstr "Costo total del uso mensual"
 
-#: rates.php:19 include/menu.php:76
+#: rates.php:19 include/menu.php:78
 msgid "Rates"
 msgstr "Tarifas"
 
@@ -399,8 +398,17 @@ msgstr "Tarifas"
 msgid "Area Code"
 msgstr "Código de Área"
 
-#: resellers_credit.php:24 credit.php:24 include/menu.php:49
-#: include/menu.php:60
+#: login.php:41
+#, fuzzy
+msgid "Username"
+msgstr "Nombre de la red"
+
+#: login.php:45
+msgid "Password:"
+msgstr ""
+
+#: resellers_credit.php:24 credit.php:24 include/menu.php:51
+#: include/menu.php:62
 msgid "Add Credit"
 msgstr "Hacer recarga"
 
@@ -419,12 +427,11 @@ msgstr "Repetir el número del revendedor"
 msgid "Amount"
 msgstr "Cantidad"
 
-#: resellers_credit.php:38 credit.php:38 provisioning.php:86
-#: resellers_provisioning.php:39
+#: resellers_credit.php:38 credit.php:38 resellers_provisioning.php:39
 msgid "Amount to add"
 msgstr "Cantidad de recarga"
 
-#: resellers_credit.php:42 credit.php:42 provisioning.php:90
+#: resellers_credit.php:42 credit.php:42 provisioning.php:86
 #: resellers_provisioning.php:43
 msgid "Add"
 msgstr "Añadir"
@@ -539,53 +546,61 @@ msgstr "Estadísticas de la Red"
 msgid "Network Map"
 msgstr "Mapa de la Red"
 
-#: include/menu.php:21
+#: include/menu.php:18
+msgid "Online Support"
+msgstr "Soporte en Línea"
+
+#: include/menu.php:23
 msgid "Statistics"
 msgstr "Estadísticas"
 
-#: include/menu.php:23
+#: include/menu.php:25
 msgid "Costs"
 msgstr "Costos"
 
-#: include/menu.php:38
+#: include/menu.php:40
 msgid "Subscribers"
 msgstr "Usuarios Suscritos"
 
-#: include/menu.php:40 include/menu.php:48
+#: include/menu.php:42 include/menu.php:50
 msgid "Provisioning"
 msgstr "Dar de alta"
 
-#: include/menu.php:47
+#: include/menu.php:49
 msgid "List Resellers"
 msgstr "Lista de revendedores"
 
-#: include/menu.php:50
+#: include/menu.php:52
 msgid "Resellers invoices"
 msgstr "Recibos de revendedores"
 
-#: include/menu.php:51
+#: include/menu.php:53
 msgid "Transactions"
 msgstr "Transacciones"
 
-#: include/menu.php:52
+#: include/menu.php:54
 msgid "Configuration"
 msgstr "Configuración"
 
-#: include/menu.php:58
+#: include/menu.php:60
 msgid "Credits"
 msgstr "Recargas"
 
-#: include/menu.php:61
+#: include/menu.php:63
 msgid "History"
 msgstr "Historial"
 
-#: include/menu.php:66
+#: include/menu.php:68
 msgid "SMSs"
 msgstr "SMS"
 
-#: include/menu.php:73
+#: include/menu.php:75
 msgid "CDRs"
 msgstr "CDR"
+
+#: include/header.php:29 include/header.php:47
+msgid "RAI - Rhizomatica Administration Interface"
+msgstr "RAI - Interfaz de Administración"
 
 #: provisioning.php:28
 msgid "Provision a new subscriber"
@@ -596,41 +611,32 @@ msgid "Subscriber Name"
 msgstr "Nombre del usuario"
 
 #: provisioning.php:74 subscriber_edit.php:58
-#, fuzzy
+
 msgid "Subscriber location"
 msgstr "Ubicación del usuario"
 
-#: provisioning.php:85 resellers_provisioning.php:38
-msgid "Initial Balance"
-msgstr "Saldo inicial"
-
-#: provisioning.php:106 subscriber_edit.php:105
+#: provisioning.php:101 subscriber_edit.php:105
 msgid "Name is empty"
 msgstr "Nombre está vacío"
 
-#: provisioning.php:109
-#, fuzzy
+#: provisioning.php:104
+
 msgid "Subscriber number is empty"
 msgstr "Teléfono del usuario vacío"
 
-#: provisioning.php:112 resellers_provisioning.php:64
-msgid "Initial balance is empty"
-msgstr "Saldo inicial vacío"
-
-#: provisioning.php:115
-#, fuzzy
+#: provisioning.php:107
 msgid "Invalid number"
-msgstr "Número de recibo"
+msgstr "Número Inválido"
 
-#: provisioning.php:144
+#: provisioning.php:135
 msgid "Subscriber already exists! New subscriber number"
 msgstr "El usuario ya existe! Número de nuevo usuario"
 
-#: provisioning.php:144 provisioning.php:146 resellers_provisioning.php:84
+#: provisioning.php:135 provisioning.php:137 resellers_provisioning.php:84
 msgid "Successfully provisioned with an initial balance of"
 msgstr "Se ha dado de alta con éxito con un saldo inicial de"
 
-#: provisioning.php:151
+#: provisioning.php:142
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr "ERROR AL DAR DE ALTA AL USUARIO"
 
@@ -670,6 +676,10 @@ msgstr "PIN"
 msgid "Reseller code"
 msgstr "Codigo del revendedor"
 
+#: resellers_provisioning.php:38
+msgid "Initial Balance"
+msgstr "Saldo inicial"
+
 #: resellers_provisioning.php:58
 msgid "Reseller number is empty"
 msgstr "Número revendedor está vacío"
@@ -677,6 +687,10 @@ msgstr "Número revendedor está vacío"
 #: resellers_provisioning.php:61
 msgid "Reseller PIN is invalid"
 msgstr "El PIN del revendedor no es válido"
+
+#: resellers_provisioning.php:64
+msgid "Initial balance is empty"
+msgstr "Saldo inicial vacío"
 
 #: resellers_provisioning.php:88
 msgid "ERROR PROVISIONING RESELLER!"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-25 16:33-0600\n"
+"POT-Creation-Date: 2016-02-03 18:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,7 @@ msgstr ""
 msgid "Loading data from server"
 msgstr ""
 
-#: resellers.php:43 include/menu.php:45
+#: resellers.php:43 include/menu.php:47
 msgid "Resellers"
 msgstr ""
 
@@ -110,8 +110,8 @@ msgstr ""
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 send_sms.php:84 send_sms.php:95
 #: send_sms.php:99 send_sms.php:107 send_sms.php:111 resellers_credit.php:83
-#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:148
-#: provisioning.php:152 resellers_provisioning.php:85
+#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:139
+#: provisioning.php:143 resellers_provisioning.php:85
 #: resellers_provisioning.php:89
 msgid "Go Back"
 msgstr ""
@@ -198,7 +198,7 @@ msgstr ""
 msgid "Context"
 msgstr ""
 
-#: send_sms.php:25 send_sms.php:50 include/menu.php:68
+#: send_sms.php:25 send_sms.php:50 include/menu.php:70
 msgid "Send SMS"
 msgstr ""
 
@@ -265,7 +265,7 @@ msgstr ""
 
 #: credit_history.php:27 credit_history.php:42 credit.php:27 credit.php:28
 #: credit.php:32 credit.php:61 credit.php:64 provisioning.php:65
-#: provisioning.php:66 provisioning.php:146 subscriber_edit.php:49
+#: provisioning.php:66 provisioning.php:137 subscriber_edit.php:49
 #: subscriber_edit.php:50 subscriber_edit.php:132
 msgid "Subscriber number"
 msgstr ""
@@ -351,7 +351,7 @@ msgstr ""
 msgid "Month"
 msgstr ""
 
-#: stats/total_calls.php:79 include/menu.php:24
+#: stats/total_calls.php:79 include/menu.php:26
 msgid "Calls"
 msgstr ""
 
@@ -391,7 +391,7 @@ msgstr ""
 msgid "Monthly Total Cost Usage"
 msgstr ""
 
-#: rates.php:19 include/menu.php:76
+#: rates.php:19 include/menu.php:78
 msgid "Rates"
 msgstr ""
 
@@ -399,8 +399,16 @@ msgstr ""
 msgid "Area Code"
 msgstr ""
 
-#: resellers_credit.php:24 credit.php:24 include/menu.php:49
-#: include/menu.php:60
+#: login.php:41
+msgid "Username"
+msgstr ""
+
+#: login.php:45
+msgid "Password:"
+msgstr ""
+
+#: resellers_credit.php:24 credit.php:24 include/menu.php:51
+#: include/menu.php:62
 msgid "Add Credit"
 msgstr ""
 
@@ -419,12 +427,11 @@ msgstr ""
 msgid "Amount"
 msgstr ""
 
-#: resellers_credit.php:38 credit.php:38 provisioning.php:86
-#: resellers_provisioning.php:39
+#: resellers_credit.php:38 credit.php:38 resellers_provisioning.php:39
 msgid "Amount to add"
 msgstr ""
 
-#: resellers_credit.php:42 credit.php:42 provisioning.php:90
+#: resellers_credit.php:42 credit.php:42 provisioning.php:86
 #: resellers_provisioning.php:43
 msgid "Add"
 msgstr ""
@@ -535,52 +542,64 @@ msgstr ""
 msgid "Network Stats"
 msgstr ""
 
-#: include/menu.php:21
-msgid "Statistics"
+#: include/menu.php:17
+msgid "Network Map"
+msgstr ""
+
+#: include/menu.php:18
+msgid "Online Support"
 msgstr ""
 
 #: include/menu.php:23
+msgid "Statistics"
+msgstr ""
+
+#: include/menu.php:25
 msgid "Costs"
 msgstr ""
 
-#: include/menu.php:38
+#: include/menu.php:40
 msgid "Subscribers"
 msgstr ""
 
-#: include/menu.php:40 include/menu.php:48
+#: include/menu.php:42 include/menu.php:50
 msgid "Provisioning"
 msgstr ""
 
-#: include/menu.php:47
+#: include/menu.php:49
 msgid "List Resellers"
 msgstr ""
 
-#: include/menu.php:50
+#: include/menu.php:52
 msgid "Resellers invoices"
 msgstr ""
 
-#: include/menu.php:51
+#: include/menu.php:53
 msgid "Transactions"
 msgstr ""
 
-#: include/menu.php:52
+#: include/menu.php:54
 msgid "Configuration"
 msgstr ""
 
-#: include/menu.php:58
+#: include/menu.php:60
 msgid "Credits"
 msgstr ""
 
-#: include/menu.php:61
+#: include/menu.php:63
 msgid "History"
 msgstr ""
 
-#: include/menu.php:66
+#: include/menu.php:68
 msgid "SMSs"
 msgstr ""
 
-#: include/menu.php:73
+#: include/menu.php:75
 msgid "CDRs"
+msgstr ""
+
+#: include/header.php:29 include/header.php:47
+msgid "RAI - Rhizomatica Administration Interface"
 msgstr ""
 
 #: provisioning.php:28
@@ -595,35 +614,27 @@ msgstr ""
 msgid "Subscriber location"
 msgstr ""
 
-#: provisioning.php:85 resellers_provisioning.php:38
-msgid "Initial Balance"
-msgstr ""
-
-#: provisioning.php:106 subscriber_edit.php:105
+#: provisioning.php:101 subscriber_edit.php:105
 msgid "Name is empty"
 msgstr ""
 
-#: provisioning.php:109
+#: provisioning.php:104
 msgid "Subscriber number is empty"
 msgstr ""
 
-#: provisioning.php:112 resellers_provisioning.php:64
-msgid "Initial balance is empty"
-msgstr ""
-
-#: provisioning.php:115
+#: provisioning.php:107
 msgid "Invalid number"
 msgstr ""
 
-#: provisioning.php:144
+#: provisioning.php:135
 msgid "Subscriber already exists! New subscriber number"
 msgstr ""
 
-#: provisioning.php:144 provisioning.php:146 resellers_provisioning.php:84
+#: provisioning.php:135 provisioning.php:137 resellers_provisioning.php:84
 msgid "Successfully provisioned with an initial balance of"
 msgstr ""
 
-#: provisioning.php:151
+#: provisioning.php:142
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr ""
 
@@ -663,12 +674,20 @@ msgstr ""
 msgid "Reseller code"
 msgstr ""
 
+#: resellers_provisioning.php:38
+msgid "Initial Balance"
+msgstr ""
+
 #: resellers_provisioning.php:58
 msgid "Reseller number is empty"
 msgstr ""
 
 #: resellers_provisioning.php:61
 msgid "Reseller PIN is invalid"
+msgstr ""
+
+#: resellers_provisioning.php:64
+msgid "Initial balance is empty"
 msgstr ""
 
 #: resellers_provisioning.php:88

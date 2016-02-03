@@ -15,6 +15,7 @@ function print_menu($select) {
 	echo "<li><a href='platform_stats.php'>"._("System Stats")."</a></li>";
 	echo "<li><a href='network_stats.php'>"._("Network Stats")."</a></li>";
 	echo "<li><a href='localnet.php'>"._("Network Map")."</a></li>";
+	echo "<li><a class='support_popup' href='http://".$_SERVER['SERVER_ADDR'].":7778/'>"._("Online Support")."</a></li>";
 	echo "</li>";
 	echo "</ul>";
 
