@@ -120,7 +120,7 @@ class Dialplan:
                 dial_str = 'sofia/internal/sip:'+emergency_contact+'@172.16.0.1:5050'
             
             self.session.setVariable('context','EMERGENCY')
-            self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
+            self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}"+dial_str)
             
         # check if destination number is an incoming call
         # lookup dest number in DID table.

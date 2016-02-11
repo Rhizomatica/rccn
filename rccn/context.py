@@ -136,7 +136,7 @@ class Context:
                         
         # check subscriber balance if charge local call is configured
         log.info('Send call to LCR')
-        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+        self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
         # in case of no answer send call to voicemail
         #log.info('No answer, send call to voicemail')
         #self.session.execute('set','default_language=en')
@@ -159,7 +159,7 @@ class Context:
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
                     log.info('Send call to internal subscriber %s' % subscriber_number)
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}sofia/internal/sip:"+subscriber_number+'@172.16.0.1:5050')
                 else:
                     log.info('Subscriber %s doesn\'t exists or is not authorized' % subscriber_number)
             except SubscriberException as e:
@@ -207,7 +207,7 @@ class Context:
                     self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
                     self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
     
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+dest_num+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}sofia/internal/sip:"+dest_num+'@172.16.0.1:5050')
                 else:
                     log.info('Subscriber %s doesn\'t exists' % dest_num)
                     self.session.execute('playback','007_el_numero_no_es_corecto.gsm')
@@ -245,7 +245,7 @@ class Context:
                     # if current_bts is the same as local site, send the call to the local LCR
                     if site_ip == config['local_ip']:
                         log.info('Currentbts same as local site send call to LCR')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                        self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
                     else:
                         self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
                 except NumberingException as e:
@@ -268,7 +268,7 @@ class Context:
         
                         log.info('Send call to LCR')
                         self.session.setVariable('context','ROAMING_LOCAL')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                        self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
                     else:
                         # local destination subscriber unauthorized
                         # TODO: play message destination unauthorized to receive call
@@ -309,7 +309,7 @@ class Context:
                 if site_ip == config['local_ip']:
                     log.info('Called number is roaming on our site send call to LCR')
                     self.session.setVariable('context','ROAMING_LOCAL')
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='AMR,GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
                 else:
                     log.info('Called number is roaming send call to current_bts: %s' % site_ip)
                     self.session.setVariable('context','ROAMING_INTERNAL')
