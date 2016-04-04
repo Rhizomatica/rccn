@@ -152,7 +152,7 @@ class Dialplan:
                 if (self._n.is_number_roaming(self.destination_number)):
                     processed = 1
                     log.info(
-                        'Destination number %s is roaming'
+                        'Destination number %s may be roaming'
                         % self.destination_number)
                     self.context.roaming('called')
             except NumberingException as e:
