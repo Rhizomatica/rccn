@@ -40,8 +40,12 @@ class Subscription:
         unpaid=self.get_unpaid_subscriptions()
         print '---\n\n'
         for number in unpaid:
-            print 'PostGres: '+str(number)+':'
+            print 'PostGres: '+number[0]+':'
             info=sub.print_vty_hlr_info(number)
+            if "No subscriber found for extension" in info:
+                print 'OsmoHLR: '+info
+                print "Checking for 5 digit extension"
+                info=sub.print_vty_hlr_info(number[0][-5:])
             print 'OsmoHLR: '+ info
             print '---\n\n'
 
