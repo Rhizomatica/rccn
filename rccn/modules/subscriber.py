@@ -467,22 +467,44 @@ class Subscriber:
         cmd = 'subscriber extension %s delete' % msisdn
         vty.command(cmd)
 
+    def print_vty_hlr_info(self, msisdn):
+        appstring = 'OpenBSC'
+        appport = 4242
+        vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+        cmd = 'enable'
+        vty.command(cmd)
+        cmd = 'show subscriber extension %s' % msisdn
+        return vty.command(cmd)    
+        
+
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
         # auth 1 subscriber enabled
         # disable/enable subscriber on the HLR sqlite DB
+        # !! FIXME !! We shouldn't be writing to sqlite.
         try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute('UPDATE Subscriber SET authorized=? WHERE extension=?', (auth, msisdn))
-            if sq_hlr_cursor.rowcount > 0:
-                sq_hlr.commit()
-            else:
-                raise SubscriberException('SQ_HLR Subscriber not found')
-        except sqlite3.Error as e:
-            raise SubscriberException('SQ_HLR error changing auth status: %s' % e.args[0])
-        finally:
-            sq_hlr.close()
+            appstring = 'OpenBSC'
+            appport = 4242
+            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+            cmd = 'enable'
+            vty.command(cmd)
+            cmd = 'subscriber extension %s authorized %s' % (msisdn, auth)
+            vty.command(cmd)
+        except:
+            pass
+                
+            #sq_hlr = sqlite3.connect(sq_hlr_path)
+            #sq_hlr_cursor = sq_hlr.cursor()
+            #sq_hlr_cursor.execute('UPDATE Subscriber SET authorized=? WHERE extension=?', (auth, msisdn))
+            #if sq_hlr_cursor.rowcount > 0:
+            #    sq_hlr.commit()
+            #else:
+                # This breaks out of the loop and stops processing.
+            #    raise SubscriberException('SQ_HLR Subscriber not found')
+        #except sqlite3.Error as e:
+        #    raise SubscriberException('SQ_HLR error changing auth status: %s' % e.args[0])
+        #finally:
+        #    sq_hlr.close()
 
         # disable/enable subscriber on PG_HLR
         try:

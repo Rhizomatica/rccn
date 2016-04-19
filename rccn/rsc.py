@@ -25,9 +25,9 @@ Rhizomatica Subscription Checker.
 import sys
 from config import *
 
-if len(sys.argv) > 2:
+if len(sys.argv) > 2 or len(sys.argv) == 1:
     print 'RCCN Subscription Checker\n'
-    print 'Usage: %s [notice|reminder|deactivate]' % sys.argv[0]
+    print 'Usage: %s [notice|reminder|deactivate|info]' % sys.argv[0]
     sys.exit(1)
 
 action = sys.argv[1]
@@ -38,6 +38,7 @@ if action == 'notice':
     subscription_log.info(
         'Send notification to all subscribers to pay the subscription fee')
     try:
+        # 0 is the status:
         totalsub = rsc.update_subscriptions(0)
         subscription_log.info(
             'Updated subscription status to unpaid '
@@ -63,6 +64,8 @@ elif action == 'deactivate':
         rsc.deactivate_subscriptions(deactivate_msg)
     except SubscriptionException as e:
         subscription_log.error('%s' % e)
+elif action == 'info':
+    rsc.subscription_info()
 else:
     subscription_log.info('Invalid option')
     sys.exit(1)
