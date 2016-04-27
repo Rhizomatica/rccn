@@ -176,7 +176,11 @@ class SMS:
             raise SMSException('Receive SMS Error: %s' % e)
     
     def send(self, source, destination, text, server=config['local_ip']):
-        enc_text = urllib.urlencode({'text': text })
+        try:
+            text=unicode(text).encode('utf-8')
+            enc_text = urllib.urlencode({'text': text })
+        except UnicodeEncodeError:
+            raise SMSException('Can\'t handle the Character Set')             
         if server == config['local_ip']:
             try:
                 sms_log.info('Send SMS: %s %s' % (source, destination))
