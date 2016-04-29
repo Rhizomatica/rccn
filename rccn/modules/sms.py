@@ -59,7 +59,7 @@ class SMS:
         self.destination = destination
         self.text = text
 
-        sms_log.info('Received SMS: %s %s' % (source, destination))
+        sms_log.info('Received SMS: %s %s %s' % (source, destination, text))	
         # SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
         try:
@@ -177,13 +177,13 @@ class SMS:
     
     def send(self, source, destination, text, server=config['local_ip']):
         try:
-            text=unicode(text).encode('utf-8')
-            enc_text = urllib.urlencode({'text': text })
-        except UnicodeEncodeError:
-            raise SMSException('Can\'t handle the Character Set')             
+            utext=unicode(text).encode('utf-8')
+            enc_text = urllib.urlencode({'text': utext })
+        except:
+            raise SMSException('Can\'t handle the Character Set: %s %s' % (sys.exc_info()[0],sys.exc_info()[1]) )             
         if server == config['local_ip']:
             try:
-                sms_log.info('Send SMS: %s %s' % (source, destination))
+                sms_log.info('Send SMS: %s %s %s %s' % (source, destination, text, enc_text))
                 res = urllib.urlopen(
                     "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                     % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
@@ -195,7 +195,7 @@ class SMS:
                 raise SMSException('Error connecting to Kannel to send SMS')
         else:
             try:
-                sms_log.info('Send SMS to %s: %s %s' % (server, source, destination))
+                sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
                 values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text }
                 data = urllib.urlencode(values)
                 res = urllib.urlopen('http://%s:8085/sms' % server, data).read()
