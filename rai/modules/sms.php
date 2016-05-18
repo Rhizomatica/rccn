@@ -16,11 +16,13 @@ class SMS
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
 			throw new SMSException($e->getMessage());
 		}
-			
-                $data = $response->body;
-                if ($data->status == 'failed') {
-                        throw new SMSException($data->error);
-                }
+		if ($response->code != 201) {
+      throw new SMSException($response->body);
+    }	
+    $data = $response->body;
+    if ($data->status == 'failed') {
+            throw new SMSException(htmlentities($data->error));
+    }
 	}
 
         public function send_broadcast($text, $btype) {

@@ -14,9 +14,9 @@
 <?
 function print_form($post_data,$errors) {
 
-	$message = ($_POST['message'] != '') ? $_POST['message'] : '';
-	$number = ($_POST['number'] != '') ? $_POST['number'] : '';
-	$bulk_send = ($_POST['bulk_send'] != '') ? $_POST['bulk_send'] : '';
+	$message = (isset($_POST['message']) && $_POST['message'] != '') ? $_POST['message'] : '';
+	$number = (isset($_POST['number']) && $_POST['number'] != '') ? $_POST['number'] : '';
+	$bulk_send = (isset($_POST['bulk_send']) && $_POST['bulk_send'] != '') ? $_POST['bulk_send'] : '';
 
 ?>
 

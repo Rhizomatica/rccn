@@ -35,8 +35,23 @@ class Subscription:
     def __init__(self, logger):
         self.logger = logger
 
+    def subscription_info(self):
+        sub = Subscriber()
+        unpaid=self.get_unpaid_subscriptions()
+        print '---\n\n'
+        for number in unpaid:
+            print 'PostGres: '+number[0]+':'
+            info=sub.print_vty_hlr_info(number)
+            if "No subscriber found for extension" in info:
+                print 'OsmoHLR: '+info
+                print "Checking for 5 digit extension"
+                info=sub.print_vty_hlr_info(number[0][-5:])
+            print 'OsmoHLR: '+ info
+            print '---\n\n'
+
     def get_unpaid_subscriptions(self):
         # get all subscribers that haven't paid yet
+        # Shouldn't we only do this for those who are actually authorised?
         try:
             cur = db_conn.cursor()
             cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
@@ -69,7 +84,7 @@ class Subscription:
             sms = SMS()
             sub = Subscriber()
             cur = db_conn.cursor()
-            cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0')
+            cur.execute('SELECT msisdn FROM subscribers WHERE subscription_status = 0 AND authorized = 1')
             count = cur.rowcount
             if count > 0:
                 self.logger.info('Found %d subscribers to be deactivated' % count)

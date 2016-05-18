@@ -268,8 +268,8 @@ class SMSRESTService:
 
     @route('/', Http.POST)
     def receive(self, request, source, destination, charset, coding, text):
-        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s"' % (request.getHost().host, self.path, source,
-        destination, charset, coding))
+        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s" content: %s' % (request.getHost().host, self.path, source,
+        destination, charset, coding, text))
         try:
             sms = SMS()
             sms.receive(source, destination, text, charset, coding)
@@ -282,13 +282,15 @@ class SMSRESTService:
 
     @route('/send', Http.POST)
     def send(self, request, source, destination, text):
-        api_log.info('%s - [POST] %s/send Data: source:"%s" destination:"%s"' % (request.getHost().host, self.path, source, destination))
+        api_log.info('%s - [POST] %s/send Data: source:"%s" destination:"%s text: %s"' % (request.getHost().host, self.path, source, destination, text))
         try:
             sms = SMS()
             sms.send(source, destination, text)
             data = {'status': 'success', 'error': ''}
-        except SMSException as e:
-            data = {'status': 'failed', 'error': str(e)}
+        except:
+            e=sys.exc_info()[0]
+            api_log.info('SMS Exception: %s %s' % (e, sys.exc_info()[1]))
+            data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
         
         api_log.info(data)
         return data

@@ -59,7 +59,7 @@ class SMS:
         self.destination = destination
         self.text = text
 
-        sms_log.info('Received SMS: %s %s' % (source, destination))
+        sms_log.info('Received SMS: %s %s %s %s %s' % (source, destination, text, charset, coding))	
         # SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
         try:
@@ -119,18 +119,18 @@ class SMS:
                         sms_log.info('Forward SMS back to BSC')
                         # number is local send SMS back to SMSc
                         self.context = 'SMS_LOCAL'
-                        self.send(source, destination, text)
+                        self.send(source, destination, text, charset)
                     else:
                         if not self.numbering.is_number_local(source) and destination_authorized:
                             sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
                             self.context = 'SMS_INTERNAL'
-                            self.send(source, destination, text)
+                            self.send(source, destination, text, charset)
                         else:
                             if destination_authorized and not self.numbering.is_number_local(source):
                                 sms_log.info('SMS_INBOUND Forward SMS back to BSC')
                                 # number is local send SMS back to SMSc
                                 self.context = 'SMS_INBOUND'
-                                self.send(source, destination, text)
+                                self.send(source, destination, text, charset)
                             else:
                                 self.charset = 'UTF-8'
                                 self.coding = 2
@@ -164,22 +164,28 @@ class SMS:
                             site_ip = self.numbering.get_site_ip(destination)
                             sms_log.info('Send SMS to site IP: %s' % site_ip)
                             self.context = 'SMS_INTERNAL'
-                            self.send(source, destination, text, site_ip)
+                            self.send(source, destination, text, self.charset, site_ip)
                         except NumberingException as e:
                             raise SMSException('Receive SMS error: %s' % e)
                     else:
                         # dest number is for an external number send sms to sms provider
                         self.context = 'SMS_OUTBOUND'
                         sms_log.info('SMS is for an external number send SMS to SMS provider')
+                        self.send(config['smsc'], source, 'Lo sentimos, destino '+str(destination)+ ' no disponible', 'utf-8')
 
         except NumberingException as e:
             raise SMSException('Receive SMS Error: %s' % e)
     
-    def send(self, source, destination, text, server=config['local_ip']):
-        enc_text = urllib.urlencode({'text': text })
+    def send(self, source, destination, text, charset='utf-8', server=config['local_ip']):
+        
+        try:
+            utext=unicode(text,charset).encode('utf-8')
+            enc_text = urllib.urlencode({'text': utext })
+        except:
+            raise SMSException('Encoding Error: %s %s' % (charset, sys.exc_info()[1]) )             
         if server == config['local_ip']:
             try:
-                sms_log.info('Send SMS: %s %s' % (source, destination))
+                sms_log.info('Send SMS: %s %s %s %s' % (source, destination, text, enc_text))
                 res = urllib.urlopen(
                     "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                     % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
@@ -191,7 +197,7 @@ class SMS:
                 raise SMSException('Error connecting to Kannel to send SMS')
         else:
             try:
-                sms_log.info('Send SMS to %s: %s %s' % (server, source, destination))
+                sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
                 values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text }
                 data = urllib.urlencode(values)
                 res = urllib.urlopen('http://%s:8085/sms' % server, data).read()
@@ -221,7 +227,7 @@ class SMS:
                     else:
                         # send sms to destination site
                         self.context = 'SMS_ROAMING_INTERNAL'
-                        self.send(self.source, self.destination, self.text, current_bts)
+                        self.send(self.source, self.destination, self.text, self.charset, current_bts)
                 except NumberingException as e:
                     sms_log.error(e)
             else:
@@ -243,11 +249,11 @@ class SMS:
                         # number is internal send SMS to destination site
                         current_bts = self.numbering.get_site_ip(self.destination)
                         self.context = 'SMS_ROAMING_INTERNAL'
-                        self.send(self.source, self.destination, self.text, current_bts)
+                        self.send(self.source, self.destination, self.text, self.charset, current_bts)
                     else:
                         # check if number is for outbound.
                         # not implemented yet. just return
-                        sms_log.info('Invalid destination for SMS')
+                        sms_log.info('Invalid destination for SMS')                        
                         return
         else:
             # the destination is roaming send call to current_bts
@@ -260,7 +266,7 @@ class SMS:
                 else:
                     sms_log.info('Destination is roaming send sms to other site')
                     self.context = 'SMS_ROAMING_INTERNAL'
-                    self.send(self.source, self.destination, self.text, current_bts)
+                    self.send(self.source, self.destination, self.text, self.charset, current_bts)
             except NumberingException as e:
                 sms_log.error(e)
                 
