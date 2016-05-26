@@ -179,7 +179,10 @@ class SMS:
     def send(self, source, destination, text, charset='utf-8', server=config['local_ip']):
         
         try:
-            utext=unicode(text,charset).encode('utf-8')
+            if type(text) != unicode:
+                utext=unicode(text,charset).encode('utf-8')
+            else:
+                utext=text.encode('utf-8')
             enc_text = urllib.urlencode({'text': utext })
         except:
             raise SMSException('Encoding Error: %s %s' % (charset, sys.exc_info()[1]) )             
