@@ -56,6 +56,7 @@ def handler(session, args):
     log.info('===========================================================================')
     log.info("Lookup dialplan for called number: %s" % destination_number)
     dialplan.lookup()
+    log.info('Leaving handler()')
 
 def xml_fetch(params):
 

@@ -21,6 +21,7 @@
 ############################################################################
 
 from config import *
+import pprint
 
 class Context:
     """ Context object """
@@ -136,7 +137,20 @@ class Context:
                         
         # check subscriber balance if charge local call is configured
         log.info('Send call to LCR')
+        # Hangup after bridge is true in the dialplan.
+        #self.session.execute('set','hangup_after_bridge=false')
+        self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
         self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+        _fail_cause=self.session.getVariable('originate_disposition')
+        log.info('LCR Finished with Call: %s' % _fail_cause)
+        if _fail_cause == "DESTINATION_OUT_OF_ORDER":
+            self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
+        if _fail_cause == "USER_BUSY":
+            self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
+            
+        pp=pprint.PrettyPrinter()
+        _session=pp.pformat(vars(self.session))
+        log.info(_session)
         # in case of no answer send call to voicemail
         #log.info('No answer, send call to voicemail')
         #self.session.execute('set','default_language=en')
