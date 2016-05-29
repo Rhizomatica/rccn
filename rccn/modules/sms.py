@@ -31,6 +31,8 @@ from subscriber import Subscriber, SubscriberException
 from numbering import Numbering, NumberingException
 from threading import Thread
 
+import binascii
+
 class SMSException(Exception):
     pass
 
@@ -60,6 +62,7 @@ class SMS:
         self.text = text
 
         sms_log.info('Received SMS: %s %s %s %s %s' % (source, destination, text, charset, coding))	
+        #sms_log.info(binascii.hexlify(text))
         # SMS_LOCAL | SMS_INTERNAL | SMS_INBOUND | SMS_OUTBOUND | SMS_ROAMING
 
         try:
@@ -119,6 +122,7 @@ class SMS:
                         sms_log.info('Forward SMS back to BSC')
                         # number is local send SMS back to SMSc
                         self.context = 'SMS_LOCAL'
+                        # Decision was not to send coding on here.....
                         self.send(source, destination, text, charset)
                     else:
                         if not self.numbering.is_number_local(source) and destination_authorized:
@@ -177,22 +181,29 @@ class SMS:
             raise SMSException('Receive SMS Error: %s' % e)
     
     def send(self, source, destination, text, charset='utf-8', server=config['local_ip']):
-        
+        sms_log.info('SMS Send: Text: <%s> Charset: %s' % (text, charset) )
         try:
-            if type(text) != unicode:
+            # because we might be called without charset and sent something unknown.
+            sms_log.info('Type of text: %s', (type(text)) )  
+            if charset == 'UTF-8' and type(text) != unicode:
                 utext=unicode(text,charset).encode('utf-8')
+            elif charset == 'UTF-16BE':
+                utext=text.encode('utf-16be')                                   
             else:
                 utext=text.encode('utf-8')
+                
+            sms_log.info('Type: %s', (type(utext)) )
+                
             enc_text = urllib.urlencode({'text': utext })
         except:
-            raise SMSException('Encoding Error: %s %s' % (charset, sys.exc_info()[1]) )             
+            sms_log.info('Encoding Error: %s Line:%s' % (sys.exc_info()[1], sys.exc_info()[2].tb_lineno))             
         if server == config['local_ip']:
             try:
                 sms_log.info('Send SMS: %s %s %s %s' % (source, destination, text, enc_text))
-                res = urllib.urlopen(
-                    "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
+                kannel_post="http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
                     % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
-                ).read()
+                sms_log.info('Kannel URL: %s' % (kannel_post))     
+                res = urllib.urlopen(kannel_post).read()
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)

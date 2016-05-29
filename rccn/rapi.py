@@ -23,6 +23,8 @@
 from corepost import Response, NotFoundException, AlreadyExistsException
 from corepost.web import RESTResource, route, Http 
 from config import *
+import binascii
+import gsm0338
 
 class SubscriberRESTService:
     path = '/subscriber'
@@ -267,9 +269,33 @@ class SMSRESTService:
     path = '/sms'
 
     @route('/', Http.POST)
-    def receive(self, request, source, destination, charset, coding, text):
-        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s" content: %s' % (request.getHost().host, self.path, source,
-        destination, charset, coding, text))
+    def receive(self, request, source, destination, charset, coding, text, btext, dr, dcs):
+        
+        t=binascii.hexlify(btext)
+        
+        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' % (request.getHost().host, self.path, source,
+        destination, charset, coding, text, t, dr, dcs))
+
+        # Kannel sends us GSM0338 but sets coding to UTF-8. 
+        if coding == '0':
+            try:
+                text=btext.decode('gsm0338')
+                api_log.info('GSM 03.38 decoded: "%s"' % text)            
+            except: # Catch Everything, try to not actually LOSE messages!  
+                e=sys.exc_info()[0]
+                api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
+                data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
+                text=btext
+        # Kannel can have problems if we send back UTF-16BE, so let's standardise here:
+        if coding == '2' and charset == 'UTF-16BE':
+            try:
+                text=btext.decode('utf-16be')
+                api_log.info('UTF-16BE decoded: "%s"' % text)            
+            except: # Catch Everything, try to not actually LOSE messages!  
+                e=sys.exc_info()[0]
+                api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
+                data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
+                text=btext        
         try:
             sms = SMS()
             sms.receive(source, destination, text, charset, coding)
