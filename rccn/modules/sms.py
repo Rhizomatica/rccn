@@ -193,7 +193,11 @@ class SMS:
                 utext=text.encode('utf-8')
                 
             sms_log.info('Type: %s', (type(utext)) )
-                
+
+            # I think we ALWAYS need to send coding=2 to kannel.
+            if type(text) == unicode:
+		self.coding = 2
+    
             enc_text = urllib.urlencode({'text': utext })
         except:
             sms_log.info('Encoding Error: %s Line:%s' % (sys.exc_info()[1], sys.exc_info()[2].tb_lineno))             

@@ -276,7 +276,7 @@ class SMSRESTService:
         api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' % (request.getHost().host, self.path, source,
         destination, charset, coding, text, t, dr, dcs))
 
-        # Kannel sends us GSM0338 but sets coding to UTF-8. 
+        # Kannel sends us GSM0338 but sets charset to UTF-8 and coding to 0
         if coding == '0':
             try:
                 text=btext.decode('gsm0338')
