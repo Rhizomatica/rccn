@@ -171,11 +171,13 @@ class SMS:
                             self.send(source, destination, text, self.charset, site_ip)
                         except NumberingException as e:
                             raise SMSException('Receive SMS error: %s' % e)
-                    else:
+                    elif len(destination) != 3:
                         # dest number is for an external number send sms to sms provider
                         self.context = 'SMS_OUTBOUND'
                         sms_log.info('SMS is for an external number send SMS to SMS provider')
                         self.send(config['smsc'], source, 'Lo sentimos, destino '+str(destination)+ ' no disponible', 'utf-8')
+                    else:
+                        sms_log.info('SMS for %s was dropped' % destination)
 
         except NumberingException as e:
             raise SMSException('Receive SMS Error: %s' % e)
