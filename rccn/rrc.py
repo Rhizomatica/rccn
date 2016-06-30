@@ -109,6 +109,31 @@ def update_local_subscribers():
         except SubscriberException as e:
             roaming_log.error("An error ocurred updating the location of %s: %s" % (imsi, e))
 
+def update_local_connected():
+    sub = Subscriber()
+    num = Numbering()
+    roaming_log.info('Getting all local (our) connected subscribers')
+    try:
+        c = sub.get_all_connected()
+    except SubscriberException as e:
+        roaming_log.info("Error getting Connected Subscribers: %s" % e)
+        return
+    roaming_log.info("Got %s connected Subscribers" % len(c))
+    try:
+        for msisdn in c:
+            bts = num.get_current_bts(msisdn)
+            roaming_log.info("%s is at %s acording to local hlr" % (msisdn[0], bts))
+            if  bts != config['local_ip']:
+                try:
+                    imsi = sub._get_imsi(msisdn[0])
+                except SubscriberException as e:
+                    roaming_log.info("Error getting IMSI for %s: %s" % (str(msisdn[0]), e))
+                    continue
+                roaming_log.info("Moving %s IMSI:%s home" % (msisdn[0], imsi))
+                sub.update_location(imsi, msisdn[0], True)
+    except SubscriberException as e:
+        roaming_log.info("Error updating DHLR for %s: %s" % (msisdn[0], e))
+
 def purge_inactive_subscribers():
     sub = Subscriber()
     try:
@@ -126,5 +151,5 @@ def purge_inactive_subscribers():
 
 if __name__ == '__main__':
     update_foreign_subscribers()
-    update_local_subscribers()
+    update_local_connected()
     purge_inactive_subscribers()
