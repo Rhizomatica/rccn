@@ -114,7 +114,7 @@ def update_local_connected():
     num = Numbering()
     roaming_log.info('Getting all local (our) connected subscribers')
     try:
-        c = sub.get_all_disconnected()
+        c = sub.get_all_connected()
     except SubscriberException as e:
         roaming_log.info("Error getting Connected Subscribers: %s" % e)
         return
