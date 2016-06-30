@@ -114,7 +114,7 @@ def update_local_connected():
     num = Numbering()
     roaming_log.info('Getting all local (our) connected subscribers')
     try:
-        c = sub.get_all_connected()
+        c = sub.get_all_disconnected()
     except SubscriberException as e:
         roaming_log.info("Error getting Connected Subscribers: %s" % e)
         return
@@ -129,7 +129,7 @@ def update_local_connected():
                 except SubscriberException as e:
                     roaming_log.info("Error getting IMSI for %s: %s" % (str(msisdn[0]), e))
                     continue
-                roaming_log.info("Moving %s IMSI:%s home" % (msisdn[0], imsi))
+                roaming_log.info("Moving %s IMSI:%s home (was %s)" % (msisdn[0], imsi, bts))
                 sub.update_location(imsi, msisdn[0], True)
     except SubscriberException as e:
         roaming_log.info("Error updating DHLR for %s: %s" % (msisdn[0], e))
