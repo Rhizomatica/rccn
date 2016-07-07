@@ -73,12 +73,14 @@ class SMS:
             # check if source or destination is roaming
             try:
                 if self.numbering.is_number_roaming(source):
+                # FIXME: ^^ Returns False for unregistered or unknown numbers.
                     sms_log.info('Source number is roaming')
                     self.roaming('caller')
 		    return
             except NumberingException as e:
-                sms_log.info('Sender unauthorized send notification message')
+                sms_log.info('Sender unauthorized send notification message (exception)')
                 self.context = 'SMS_UNAUTH'
+                self.coding = 2
                 self.send(config['smsc'], source, config['sms_source_unauthorized'])
                 return
 
@@ -106,8 +108,9 @@ class SMS:
 
 
             if not source_authorized and not self.numbering.is_number_internal(source):
-                sms_log.info('Sender unauthorized send notification message')
+                sms_log.info('Sender unauthorized send notification message (EXT)')
                 self.context = 'SMS_UNAUTH'
+                self.coding = 2
                 self.send(config['smsc'], source, config['sms_source_unauthorized'])
                 return
 
@@ -187,7 +190,7 @@ class SMS:
         try:
             # because we might be called without charset and sent something unknown.
             sms_log.info('Type of text: %s', (type(text)) )  
-            if charset == 'UTF-8' and type(text) != unicode:
+            if (charset == 'UTF-8' or charset == 'utf-8') and type(text) != unicode:
                 utext=unicode(text,charset).encode('utf-8')
             elif charset == 'UTF-16BE':
                 utext=text.encode('utf-16be')                                   
