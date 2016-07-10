@@ -83,7 +83,7 @@ def update_list(subscribers, welcome=False):
 
 
         except NumberingException as e:
-            roaming_log.debug("Couldn't retrieve msisdn from the imsi: %s" % e)
+            roaming_log.debug("Couldn't retrieve msisdn %s from the imsi: %s" % (msisdn,e))
         except SubscriberException as e:
             roaming_log.error("An error ocurred adding the roaming number %s: %s" % (number, e))
 
@@ -101,7 +101,7 @@ def update_local_subscribers():
         try:
             msisdn = sub.get_local_msisdn(imsi)
         except SubscriberException as e:
-            roaming_log.info("Couldn't retrieve the msisdn from imsi %s: %s" % (imsi, e))
+            roaming_log.info("Couldn't retrieve the msisdn %s from imsi %s: %s" % (msisdn, imsi, e))
             continue
         try:
             roaming_log.info('Subscriber %s is back at home_bts, update location' % msisdn)
@@ -137,7 +137,7 @@ def update_local_connected():
 def purge_inactive_subscribers():
     sub = Subscriber()
     try:
-        inactive = sub.get_all_inactive_roaming()
+        inactive = sub.get_all_inactive_roaming_since(3)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of inactive: %s" % e)
         return
@@ -150,6 +150,16 @@ def purge_inactive_subscribers():
             roaming_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
 
 if __name__ == '__main__':
-    update_foreign_subscribers()
-    update_local_connected()
-    purge_inactive_subscribers()
+    if len(sys.argv) == 1:
+        update_foreign_subscribers()
+        update_local_connected()
+        purge_inactive_subscribers()
+    else:
+        if sys.argv[1] == 'f':
+            update_foreign_subscribers()
+        elif sys.argv[1] == 'u':
+            update_local_connected()
+        elif sys.argv[1] == 'p':
+            purge_inactive_subscribers()
+        else:
+            print ("Unknown Option: %s" % sys.argv[1])

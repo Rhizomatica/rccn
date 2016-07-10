@@ -177,6 +177,22 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
+    def get_all_disconnected(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select extension from subscriber where extension like ? and lac = 0", [(config['internal_prefix']+'%')])
+            disconnected = sq_hlr_cursor.fetchall()
+            if disconnected == []:
+                raise SubscriberException('No disconnected subscribers found')
+            else:
+                sq_hlr.close()
+                return disconnected
+
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
     def get_all_unregistered(self):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -226,6 +242,47 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
+    def get_all_inactive_roaming_since(self, days):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            _sql=("select extension from subscriber where length(extension) = 11 and extension not like \"%(prefix)s%%\" and lac = 0 and updated < date('now', '-%(days)s days')" % {'days': days, 'prefix': config['internal_prefix']})
+            print _sql
+            sq_hlr_cursor.execute(_sql)
+            inactive = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            return inactive
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
+    def get_all_roaming_ours(self):
+        try:
+            b = riak_client.bucket('hlr')
+            b.set_property('r',1)
+            # Lets do it by site.
+            #s = riak_client.bucket('sites')
+            #s.set_property('r',1)
+            #sites=s.get_keys()
+            # We only actually care here about us
+            sites=[config['internal_prefix']]
+            results=[]
+            for site in sites:
+                roaming_log.info('Start searching site: %s' % site)
+                keys = b.get_index('msisdn_bin',site,str(int(site)+1)).results
+                roaming_log.info('Got %s keys' % len(keys) )
+                for imsi in keys:
+                    data = b.get(imsi).data
+                    if type(data) is not dict:
+                        continue
+                    if data['home_bts'] != data['current_bts']:
+                        results.append(imsi)
+            return results
+        except riak.RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
+        except socket.error:
+            raise SubscriberException('RK_HLR error: unable to connect')
 
     def get_all_roaming(self):
         try:
@@ -425,7 +482,8 @@ class Subscriber:
             update_date = datetime.datetime.fromtimestamp(subscriber.data['updated'])
             cur.execute('UPDATE hlr SET msisdn=%(msisdn)s, home_bts=%(home_bts)s, current_bts=%(current_bts)s, '
                         'authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
-            {'msisdn': subscriber.data['msisdn'], 'home_bts': subscriber.data['home_bts'], 'current_bts': subscriber.data['current_bts'],
+            {'msisdn': subscriber.data['msisdn'], 'home_bts': subscriber.data['home_bts'],
+            'current_bts': subscriber.data['current_bts'],
             'authorized': subscriber.data['authorized'], 'updated': update_date})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
