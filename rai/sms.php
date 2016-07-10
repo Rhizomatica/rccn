@@ -18,7 +18,7 @@
 			<? print_menu('sms'); ?>	
 
 			<h1><?= _("SMS History") ?></h1><br/>
-			<div id="dynamic" style="margin-left: 20px;">
+			<div id="dynamic">
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
 	<thead>
 		<tr>

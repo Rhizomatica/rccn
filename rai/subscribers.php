@@ -1,55 +1,52 @@
 <?php 
-
-	require_once('include/header.php');
-	require_once('include/menu.php');
-	require_once('modules/subscriber.php');
-
+require_once('include/header.php');
+require_once('include/menu.php');
+require_once('modules/subscriber.php');
 ?>
-			<? print_menu('subscribers'); ?>
+	<? print_menu('subscribers'); ?>
 
-                	<script type="text/javascript" charset="utf-8">
-                        $(document).ready(function() {
-                                $('#example').dataTable( {
-					<?
-					/*$lang_file = 'js/'.$_SESSION['lang'].'.txt';
-					if (file_exists($lang_file)) {
-						echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
-					}*/
-					?>
-                                        "sPaginationType": "full_numbers",
-                                        "bProcessing": true,
-                                        "bServerSide": true,
-                                        "aaSorting": [[ 0, "desc" ]],
-                                        "aoColumnDefs": [
-                                           {
-                                                "aTargets": [8],
-                                                "mData": null,
-                                                "mRender": function (data, type, full) {
-                                                    sub = full[4].match(/\d\d\d\d\d\d\d\d\d\d\d/);
-                                                    return '<a href="subscriber_edit.php?id='+sub+'" class="pop"><img src="img/edit.png" alt="Edit" valign="middle" /></a> | <a href="subscriber_delete.php?id='+sub+'" class="pop"><img src="img/delete.png" alt="Delete" valign="middle" /></a>';
-                                                }
-                                            }
-                                        ],
-                                        "aoColumns": [
-                                                {},{},{"sClass": "center"},{"sClass": "center"},{},{},{}
-                                        ],
-                                        "fnDrawCallback": function () {
-                                                $(".pop").fancybox({
-                                                    'width'             : '50%',
-                                                    'height'            : '70%',
-                                                    'autoScale'         : false,
-                                                    'type'              : 'iframe',
-                                                    'onClosed'          : function() {
-                                                          parent.location.reload(true);
-                                                    }
-                                                });
-                                        },
-                                        "sAjaxSource": "subscribers_processing.php"
-                                } );
-
-                        });
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            $('#example').dataTable( {
+                <?
+                $lang_file = 'js/'.$_SESSION['lang'].'.txt';
+                if (file_exists($lang_file)) {
+                    echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
+                }
+                ?>
+                "sPaginationType": "full_numbers",
+                "bProcessing": true,
+                "bServerSide": true,
+                "aaSorting": [[ 0, "desc" ]],
+                "aoColumnDefs": [
+                   {
+                        "aTargets": [8],
+                        "mData": null,
+                        "mRender": function (data, type, full) {
+                            sub = full[4].match(/\d\d\d\d\d\d\d\d\d\d\d/);
+                            return '<a href="subscriber_edit.php?id='+sub+'" class="pop"><img src="img/edit.png" alt="Edit" valign="middle" /></a> | <a href="subscriber_delete.php?id='+sub+'" class="pop"><img src="img/delete.png" alt="Delete" valign="middle" /></a>';
+                        }
+                    }
+                ],
+                "aoColumns": [
+                        {},{},{"sClass": "center"},{"sClass": "center"},{},{},{}
+                ],
+                "fnDrawCallback": function () {
+                        $(".pop").fancybox({
+                            'width'             : '50%',
+                            'height'            : '80%',
+                            'autoScale'         : false,
+                            'type'              : 'iframe',
+                            'onClosed'          : function() {
+                                  parent.location.reload(true);
+                            }
+                        });
+                },
+                "sAjaxSource": "subscribers_processing.php"
+            } );
+        });
                         
-	                </script><br/>
+	</script><br/>
                         <?php
                             try {
                                 $sub = new Subscriber();
@@ -72,7 +69,7 @@
 
 
 			<h1><?= _('Subscribers Phones') ?></h1><br/>
-			<div id="dynamic" style="margin-left: 20px;">
+			<div id="dynamic">
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
 	<thead>
 		<tr>
