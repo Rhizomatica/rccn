@@ -9,12 +9,11 @@ require_once('include/menu.php');
                         $(document).ready(function() {
                                 $('#example').dataTable( {
                                         <?
-                                        /*$lang_file = 'js/'.$_SESSION['lang'].'.txt';
+                                        $lang_file = 'js/'.$_SESSION['lang'].'.txt';
                                         if (file_exists($lang_file)) {
                                                 echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
-                                        }*/
+                                        }
                                         ?>
-
                                         "sPaginationType": "full_numbers",
                                         "bProcessing": true,
                                         "bServerSide": true,

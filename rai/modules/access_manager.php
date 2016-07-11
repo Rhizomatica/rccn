@@ -18,6 +18,7 @@ class AccessManager
 			$this->initializeSession();
 			header('Location: subscribers.php');
 		} else {
+			return;
 			header('Location: login.php');
 		}
 	}
