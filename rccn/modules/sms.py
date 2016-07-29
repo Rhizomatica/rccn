@@ -221,7 +221,7 @@ class SMS:
         else:
             try:
                 sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
-                values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text }
+                values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text, 'btext': '', 'dr': '', 'dcs': ''}
                 data = urllib.urlencode(values)
                 res = urllib.urlopen('http://%s:8085/sms' % server, data).read()
                 if self.save_sms:
