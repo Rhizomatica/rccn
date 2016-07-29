@@ -144,7 +144,7 @@ except psycopg2.DatabaseError as e:
 #riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
 # use protocol buffers
 try:
-    riak_client = riak.RiakClient(host=vpn_ip_address, pb_port=8087, protocol='pbc', RETRY_COUNT=1)
+    riak_client = riak.RiakClient(host=riak_ip_address, pb_port=8087, protocol='pbc', RETRY_COUNT=1)
 except socket.error(111, 'Connection refused'):
     log.error('RK_HLR error: unable to connect')
 
