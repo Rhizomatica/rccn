@@ -52,7 +52,7 @@ header('Content-Type: text/html; charset=utf-8');
 			    @import "css/form.css";
                 @import "js/fancybox/jquery.fancybox-1.3.4.css";
                 </style>
-                <link rel="stylesheet" href="css/jquery-ui.css" type="text/css" />   
+                <link rel="stylesheet" href="css/jquery-ui.min.css" type="text/css" />   
                 <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
