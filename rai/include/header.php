@@ -46,13 +46,15 @@ header('Content-Type: text/html; charset=utf-8');
 
                 <title><?=_('RAI - Rhizomatica Administration Interface')?></title>
                 <style type="text/css" title="currentStyle">
-                        @import "css/page.css";
-                        @import "css/table.css";
-			@import "css/login.css";
-			@import "css/form.css";
-                        @import "js/fancybox/jquery.fancybox-1.3.4.css";
+                @import "css/page.css";
+                @import "css/table.css";
+			    @import "css/login.css";
+			    @import "css/form.css";
+                @import "js/fancybox/jquery.fancybox-1.3.4.css";
                 </style>
+                <link rel="stylesheet" href="css/jquery-ui.css" type="text/css" />   
                 <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
+                <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.columnFilter.js"></script>
                 <script type="text/javascript" language="javascript" src="js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
