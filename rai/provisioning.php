@@ -8,7 +8,7 @@ print_menu('subscribers');
  
 ?>	
 
-<br/><br/><br/><br/>
+<br/><br/><br/>
 
 <?php
 
@@ -23,9 +23,17 @@ function print_form($post_data,$errors) {
 	
 
 ?>
-			<div id="stylized" class="myform">
+
+			<div id="stylized" class="myform" style="width:500px">
 				<form id="form" name="form" method="post" action="provisioning.php">
-				<h1><?= _("Provision a new subscriber") ?></h1><br/>
+				<h1><?= _("Provision a new subscriber") ?></h1>
+					<div id="tabs" class="ui-override">
+					<ul>
+					  <li><a href="#imsi">IMSI</a></li>
+					  <li><a href="#imei">IMEI</a></li>
+					</ul>
+			<div id="imsi">
+
 <?php
 				// get imsi
 				$imsi = shell_exec("/var/rhizomatica/bin/get_imsi.py");
@@ -87,11 +95,52 @@ function print_form($post_data,$errors) {
 				<div class="spacer"></div>
 				</form>
 			</div>
+
+			<div id="imei">
+
+                <label><?= _("Name") ?>
+                <span class="small"><?= _("Subscriber Name") ?></span>
+                </label>
+                <input type="text" name="firstname" id="firstname" value="<?=$firstname?>"/>
+
+				<label>IMEI ( *#06# )</label>
+				<input type="text" name="imei" id="imei_box" />
+				<br />
+				<button type="submit" name="add_subscriber"><?= _("Add") ?></button>
+				<div class="spacer"></div>
+
+<script>
+  $( function() {
+  	    $( "#imei_box" ).autocomplete(
+  	      {
+          source: "/rai/ajax.php?service=imei",
+          minLength: 1
+          }
+         );
+  });
+</script>
+
+
+			</div>
+		</div>
+	</div>
 <?
 }	
 				$error_txt = "";
 				// errors check
-				if (isset($_POST['add_subscriber'])) {
+				
+				if (isset($_POST['imei']) && strlen($_POST['imei'])==15) {
+					$firstname = $_POST['firstname'];
+					$callerid = rtrim($_POST['imei'],'X');
+					$path = "http://localhost:8085/subscriber/imei/".$callerid;
+					$response = \Httpful\Request::get($path)->expectsJson()->send();
+					$data = $response->body;
+					$callerid=$data[0][2];
+					if (strlen($callerid)==11) {
+						$error_txt .= _("Subscriber already exists:").' '.$callerid;
+					}
+
+				} elseif (isset($_POST['callerid'])) {
 					// form pressed verify if any data is missing
 					$firstname = $_POST['firstname'];
 					$callerid = $_POST['callerid'];
@@ -110,11 +159,11 @@ function print_form($post_data,$errors) {
 
 				if (isset($_POST['add_subscriber']) && $error_txt != "") {
 					print_form(1,$error_txt);
-				}elseif (isset($_POST['add_subscriber']) && $error_txt == "") {
+				} elseif (isset($_POST['add_subscriber']) && $error_txt == "") {
 					// no error process form
 		                        
 					$firstname = $_POST['firstname'];
-                                        $callerid = $_POST['callerid'];
+                    //$callerid = $_POST['callerid'];
 					$location = $_POST['location'];
 
 					// get internal prefix
@@ -151,5 +200,10 @@ function print_form($post_data,$errors) {
 			?>
 
 		</div>
+<script>
+  $( function() {
+    $( "#tabs" ).tabs();
+  } );
+</script>
 	</body>
 </html>

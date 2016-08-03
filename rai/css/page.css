@@ -306,3 +306,19 @@ nav ul {
 	margin-left: 15px;
 	margin-right: 8px;
 }
+.ui-override .ui-tabs-active a {
+	color: #FFFFFF !important;
+
+}
+.ui-override .ui-widget-header {
+    background: #333333;
+    background: linear-gradient(top, #333333 0%, #666666 100%);
+    background: -moz-linear-gradient(top, #333333 0%, #666666 100%);
+    background: -webkit-linear-gradient(top, #333333 0%,#666666 100%);
+}
+.ui-autocomplete {
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+	
