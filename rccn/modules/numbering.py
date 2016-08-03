@@ -101,6 +101,48 @@ class Numbering:
         except socket.error:
             raise NumberingException('RK_HLR error: unable to connect')
 
+    def get_msisdn_from_imei(self, imei):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sql=('SELECT Equipment.imei, Subscriber.imsi, '
+            'Subscriber.extension, Equipment.updated '
+            'FROM Equipment, EquipmentWatch, Subscriber '
+            'WHERE EquipmentWatch.equipment_id=Equipment.id '
+            'AND EquipmentWatch.subscriber_id=Subscriber.id '
+            'AND Equipment.imei=? '
+            'ORDER BY Equipment.updated DESC;')
+            print sql
+            sq_hlr_cursor.execute(sql, [(imei)])
+            extensions = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            return extensions
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise NumberingException('SQ_HLR error: %s' % e.args[0])
+
+    def get_imei_autocomplete(self, partial_imei=''):
+        try: 
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sql='SELECT DISTINCT Equipment.imei FROM Equipment '
+            if partial_imei!='':
+                sql+='WHERE Equipment.imei LIKE ? '
+                sq_hlr_cursor.execute(sql, [(partial_imei+'%')])
+            else:
+                sq_hlr_cursor.execute(sql)
+            imeis = sq_hlr_cursor.fetchall()
+            sq_hlr.close()
+            if imeis == []:
+                return []
+            if len(imeis)==1:
+                data=self.get_msisdn_from_imei(imeis[0][0])
+                return data
+            else:
+                return imeis
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise NumberingException('SQ_HLR error: %s' % e.args[0])
 
     def get_current_bts(self, number):
         try:

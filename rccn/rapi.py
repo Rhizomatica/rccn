@@ -145,7 +145,28 @@ class SubscriberRESTService:
 
         api_log.info(data)
         return data
-        
+
+    # Get List of IMEI for autocomplete
+    @route('/imei')
+    def imei(self, request):
+        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, partial_imei))
+        try:
+            num = Numbering()
+            data = json.dumps(num.get_imei_autocomplete())
+        except NumberingException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return data
+
+    @route('/imei/<partial_imei>')
+    def imei(self, request, partial_imei):
+        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, partial_imei))
+        try:
+            num = Numbering()
+            data = json.dumps(num.get_imei_autocomplete(partial_imei))
+        except NumberingException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return data
+
 class ResellerRESTService:
     path = '/reseller'
    
