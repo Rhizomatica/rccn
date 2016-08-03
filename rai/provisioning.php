@@ -139,6 +139,10 @@ function print_form($post_data,$errors) {
 					if (strlen($callerid)==11) {
 						$error_txt .= _("Subscriber already exists:").' '.$callerid;
 					}
+					if (strlen($callerid)!=5) {
+						$error_txt .= _("Subscriber not found").' '.$callerid;
+					}
+
 
 				} elseif (isset($_POST['callerid'])) {
 					// form pressed verify if any data is missing
