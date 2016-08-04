@@ -106,6 +106,21 @@ function print_form($post_data,$errors,$active_tab='0') {
 		<span class="small"><?= _("The phone must be connected or have recently attempted to connect") ?></span>
 		</label>
 		<input type="text" name="imei" id="imei_text" />
+<?php
+				if (count($locations) > 1) {
+?>
+				<label><?= _("Location") ?>
+				<span class="small"><?= _("Subscriber location") ?></span>
+				</label>
+<?php
+					echo "<select name='location_imei' id='location_imei'>";
+					foreach ($locations as $rloc) {
+						echo "<option value='".$rloc->name."'>".$rloc->name."</option>";
+					}
+					echo "</select>";
+				}
+					
+?>
 		<br />
 		<button type="submit" name="add_subscriber_imei"><?= _("Add") ?></button>
 		<div class="spacer"></div>
@@ -137,6 +152,7 @@ function print_form($post_data,$errors,$active_tab='0') {
 		if ($firstname == "") {
 			$error_txt .= _("Name is empty")."<br/>";
 		}
+		$location = $_POST['location_imei'];
 		if (isset($_POST['imei']) && strlen($_POST['imei'])==15) {
 
 			$imei = rtrim($_POST['imei'],'X');
@@ -177,10 +193,6 @@ function print_form($post_data,$errors,$active_tab='0') {
 		} elseif ($error_txt == "") {
 			// no error process form
 	                    
-			$firstname = $_POST['firstname'];
-	        //$callerid = $_POST['callerid'];
-			$location = $_POST['location'];
-
 			// get internal prefix
 			$site = new Configuration();
 			$info = $site->getSite();

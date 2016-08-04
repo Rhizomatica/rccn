@@ -106,12 +106,12 @@ class Numbering:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             sql=('SELECT Equipment.imei, Subscriber.imsi, '
-            'Subscriber.extension, Equipment.updated '
+            'Subscriber.extension, Subscriber.updated '
             'FROM Equipment, EquipmentWatch, Subscriber '
             'WHERE EquipmentWatch.equipment_id=Equipment.id '
             'AND EquipmentWatch.subscriber_id=Subscriber.id '
             'AND Equipment.imei=? '
-            'ORDER BY Equipment.updated DESC;')
+            'ORDER BY Subscriber.updated DESC LIMIT 1;')
             print sql
             sq_hlr_cursor.execute(sql, [(imei)])
             extensions = sq_hlr_cursor.fetchall()
