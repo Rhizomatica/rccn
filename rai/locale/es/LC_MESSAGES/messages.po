@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-11 16:38+0100\n"
+"POT-Creation-Date: 2016-08-04 16:02+0200\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
 "Last-Translator: Keith <keith@rhizomatica.org>\n"
 "Language: es\n"
@@ -60,8 +60,8 @@ msgstr "Autorizado"
 msgid "Number"
 msgstr "Número Telefónico"
 
-#: subscribers.php:81 subscribers.php:99 provisioning.php:60
-#: subscriber_edit.php:43
+#: subscribers.php:81 subscribers.php:99 provisioning.php:66
+#: provisioning.php:100 subscriber_edit.php:43
 msgid "Name"
 msgstr "Nombre"
 
@@ -70,7 +70,7 @@ msgid "Balance"
 msgstr "Saldo"
 
 #
-#: subscribers.php:83 subscribers.php:101 provisioning.php:73
+#: subscribers.php:83 subscribers.php:101 provisioning.php:79
 #: subscriber_edit.php:57
 msgid "Location"
 msgstr "Ubicación"
@@ -110,8 +110,8 @@ msgstr "¡Error al cargar la información!"
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 send_sms.php:84 send_sms.php:95
 #: send_sms.php:99 send_sms.php:107 send_sms.php:111 resellers_credit.php:83
-#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:139
-#: provisioning.php:143 resellers_provisioning.php:85
+#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:203
+#: provisioning.php:208 resellers_provisioning.php:85
 #: resellers_provisioning.php:89
 msgid "Go Back"
 msgstr "Regresar"
@@ -264,9 +264,9 @@ msgid "Invoice Number"
 msgstr "Número de Recibo"
 
 #: credit_history.php:33 credit_history.php:48 credit.php:27 credit.php:28
-#: credit.php:32 credit.php:61 credit.php:64 provisioning.php:65
-#: provisioning.php:66 provisioning.php:137 subscriber_edit.php:49
-#: subscriber_edit.php:50 subscriber_edit.php:132
+#: credit.php:32 credit.php:61 credit.php:64 provisioning.php:72
+#: provisioning.php:201 subscriber_edit.php:49 subscriber_edit.php:50
+#: subscriber_edit.php:132
 msgid "Subscriber number"
 msgstr "Teléfono del usuario"
 
@@ -415,13 +415,13 @@ msgstr "Contraseña:"
 msgid "Login"
 msgstr "Entrar"
 
-#: login.php:70
 #
+#: login.php:70
 msgid "Username is empty"
 msgstr "Usuario está vacío"
 
-#: login.php:73
 #
+#: login.php:73
 msgid "Password is empty"
 msgstr "Contraseña está vacío"
 
@@ -453,8 +453,8 @@ msgstr "Cantidad"
 msgid "Amount to add"
 msgstr "Cantidad de recarga"
 
-#: resellers_credit.php:42 credit.php:42 provisioning.php:86
-#: resellers_provisioning.php:43
+#: resellers_credit.php:42 credit.php:42 provisioning.php:92
+#: provisioning.php:110 resellers_provisioning.php:43
 msgid "Add"
 msgstr "Añadir"
 
@@ -621,46 +621,67 @@ msgstr "SMS"
 msgid "CDRs"
 msgstr "CDR"
 
-#: include/header.php:47 include/header.php:65
+#: include/header.php:47 include/header.php:67
 msgid "RAI - Rhizomatica Administration Interface"
 msgstr "RAI - Interfaz de Administración"
 
-#: provisioning.php:28
+#: provisioning.php:29
 msgid "Provision a new subscriber"
 msgstr "Dar de alta a nuevo usuario"
 
-#: provisioning.php:61 subscriber_edit.php:44
+#: provisioning.php:67 provisioning.php:101 subscriber_edit.php:44
 msgid "Subscriber Name"
 msgstr "Nombre del usuario"
 
+#: provisioning.php:71
+msgid "Subscriber number or IMSI"
+msgstr "Teléfono del usuario o IMSI"
+
 #
-#: provisioning.php:74 subscriber_edit.php:58
+#: provisioning.php:80 subscriber_edit.php:58
 msgid "Subscriber location"
 msgstr "Ubicación del usuario"
 
-#: provisioning.php:101 subscriber_edit.php:105
+#: provisioning.php:106
+msgid "The phone must be connected or have recently attempted to connect"
+msgstr "El teléfono debe o estar conectado o haber recien intentado conectar"
+
+#: provisioning.php:138 provisioning.php:165 subscriber_edit.php:105
 msgid "Name is empty"
 msgstr "Nombre está vacío"
 
+#: provisioning.php:148
+msgid "Subscriber already exists:"
+msgstr "Usuario ya existe:"
+
 #
-#: provisioning.php:104
+#: provisioning.php:150
+msgid "Subscriber not found"
+msgstr "Usuario no encontrado"
+
+#: provisioning.php:153
+msgid "Invalid IMEI"
+msgstr "IMEI no valido"
+
+#
+#: provisioning.php:168
 msgid "Subscriber number is empty"
 msgstr "Teléfono del usuario vacío"
 
 #
-#: provisioning.php:107
+#: provisioning.php:170
 msgid "Invalid number"
 msgstr "Número inválido"
 
-#: provisioning.php:135
+#: provisioning.php:199
 msgid "Subscriber already exists! New subscriber number"
 msgstr "El usuario ya existe! Número de nuevo usuario"
 
-#: provisioning.php:135 provisioning.php:137 resellers_provisioning.php:84
+#: provisioning.php:199 provisioning.php:201 resellers_provisioning.php:84
 msgid "Successfully provisioned with an initial balance of"
 msgstr "Se ha dado de alta con éxito con un saldo inicial de"
 
-#: provisioning.php:142
+#: provisioning.php:206
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr "ERROR AL DAR DE ALTA AL USUARIO"
 
