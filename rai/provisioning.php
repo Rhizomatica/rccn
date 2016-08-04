@@ -13,67 +13,65 @@ print_menu('subscribers');
 <?php
 
 
-function print_form($post_data,$errors) {
+function print_form($post_data,$errors,$active_tab='0') {
 
 	$firstname = ($_POST['firstname'] != '') ? $_POST['firstname'] : '';
+	$firstname_imei = ($_POST['firstname_imei'] != '') ? $_POST['firstname_imei'] : '';
 	$callerid = ($_POST['callerid'] != '') ? $_POST['callerid'] : '';
 	$amount = ($_POST['amount'] != '') ? $_POST['amount'] : '0';
 	$location = ($_POST['location'] != '') ? $_POST['location'] : '';
-
 	
 
 ?>
 
-			<div id="stylized" class="myform" style="width:500px">
-				<form id="form" name="form" method="post" action="provisioning.php">
-				<h1><?= _("Provision a new subscriber") ?></h1>
-					<div id="tabs" class="ui-override">
-					<ul>
-					  <li><a href="#imsi">IMSI</a></li>
-					  <li><a href="#imei">IMEI</a></li>
-					</ul>
-			<div id="imsi">
+	<div id="stylized" class="myform" style="width:500px">
+		<form id="form" name="form" method="post" action="provisioning.php">
+		<h1><?= _("Provision a new subscriber") ?></h1>
+			<div id="tabs" class="ui-override">
+			<ul>
+			  <li><a href="#imsi">IMSI</a></li>
+			  <li><a href="#imei">IMEI</a></li>
+			</ul>
+	<div id="imsi">
 
 <?php
-				// get imsi
+		// get imsi
+		$imsi_script="/var/rhizomatica/bin/get_imsi.py";
+		if (file_exists($imsi_script) && is_executable($imsi_script)) {
 				$imsi = shell_exec("/var/rhizomatica/bin/get_imsi.py");
 				if (isset($imsi) && strlen($imsi) == 16) {
 					echo "&nbsp;&nbsp;Got IMSI: $imsi";
+					$sub = new Subscriber();
+	                try {
+	                    $ext = $sub->get_extension($imsi);
+					} catch (SubscriberException $e) { 
+						echo "&nbsp;&nbsp;Error getting Subscriber extension";
+					}
 				} else {
 					echo "&nbsp;&nbsp;Error getting IMSI please retry";
 				}
+		}
 
-				$sub = new Subscriber();
-                                try {
-                                	$ext = $sub->get_extension($imsi);
-				} catch (SubscriberException $e) { 
-					echo "&nbsp;&nbsp;Error getting Subscriber extension";
-				}
-
-
-                                try {
-					$loc = new Configuration();
-					$locations = $loc->getLocations();
+        try {
+			$loc = new Configuration();
+			$locations = $loc->getLocations();
 				
-				} catch (ConfigurationException $e) {
-					echo "&nbsp;&nbsp;Error getting locations";
-				}
-
+		} catch (ConfigurationException $e) {
+			echo "&nbsp;&nbsp;Error getting locations";
+		}
 
 ?>
 
+	<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
+                    <label><?= _("Name") ?>
+                    <span class="small"><?= _("Subscriber Name") ?></span>
+                    </label>
+                    <input type="text" name="firstname" id="firstname" value="<?=$firstname?>"/>
 
-				<br/>
-				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
-                                <label><?= _("Name") ?>
-                                <span class="small"><?= _("Subscriber Name") ?></span>
-                                </label>
-                                <input type="text" name="firstname" id="firstname" value="<?=$firstname?>"/>
-
-				<label><?= _("Subscriber number") ?>
-				<span class="small"><?= _("Subscriber number") ?></span>
-				</label>
-				<input type="text" name="callerid" id="callerid" value="<?=$ext?>"/>
+	<label><?= _("Subscriber number or IMSI") ?>
+	<span class="small"><?= _("Subscriber number") ?></span>
+	</label>
+	<input type="text" name="callerid" id="callerid" value="<?=$ext?>"/>
 
 <?php
 				if (count($locations) > 1) {
@@ -91,30 +89,34 @@ function print_form($post_data,$errors) {
 					
 ?>
 				<br/>
-				<button type="submit" name="add_subscriber"><?= _("Add") ?></button>
+				<button type="submit" name="add_subscriber_imsi"><?= _("Add") ?></button>
 				<div class="spacer"></div>
 				</form>
-			</div>
+	</div>
 
-			<div id="imei">
+		<div id="imei">
 
-                <label><?= _("Name") ?>
-                <span class="small"><?= _("Subscriber Name") ?></span>
-                </label>
-                <input type="text" name="firstname" id="firstname" value="<?=$firstname?>"/>
+		<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
+        <label><?= _("Name") ?>
+        <span class="small"><?= _("Subscriber Name") ?></span>
+        </label>
+        <input type="text" name="firstname_imei" id="firstname_imei" value="<?=$firstname_imei?>"/>
 
-				<label>IMEI ( *#06# )</label>
-				<input type="text" name="imei" id="imei_box" />
-				<br />
-				<button type="submit" name="add_subscriber"><?= _("Add") ?></button>
-				<div class="spacer"></div>
+		<label>IMEI ( *#06# )
+		<span class="small"><?= _("The phone must be connected or have recently attempted to connect") ?></span>
+		</label>
+		<input type="text" name="imei" id="imei_text" />
+		<br />
+		<button type="submit" name="add_subscriber_imei"><?= _("Add") ?></button>
+		<div class="spacer"></div>
 
 <script>
   $( function() {
-  	    $( "#imei_box" ).autocomplete(
+        $( "#tabs" ).tabs( { active: <?=$active_tab?> } );
+        $( "#imei_text" ).autocomplete(
   	      {
           source: "/rai/ajax.php?service=imei",
-          minLength: 1
+          minLength: 3
           }
          );
   });
@@ -126,88 +128,95 @@ function print_form($post_data,$errors) {
 	</div>
 <?
 }	
-				$error_txt = "";
-				// errors check
-				
-				if (isset($_POST['imei']) && strlen($_POST['imei'])==15) {
-					$firstname = $_POST['firstname'];
-					$callerid = rtrim($_POST['imei'],'X');
-					$path = "http://localhost:8085/subscriber/imei/".$callerid;
-					$response = \Httpful\Request::get($path)->expectsJson()->send();
-					$data = $response->body;
-					$callerid=$data[0][2];
-					if (strlen($callerid)==11) {
-						$error_txt .= _("Subscriber already exists:").' '.$callerid;
-					}
-					if (strlen($callerid)!=5) {
-						$error_txt .= _("Subscriber not found").' '.$callerid;
-					}
 
 
-				} elseif (isset($_POST['callerid'])) {
-					// form pressed verify if any data is missing
-					$firstname = $_POST['firstname'];
-					$callerid = $_POST['callerid'];
-					$location = $_POST['location'];
+	$error_txt = "";
+	if (isset($_POST['add_subscriber_imei'])) {
+		$active_tab=1;
+		$firstname = $_POST['firstname_imei'];
+		if ($firstname == "") {
+			$error_txt .= _("Name is empty")."<br/>";
+		}
+		if (isset($_POST['imei']) && strlen($_POST['imei'])==15) {
 
-					if ($firstname == "") {
-						$error_txt .= _("Name is empty")."<br/>";
-					}
-					if ($callerid == "") {
-						$error_txt .= _("Subscriber number is empty")."<br/>";
-					}
-					if (strlen($callerid) != 5 && strlen($callerid) != 15) {
-						$error_txt .= _("Invalid number")."<br/>";
-					}
-				} 
+			$imei = rtrim($_POST['imei'],'X');
+			$path = "http://localhost:8085/subscriber/imei/".$imei;
+			$response = \Httpful\Request::get($path)->expectsJson()->send();
+			$data = $response->body;
+			$callerid=$data[0][2];
+			if (strlen($callerid)==11) {
+				$error_txt .= _("Subscriber already exists:").' '.$callerid;
+			} elseif (strlen($callerid)!=5) {
+				$error_txt .= _("Subscriber not found").' '.$callerid;
+			}
+	    } else {
+	    	$error_txt .= _("Invalid IMEI");
+	    }
 
-				if (isset($_POST['add_subscriber']) && $error_txt != "") {
-					print_form(1,$error_txt);
-				} elseif (isset($_POST['add_subscriber']) && $error_txt == "") {
-					// no error process form
-		                        
-					$firstname = $_POST['firstname'];
-                    //$callerid = $_POST['callerid'];
-					$location = $_POST['location'];
+	} elseif (isset($_POST['add_subscriber_imsi'])) { 
+		$active_tab=0;
+		// form pressed verify if any data is missing
 
-					// get internal prefix
-					$site = new Configuration();
-					$info = $site->getSite();
-					$internalprefix = $info->postcode.$info->pbxcode;
+		$firstname = $_POST['firstname'];
+		$callerid = $_POST['callerid'];
+		$location = $_POST['location'];
 
-					$new_num = "$internalprefix$callerid";
-				
-					echo "<center>";
-					$amount = 0;
-					$sub = new Subscriber();
-					try {
-						$sub->set("",$callerid,$firstname,1,$amount,"", "", $location);
-						$ret = $sub->create();
-						echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
-						if ($ret != "") {
-							echo "<span style='font-size: 20px;'>"._("Subscriber already exists! New subscriber number").": <b>$ret</b> "._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
-						} else {
-							echo "<span style='font-size: 20px;'>"._("Subscriber number").": <b>$callerid</b> "._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
-						}
-						echo "<a href='provisioning.php'><button class='b1'>"._("Go Back")."</button></a>";
-					} catch (SubscriberException $e) {
-						echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
-						echo "<span style='font-size: 20px; color: red;'>"._("ERROR PROVISIONING SUBSCRIBER!")." </span><br/>".$e->getMessage()."<br/><br/><br/>";
-						echo "<a href='provisioning.php'><button class='b1'>"._("Go Back")."</button></a>";
-					}
-					
-					echo "</center>";
+		if ($firstname == "") {
+			$error_txt .= _("Name is empty")."<br/>";
+		}
+		if ($callerid == "") {
+			$error_txt .= _("Subscriber number is empty")."<br/>";
+		} elseif (strlen($callerid) != 5 && strlen($callerid) != 15) {
+			$error_txt .= _("Invalid number")."<br/>";
+		}
+	}
+
+	if (isset($_POST['add_subscriber_imsi']) || isset($_POST['add_subscriber_imei'])) {
+		if ($error_txt != "") {
+			print_form(1,$error_txt,$active_tab);
+		} elseif ($error_txt == "") {
+			// no error process form
+	                    
+			$firstname = $_POST['firstname'];
+	        //$callerid = $_POST['callerid'];
+			$location = $_POST['location'];
+
+			// get internal prefix
+			$site = new Configuration();
+			$info = $site->getSite();
+			$internalprefix = $info->postcode.$info->pbxcode;
+
+			$new_num = "$internalprefix$callerid";
+		
+			echo "<center>";
+			$amount = 0;
+			$sub = new Subscriber();
+			try {
+				$sub->set("",$callerid,$firstname,1,$amount,"", "", $location);
+				$ret = $sub->create();
+				echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
+				if ($ret != "") {
+					echo "<span style='font-size: 20px;'>"._("Subscriber already exists! New subscriber number").": <b>$ret</b> "._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
 				} else {
-					print_form(0,'');
+					echo "<span style='font-size: 20px;'>"._("Subscriber number").": <b>$callerid</b> "._("Successfully provisioned with an initial balance of")." $amount<br/><br/>";
 				}
+				echo "<a href='provisioning.php'><button class='b1'>"._("Go Back")."</button></a>";
+			} catch (SubscriberException $e) {
+				echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
+				echo "<span style='font-size: 20px; color: red;'>"._("ERROR PROVISIONING SUBSCRIBER!").
+					 " ".$callerid."</span><br/>".$e->getMessage()."<br/><br/><br/>";
+				echo "<a href='provisioning.php'><button class='b1'>"._("Go Back")."</button></a>";
+			}
+			
+			echo "</center>";
+		}
+	} else {
+		print_form(0,'');
+	}
 
-			?>
+?>
 
-		</div>
-<script>
-  $( function() {
-    $( "#tabs" ).tabs();
-  } );
-</script>
+	</div>
+
 	</body>
 </html>

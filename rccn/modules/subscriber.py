@@ -390,9 +390,11 @@ class Subscriber:
         if len(msisdn) == 15:
             # lookup extension by imsi
             extension = self.get_local_extension(msisdn)
+            if len(extension) == 11:
+                extension=extension[-5:]
             imsi = msisdn
             msisdn = extension
-   	else:
+        else:
             imsi = self._get_imsi(msisdn)
 
 	subscriber_number = config['internal_prefix'] + msisdn
@@ -420,6 +422,7 @@ class Subscriber:
 
     def _check_subscriber_exists(self, msisdn):
         try:
+            api_log.debug('Check exists: %s' % msisdn)
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             sq_hlr_cursor.execute('SELECT extension FROM subscriber where extension=?', [(config['internal_prefix'] + msisdn)])
@@ -433,13 +436,17 @@ class Subscriber:
 
     def _get_new_msisdn(self, msisdn, name):
         try:
+            newext=msisdn
             while True:
+                # There was an Infinite loop here if msisdn + 1 does exist we never get out
+                # Not ever sure what this is for.                
                 # if last ext available reset to 0
-                if msisdn == 99999:
-                    msisdn = 00000
+                if newext == 99999:
+                    newext = 00000
                 # increment msisdn of one and check if exists
-                newexti = int(msisdn) + 1
+                newexti = int(newext) + 1
                 newext = str(newexti)
+                api_log.debug('New Extension: %s' % newext)
                 if not self._check_subscriber_exists(newext):
                     try:
                         self._authorize_subscriber_in_local_hlr(msisdn, config['internal_prefix'] + newext, name)
@@ -667,19 +674,21 @@ class Subscriber:
 
     def _authorize_subscriber_in_local_hlr(self, msisdn, new_msisdn, name):
         try:
+            api_log.debug('Auth Subscriber in Local HLR: %s, %s' % (msisdn, new_msisdn) )
             appstring = 'OpenBSC'
             appport = 4242
             vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
             cmd = 'enable'
             vty.command(cmd)
             cmd = 'subscriber extension %s extension %s' % (msisdn, new_msisdn)
-            vty.command(cmd)
+            ret=vty.command(cmd)
+            api_log.debug('VTY: %s' % ret)
             cmd = 'subscriber extension %s authorized 1' % new_msisdn
             vty.command(cmd)
             cmd = 'subscriber extension %s name %s' % (new_msisdn, unidecode(name))
             vty.command(cmd)
-        except:
-            raise SubscriberException('SQ_HLR error provisioning the subscriber')
+        except Exception as e:
+            raise SubscriberException('SQ_HLR error provisioning the subscriber %s' % e)
 
     def _provision_in_database(self, msisdn, name, balance, location=''):
         try:
