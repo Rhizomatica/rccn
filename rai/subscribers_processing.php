@@ -205,9 +205,9 @@
             }
 	    else if ( $aColumns[$i] == "msisdn" ) {
             if ($aRow['current_bts'] == $aRow['home_bts']) {
-                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> ".$aRow[$aColumns[$i]] : "<img src='img/led-red.gif' /> ";
+                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> " : "<img src='img/led-red.gif' /> ";
             } else {
-                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/roaming-green.gif' /> ".$aRow[$aColumns[$i]] : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/roaming-red.gif' /> ";
+                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/roaming-green.gif' /> " : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/roaming-red.gif' /> ";
             }
             $content.= $aRow[$aColumns[$i]];
             $row[]=$content;
