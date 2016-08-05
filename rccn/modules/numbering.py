@@ -127,7 +127,7 @@ class Numbering:
             sq_hlr_cursor = sq_hlr.cursor()
             sql='SELECT DISTINCT Equipment.imei FROM Equipment '
             if partial_imei!='':
-                sql+='WHERE Equipment.imei LIKE ? '
+                sql+='WHERE Equipment.imei LIKE ? ORDER BY Equipment.imei ASC'
                 sq_hlr_cursor.execute(sql, [(partial_imei+'%')])
             else:
                 sq_hlr_cursor.execute(sql)
