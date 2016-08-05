@@ -131,7 +131,9 @@ function print_form($post_data,$errors,$active_tab='0') {
         $( "#imei_text" ).autocomplete(
   	      {
           source: "/rai/ajax.php?service=imei",
-          minLength: 3
+          minLength: 3,
+          search: function(event, ui) { $('#imei_text').addClass('ac_loading'); },
+          response: function(event, ui) { $('#imei_text').removeClass('ac_loading'); }
           }
          );
   });
