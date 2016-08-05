@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-11 16:38+0100\n"
+"POT-Creation-Date: 2016-08-05 15:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,8 +61,8 @@ msgstr ""
 msgid "Number"
 msgstr ""
 
-#: subscribers.php:81 subscribers.php:99 provisioning.php:60
-#: subscriber_edit.php:43
+#: subscribers.php:81 subscribers.php:99 provisioning.php:66
+#: provisioning.php:100 subscriber_edit.php:43
 msgid "Name"
 msgstr ""
 
@@ -70,8 +70,8 @@ msgstr ""
 msgid "Balance"
 msgstr ""
 
-#: subscribers.php:83 subscribers.php:101 provisioning.php:73
-#: subscriber_edit.php:57
+#: subscribers.php:83 subscribers.php:101 provisioning.php:79
+#: provisioning.php:112 subscriber_edit.php:57
 msgid "Location"
 msgstr ""
 
@@ -110,8 +110,8 @@ msgstr ""
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 send_sms.php:84 send_sms.php:95
 #: send_sms.php:99 send_sms.php:107 send_sms.php:111 resellers_credit.php:83
-#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:139
-#: provisioning.php:143 resellers_provisioning.php:85
+#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:217
+#: provisioning.php:222 resellers_provisioning.php:85
 #: resellers_provisioning.php:89
 msgid "Go Back"
 msgstr ""
@@ -264,9 +264,9 @@ msgid "Invoice Number"
 msgstr ""
 
 #: credit_history.php:33 credit_history.php:48 credit.php:27 credit.php:28
-#: credit.php:32 credit.php:61 credit.php:64 provisioning.php:65
-#: provisioning.php:66 provisioning.php:137 subscriber_edit.php:49
-#: subscriber_edit.php:50 subscriber_edit.php:132
+#: credit.php:32 credit.php:61 credit.php:64 provisioning.php:72
+#: provisioning.php:215 subscriber_edit.php:49 subscriber_edit.php:50
+#: subscriber_edit.php:132
 msgid "Subscriber number"
 msgstr ""
 
@@ -284,6 +284,14 @@ msgstr ""
 #: credit_history.php:36 credit_history.php:51 resellers_credit_history.php:36
 #: resellers_credit_history.php:51
 msgid "Balance after Recharge"
+msgstr ""
+
+#: subscribers_processing.php:198
+msgid "Roaming on"
+msgstr ""
+
+#: subscribers_processing.php:205
+msgid "Not authorized on HLR!"
 msgstr ""
 
 #: cdr.php:28
@@ -451,8 +459,8 @@ msgstr ""
 msgid "Amount to add"
 msgstr ""
 
-#: resellers_credit.php:42 credit.php:42 provisioning.php:86
-#: resellers_provisioning.php:43
+#: resellers_credit.php:42 credit.php:42 provisioning.php:92
+#: provisioning.php:125 resellers_provisioning.php:43
 msgid "Add"
 msgstr ""
 
@@ -618,43 +626,63 @@ msgstr ""
 msgid "CDRs"
 msgstr ""
 
-#: include/header.php:47 include/header.php:65
+#: include/header.php:47 include/header.php:67
 msgid "RAI - Rhizomatica Administration Interface"
 msgstr ""
 
-#: provisioning.php:28
+#: provisioning.php:29
 msgid "Provision a new subscriber"
 msgstr ""
 
-#: provisioning.php:61 subscriber_edit.php:44
+#: provisioning.php:67 provisioning.php:101 subscriber_edit.php:44
 msgid "Subscriber Name"
 msgstr ""
 
-#: provisioning.php:74 subscriber_edit.php:58
+#: provisioning.php:71
+msgid "Subscriber number or IMSI"
+msgstr ""
+
+#: provisioning.php:80 provisioning.php:113 subscriber_edit.php:58
 msgid "Subscriber location"
 msgstr ""
 
-#: provisioning.php:101 subscriber_edit.php:105
+#: provisioning.php:106
+msgid "The phone must be connected or have recently attempted to connect"
+msgstr ""
+
+#: provisioning.php:155 provisioning.php:183 subscriber_edit.php:105
 msgid "Name is empty"
 msgstr ""
 
-#: provisioning.php:104
+#: provisioning.php:166
+msgid "Subscriber already exists:"
+msgstr ""
+
+#: provisioning.php:168
+msgid "Subscriber not found"
+msgstr ""
+
+#: provisioning.php:171
+msgid "Invalid IMEI"
+msgstr ""
+
+#: provisioning.php:186
 msgid "Subscriber number is empty"
 msgstr ""
 
-#: provisioning.php:107
+#: provisioning.php:188
 msgid "Invalid number"
 msgstr ""
 
-#: provisioning.php:135
+#: provisioning.php:213
 msgid "Subscriber already exists! New subscriber number"
 msgstr ""
 
-#: provisioning.php:135 provisioning.php:137 resellers_provisioning.php:84
+#: provisioning.php:213 provisioning.php:215 resellers_provisioning.php:84
 msgid "Successfully provisioned with an initial balance of"
 msgstr ""
 
-#: provisioning.php:142
+#: provisioning.php:220
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr ""
 
