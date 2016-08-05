@@ -85,3 +85,7 @@ color:#FFFFFF;
 font-size:18px;
 font-weight:bold;
 }
+
+.ac_loading {
+	background: white url('../img/loading_small.gif') right center no-repeat;
+}
