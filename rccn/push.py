@@ -53,7 +53,8 @@ def get(msisdn, imsi):
     pb_port=8087,
     protocol='pbc')
     bucket = riak_client.bucket('hlr')
-    sub = Subscriber();
+    sub = Subscriber()
+    num = Numbering()
     try:
         riak_imsi = bucket.get_index('msisdn_bin', msisdn).results
         if not len(riak_imsi):
@@ -61,7 +62,8 @@ def get(msisdn, imsi):
             sub._provision_in_distributed_hlr(imsi, msisdn)
         else:
             if imsi != riak_imsi[0]:
-                print "\033[91;1mIMSIs do not Match!\033[0m"  
+                print "\033[91;1mIMSIs do not Match!\033[0m (%s)" % riak_imsi[0]  
+		print "%s Belongs to %s" % (riak_imsi[0], num.get_msisdn_from_imsi(riak_imsi[0]))
                 return False
             print 'Extension: \033[95m%s\033[0m-%s-\033[92m%s\033[0m ' \
                   'has IMSI \033[96m%s\033[0m' % (msisdn[:5], msisdn[5:6], msisdn[6:], riak_imsi[0])
