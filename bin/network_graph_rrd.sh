@@ -2,7 +2,7 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
-AGES="12h 1d 1w 1m"
+AGES="3h 12h 1d 1w 1m"
 
 for age in $AGES; do
 
@@ -28,6 +28,24 @@ rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "Channels Usa
  GPRINT:tch:LAST:"Current\:%6.0lf%%"  \
  GPRINT:tch:AVERAGE:"Average\:%6.0lf%%"  \
  GPRINT:tch:MAX:"Maximum\:%6.0lf%%" \
+
+for bts in 0 1 2 3 4 5; do 
+
+rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "BTS$bts Channels Usage (%)" $RHIZO_DIR/graphs/chans-$bts-$age.png \
+ DEF:sdcchu=$RHIZO_DIR/bts_channels.rrd:sdcch$bts:AVERAGE \
+ CDEF:sdcch=sdcchu,FLOOR \
+ DEF:tchu=$RHIZO_DIR/bts_channels.rrd:tch$bts:AVERAGE \
+ CDEF:tch=tchu,FLOOR \
+ LINE:sdcch#2AAAFF:"SDCCH           " \
+ GPRINT:sdcch:LAST:"Current\:%6.0lf%%\t        "  \
+ GPRINT:sdcch:AVERAGE:"Average\:%6.0lf%%\t       "  \
+ GPRINT:sdcch:MAX:" Maximum\:%6.0lf%%\n" \
+ LINE1:tch#F87D00:TCH \
+ GPRINT:tch:LAST:"Current\:%6.0lf%%"  \
+ GPRINT:tch:AVERAGE:"Average\:%6.0lf%%"  \
+ GPRINT:tch:MAX:"Maximum\:%6.0lf%%" \
+
+done
 
 rrdtool graph --start -$age -v 'subscribers' -w 600 -t "Online registered subscribers" $RHIZO_DIR/graphs/hlr_onlinereg-$age.png \
 "DEF:onlineu=$RHIZO_DIR/hlr.rrd:online_reg_subs:AVERAGE" \
