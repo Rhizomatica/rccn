@@ -11,7 +11,7 @@ require_once('include/menu.php');
 			<?php
 				$age = (isset($_GET['a'])) ? $_GET['a'] : '12h';
 
-				$graphs = array('calls','chans');
+				$graphs = array('calls','chans','broken');
                                 for ($i=0;$i<6;$i++) {
 				  array_push($graphs,"chans-".$i);
 				}
