@@ -22,9 +22,9 @@ rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "Channels Usa
  CDEF:sdcch=sdcchu,FLOOR \
  DEF:tchu=$RHIZO_DIR/bsc_channels.rrd:tch:AVERAGE \
  CDEF:tch=tchu,FLOOR \
- LINE:sdcch#2AAAFF:"SDCCH           " \
- GPRINT:sdcch:LAST:"Current\:%6.0lf%%\t        "  \
- GPRINT:sdcch:AVERAGE:"Average\:%6.0lf%%\t       "  \
+ LINE:sdcch#2AAAFF:"SDCCH            " \
+ GPRINT:sdcch:LAST:"Current\:%6.0lf%%\t       "  \
+ GPRINT:sdcch:AVERAGE:"Average\:%6.0lf%%\t      "  \
  GPRINT:sdcch:MAX:" Maximum\:%6.0lf%%\n" \
  LINE1:tch#F87D00:TCH \
  GPRINT:tch:LAST:"Current\:%6.0lf%%"  \
@@ -35,19 +35,19 @@ for bts in 0 1 2 3 4 5; do
 
 _w=$(bname $bts)
 
-rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "$_w Ch. Usage (Absolute)." $RHIZO_DIR/graphs/chans-$bts-$age.png \
+rrdtool graph --start -$age -v 'Channels' -w 600 --slope-mode -t "$_w Ch. Usage (Absolute)." $RHIZO_DIR/graphs/chans-$bts-$age.png \
  DEF:sdcchu=$RHIZO_DIR/bts_channels60.rrd:sdcch$bts:AVERAGE \
  CDEF:sdcch=sdcchu,FLOOR \
  DEF:tchu=$RHIZO_DIR/bts_channels60.rrd:tch$bts:AVERAGE \
  CDEF:tch=tchu,FLOOR \
- LINE:sdcch#2AAAFF:"SDCCH           " \
- GPRINT:sdcch:LAST:"Current\:%6.0lf%%\t        "  \
- GPRINT:sdcch:AVERAGE:"Average\:%6.0lf%%\t       "  \
- GPRINT:sdcch:MAX:" Maximum\:%6.0lf%%\n" \
- LINE1:tch#F87D00:TCH \
- GPRINT:tch:LAST:"Current\:%6.0lf%%"  \
- GPRINT:tch:AVERAGE:"Average\:%6.0lf%%"  \
- GPRINT:tch:MAX:"Maximum\:%6.0lf%%" \
+ LINE1:sdcch#2AAAFF:"SDCCH            " \
+ GPRINT:sdcch:LAST:"Current\:%6.0lf\t        "  \
+ GPRINT:sdcch:AVERAGE:"Average\:%6.0lf\t       "  \
+ GPRINT:sdcch:MAX:" Maximum\:%6.0lf\n" \
+ LINE1:tch#F87D00:"TCH" \
+ GPRINT:tch:LAST:"Current\:%6.0lf"  \
+ GPRINT:tch:AVERAGE:"Average\:%6.0lf"  \
+ GPRINT:tch:MAX:"Maximum\:%6.0lf" \
 
 done
 
