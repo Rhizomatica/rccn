@@ -11,7 +11,7 @@ rrdtool update $RHIZO_DIR/cpu.rrd N:$cpustat
 temperature=`sensors 2>/dev/null | grep temp1: | head -1 | awk '{print $2}' | sed -e 's/°C//g' -e 's/\+//g'`
 rrdtool update $RHIZO_DIR/temperature.rrd N:$temperature
 
-linev=`/sbin/apcaccess status | grep LINEV | head -1 | awk '{print $3}'`
+linev=`/sbin/apcaccess status 2>/dev/null | grep LINEV | head -1 | awk '{print $3}'`
 /usr/bin/rrdtool update $RHIZO_DIR/voltage.rrd N:$linev
 
 C=$(egrep ^Cached /proc/meminfo|awk '{print $2}')
