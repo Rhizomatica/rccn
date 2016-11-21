@@ -2,7 +2,19 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
-AGES="3h 12h 1d 1w 1m"
+
+function bname {
+    case $1 in
+        0) echo -n "SAN PEDRO ONE" ;;
+        1) echo -n "SAN PEDRO TWO" ;;
+        2) echo -n "SAN MATEO ONE" ;;
+        3) echo -n "SAN MATEO TWO" ;;
+        4) echo -n "YAGANIZA ONE" ;;
+        5) echo -n "YAGANIZA TWO" ;;
+    esac
+}
+
+AGES="3h 12h 1d 1w 1m 1y"
 
 for age in $AGES; do
 
@@ -31,10 +43,12 @@ rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "Channels Usa
 
 for bts in 0 1 2 3 4 5; do 
 
-rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "BTS$bts Channels Usage (%)" $RHIZO_DIR/graphs/chans-$bts-$age.png \
- DEF:sdcchu=$RHIZO_DIR/bts_channels.rrd:sdcch$bts:AVERAGE \
+_w=$(bname $bts)
+
+rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "$_w Ch. Usage (%)" $RHIZO_DIR/graphs/chans-$bts-$age.png \
+ DEF:sdcchu=$RHIZO_DIR/bts_channels60.rrd:sdcch$bts:AVERAGE \
  CDEF:sdcch=sdcchu,FLOOR \
- DEF:tchu=$RHIZO_DIR/bts_channels.rrd:tch$bts:AVERAGE \
+ DEF:tchu=$RHIZO_DIR/bts_channels60.rrd:tch$bts:AVERAGE \
  CDEF:tch=tchu,FLOOR \
  LINE:sdcch#2AAAFF:"SDCCH           " \
  GPRINT:sdcch:LAST:"Current\:%6.0lf%%\t        "  \
