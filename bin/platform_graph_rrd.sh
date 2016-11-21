@@ -86,11 +86,13 @@ rrdtool graph $RHIZO_DIR/graphs/cpu-$age.png --start -$age -aPNG -w 600 -l 0 -u 
 
 rrdtool graph $RHIZO_DIR/graphs/temperature-$age.png --start -$age -aPNG --slope-mode -w 600 -t "Temperature" --vertical-label "temperature (°C)" DEF:temp1=$RHIZO_DIR/temperature.rrd:temp:MAX LINE1:temp1#ff0000:"Temperature"
 
-rrdtool graph $RHIZO_DIR/graphs/voltage-$age.png --start -$age -aPNG -w 600 --vertical-label='Volts' -t "Line Voltage" \
+rrdtool graph $RHIZO_DIR/graphs/voltage-$age.png --start -$age -aPNG -w 600 -l 80 -u 160 --vertical-label='Volts' -t "Line Voltage" \
 DEF:min=$RHIZO_DIR/voltage.rrd:voltage:MIN \
 DEF:max=$RHIZO_DIR/voltage.rrd:voltage:MAX \
+VDEF:curV=max,LAST \
 LINE1:min#0000AA:"Minimum voltage" \
-LINE1:max#00AA00:"Maximum voltage"
+LINE1:max#00AA00:"Maximum voltage" \
+GPRINT:curV:"Current\: %3.0lf %s"
 
 rrdtool graph $RHIZO_DIR/graphs/memory-$age.png --start -$age -aPNG -w 600 -t "Memory Usage" \
 "DEF:dsC=$RHIZO_DIR/memory.rrd:cached:AVERAGE" \
