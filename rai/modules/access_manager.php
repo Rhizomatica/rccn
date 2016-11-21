@@ -16,7 +16,11 @@ class AccessManager
 		$this->lang = $lang;
 		if ($this->checkPwd($username,$password)) {
 			$this->initializeSession();
-			header('Location: subscribers.php');
+			if (isset($_SESSION['login_goto_uri'])) {
+                            header('Location: '.$_SESSION['login_goto_uri']);
+                        } else {
+                            header('Location: subscribers.php');
+                        }
 		} else {
 			return;
 			header('Location: login.php');
@@ -59,6 +63,7 @@ class AccessManager
 	public function checkAuth() {
 		session_start();
 		if (!isset($_SESSION['username']) && !isset($_SESSION['is_logged'])) {
+		        $_SESSION['login_goto_uri']=$_SERVER["REQUEST_URI"];
 			header('Location: login.php');
 		} 
 	}
