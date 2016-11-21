@@ -13,6 +13,16 @@ RRA:MIN:0.5:10080:1 \
 RRA:MAX:0.5:10080:1
 fi
 
+if [ ! -f $RHIZO_DIR/broken.rrd ]; then
+rrdtool create $RHIZO_DIR/broken.rrd --step 300 \
+DS:broken:GAUGE:600:0:U \
+RRA:AVERAGE:0.5:1:10080 \
+RRA:MIN:0.5:1440:1 \
+RRA:MAX:0.5:1440:1 \
+RRA:MIN:0.5:10080:1 \
+RRA:MAX:0.5:10080:1
+fi
+
 if [ ! -f $RHIZO_DIR/fs_calls.rrd ]; then
 rrdtool create $RHIZO_DIR/fs_calls.rrd --step 300 \
 DS:calls:GAUGE:600:0:U \
