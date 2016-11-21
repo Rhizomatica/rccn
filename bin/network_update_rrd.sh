@@ -2,12 +2,6 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
-
-for bts in 0 1 2 3 4 5 ; do
-  eval _channels_$bts=`echo "show bts $bts" | nc localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\/F/ {tch=$2}; /SDCCH8/ {sdcch=$2} ; {sub(/%/,"",tch); sub(/%/,"",sdcch)} END {print tch":"sdcch}'`
-done
-rrdtool update $RHIZO_DIR/bts_channels.rrd N:$_channels_0:$_channels_1:$_channels_2:$_channels_3:$_channels_4:$_channels_5
-
 channels=`echo "show network" | nc localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\/F/ {tch=$2}; /SDCCH8/ {sdcch=$2} ; {sub(/%/,"",tch); sub(/%/,"",sdcch)} END {print tch":"sdcch}'`
 rrdtool update $RHIZO_DIR/bsc_channels.rrd N:$channels
 
