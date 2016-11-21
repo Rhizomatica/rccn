@@ -2,6 +2,10 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
+for default in 0 1 2 3 4 5 ; do
+  eval _channels_$default=0:0
+done
+
 mybts=`echo "show bts" | nc localhost 4242 | grep BTS | awk '{ print $2 }'`
 
 for bts in $mybts ; do
