@@ -2,6 +2,7 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
+if [ ! -f $RHIZO_DIR/bts_channels60.rrd ]; then
 rrdtool create $RHIZO_DIR/bts_channels60.rrd --step 60 \
 DS:tch0:GAUGE:120:0:U \
 DS:sdcch0:GAUGE:120:0:U \
@@ -20,3 +21,5 @@ RRA:MIN:0.5:1440:1 \
 RRA:MAX:0.5:1440:1 \
 RRA:MIN:0.5:10080:1 \
 RRA:MAX:0.5:10080:1
+
+fi
