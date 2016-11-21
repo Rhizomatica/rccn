@@ -32,8 +32,8 @@ rrdtool graph --start -$age -v 'percentage' -w 600 --slope-mode -t "Channels Usa
  GPRINT:tch:MAX:"Maximum\:%6.0lf%%" \
 
 rrdtool graph --start -$age -v 'Channels' -w 600 --slope-mode -t "Broken Channels" $RHIZO_DIR/graphs/broken-$age.png \
- DEF:broken=$RHIZO_DIR/broken.rrd:sdcch:AVERAGE \
- LINE1:broken#2AAAFF:"Broken            " \
+ DEF:brokenm=$RHIZO_DIR/broken.rrd:broken:MAX \
+ LINE1:brokenm#2AAAFF:"Broken            " \
  GPRINT:broken:LAST:"Current\:%6.0lf%%\t       "  \
  GPRINT:broken:AVERAGE:"Average\:%6.0lf%%\t      "  \
  GPRINT:broken:MAX:" Maximum\:%6.0lf%%\n" \
