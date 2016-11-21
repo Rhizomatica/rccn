@@ -64,7 +64,7 @@ class AccessManager
 	}
 
 	public function logout() {
-		session_destroy();
+		session_start();
 		unset($_SESSION['username']);
 		unset($_SESSION['lang']);
 		unset($_SESSION['is_logged']);
