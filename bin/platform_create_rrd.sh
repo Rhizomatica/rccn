@@ -26,6 +26,12 @@ rrdtool create $RHIZO_DIR/temperature.rrd --step 300 \
 DS:temp:GAUGE:600:0:U \
 RRA:MAX:0.5:1:10080
 
+rrdtool create $RHIZO_DIR/voltage.rrd --step 300 \
+'DS:voltage:GAUGE:600:0:U' \
+'RRA:AVERAGE:0.5:1:288' \
+'RRA:MIN:0.5:1:8928' \
+'RRA:MAX:0.5:1:8928'
+
 rrdtool create $RHIZO_DIR/memory.rrd --step 300 \
 DS:cached:GAUGE:600:U:U \
 DS:buffer:GAUGE:600:U:U \
