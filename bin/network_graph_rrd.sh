@@ -1,18 +1,8 @@
 #!/bin/bash
 
+. /home/rhizomatica/bin/vars.sh
+
 RHIZO_DIR="/var/rhizomatica/rrd"
-
-
-function bname {
-    case $1 in
-        0) echo -n "SAN PEDRO ONE" ;;
-        1) echo -n "SAN PEDRO TWO" ;;
-        2) echo -n "SAN MATEO ONE" ;;
-        3) echo -n "SAN MATEO TWO" ;;
-        4) echo -n "YAGANIZA ONE" ;;
-        5) echo -n "YAGANIZA TWO" ;;
-    esac
-}
 
 AGES="3h 12h 1d 1w 1m 1y"
 
