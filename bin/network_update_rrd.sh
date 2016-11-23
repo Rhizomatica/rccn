@@ -2,10 +2,10 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
-channels=`echo "show network" | nc localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\/F/ {tch=$2}; /SDCCH8/ {sdcch=$2} ; {sub(/%/,"",tch); sub(/%/,"",sdcch)} END {print tch":"sdcch}'`
+channels=`echo "show network" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\/F/ {tch=$2}; /SDCCH8/ {sdcch=$2} ; {sub(/%/,"",tch); sub(/%/,"",sdcch)} END {print tch":"sdcch}'`
 rrdtool update $RHIZO_DIR/bsc_channels.rrd N:$channels
 
-broken=`echo "show lchan" | nc localhost 4242 | grep BROKEN | wc -l`
+broken=`echo "show lchan" | nc -q1 localhost 4242 | grep BROKEN | wc -l`
 rrdtool update $RHIZO_DIR/broken.rrd N:$broken
 
 calls=`fs_cli --timeout=5000 --connect-timeout=5000 -x 'show calls count' | grep total | awk '{print $1}'`
