@@ -24,11 +24,11 @@ import time
 import riak
 from riak.transports.pbc.transport import RiakPbcTransport
 
-from config_values import site_name, vpn_ip_address, postcode, pbxcode, network_name, sq_hlr_path
+from config_values import site_name, vpn_ip_address, riak_ip_address, postcode, pbxcode, network_name, sq_hlr_path
 
 prefix = postcode + pbxcode
 
-riak_client = riak.RiakClient(host=vpn_ip_address, pb_port=8087, protocol='pbc')
+riak_client = riak.RiakClient(host=riak_ip_address, pb_port=8087, protocol='pbc')
 
 sq_hlr = sqlite3.connect(sq_hlr_path)
 sq_hlr_cursor = sq_hlr.cursor()
