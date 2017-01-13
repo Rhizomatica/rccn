@@ -122,17 +122,24 @@ class Dialplan:
             self.session.setVariable('context','EMERGENCY')
             self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
             
-        # check if destination number is an incoming call
-        # lookup dest number in DID table.
         if processed == 0:
+            # check if destination number is an incoming call
+            # lookup dest number in DID table.
             try:
                 if (self._n.is_number_did(self.destination_number)):
+                    origin_host = self.session.getVariable("sip_network_ip")
                     log.info('Called number is a DID')
+                    log.info("Caller from: %s" % origin_host)
+                    if origin_host == '172.16.0.1':
+                        log.info("Call to DID has local origin!")
+                        self.play_announcement(self.WRONG_NUMBER)
+                        return
                     log.debug('Execute context INBOUND call')
                     processed = 1
                     # send call to IVR execute context
                     self.session.setVariable('inbound_loop', '0')
                     self.context.inbound()
+                    return
             except NumberingException as e:
                 log.error(e)
 
@@ -165,7 +172,7 @@ class Dialplan:
             # prefix with + or 00
             if (
                 self.destination_number[0] == '+' or (
-                    re.search(r'^00', self.destination_number) is not None)
+                re.search(r'^00', self.destination_number) is not None)
             ) and processed == 0:
                 log.debug('Called number is an international call or national')
                 processed = 1
@@ -178,6 +185,11 @@ class Dialplan:
             try:
                 log.info('Check if called number is local')
                 dest = self.destination_number
+                callin = self.calling_number
+                if len(dest) == 5 and len(callin) == 11:
+                    dest = callin[:6] + dest
+                    self.context.destination_number = dest
+                log.info('dest: %s' % self.destination_number)
                 is_local_number = self._n.is_number_local(dest)
                 is_right_len = lambda num: len(num) == 11
 
@@ -186,7 +198,7 @@ class Dialplan:
                     processed = 1
                     # check if calling number is another site
 
-                    callin = self.calling_number
+
                     is_internal_number = self._n.is_number_internal(callin)
                     if is_internal_number and is_right_len(callin):
 

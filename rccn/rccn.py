@@ -51,12 +51,12 @@ def input_callback(session, what, obj):
 def handler(session, args):
     """ Main calls handler """
     session.setVariable('billing', '0')
-    destination_number = session.getVariable("destination_number")  
+    destination_number = session.getVariable("destination_number")
     dialplan = Dialplan(session)
     log.info('===========================================================================')
     log.info("Lookup dialplan for called number: %s" % destination_number)
     dialplan.lookup()
-    log.info('Leaving handler()')
+    log.info('Leaving rccn:handler()')
 
 def xml_fetch(params):
 
