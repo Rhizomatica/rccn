@@ -3,6 +3,18 @@
     require_once('modules/configuration.php');
     require_once('include/database.php');
 
+    require_once('modules/access_manager.php');
+
+    $access = new AccessManager();
+    $filename = basename($_SERVER['PHP_SELF']);
+    if ($filename != "login.php") {
+        $access->checkAuth();
+    }
+
+    include('include/locale.php');
+
+
+
     /*
      * Script:    DataTables server-side script for PHP and PostgreSQL
      * Copyright: 2010 - Allan Jardine
@@ -16,13 +28,17 @@
     /* Array of database columns which should be read and sent back to DataTables. Use a space where
      * you want to insert a non-database field (for example a counter or static image)
      */
+
     $aColumns = array( 'created', 'subscription_date', 'subscription_status', 'authorized', 'msisdn', 'name', 'balance', 'location' );
-     
+
+    /* Use a different set of columns to build the query. */
+    $aqColumns = array( 'subscribers.created AS created', 'subscribers.subscription_date AS subscription_date', 'subscription_status', 'subscribers.authorized AS authorized', 'subscribers.msisdn AS msisdn', 'name', 'balance', 'location', 'hlr.created AS hlr_created', 'hlr.authorized AS hlr_auth', 'current_bts', 'home_bts' );
+
     /* Indexed column (used for fast and accurate table cardinality) */
-    $sIndexColumn = "id";
+    $sIndexColumn = "subscribers.id";
      
     /* DB table to use */
-    $sTable = "subscribers";
+    $sTable = "subscribers LEFT JOIN hlr ON subscribers.msisdn = hlr.msisdn";
      
     /* Database connection information */
     $gaSql['user']       = $DB_USER;
@@ -108,10 +124,10 @@
             }
         }
         $sWhere = substr_replace( $sWhere, "", -3 );
-        $sWhere .= ") AND msisdn ILIKE '$internalprefix%' ";
+        $sWhere .= ") AND subscribers.msisdn ILIKE '$internalprefix%' ";
     }
     if ($sWhere == "") {
-	$sWhere = "WHERE msisdn ILIKE '$internalprefix%' ";
+	$sWhere = "WHERE subscribers.msisdn ILIKE '$internalprefix%' ";
     }
      
     /* Individual column filtering */
@@ -133,7 +149,7 @@
      
      
     $sQuery = "
-        SELECT ".str_replace(" , ", " ", implode(", ", $aColumns))."
+        SELECT ".str_replace(" , ", " ", implode(", ", $aqColumns))."
         FROM   $sTable
         $sWhere
         $sOrder
@@ -143,7 +159,7 @@
      
     $sQuery = "
         SELECT $sIndexColumn
-        FROM   $sTable WHERE msisdn ILIKE '$internalprefix%'
+        FROM   $sTable WHERE subscribers.msisdn ILIKE '$internalprefix%'
     ";
     $rResultTotal = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
     $iTotal = pg_num_rows($rResultTotal);
@@ -188,10 +204,20 @@
                 $row[] = ($aRow[ $aColumns[$i] ]=="0") ? '-' : $aRow[ $aColumns[$i] ];
             }
 	    else if ( $aColumns[$i] == "msisdn" ) {
-		$row[] = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> ".$aRow[$aColumns[$i]] : "<img src='img/led-red.gif' /> ".$aRow[$aColumns[$i]];
+            if ($aRow['current_bts'] == $aRow['home_bts']) {
+                $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> " : "<img src='img/led-red.gif' /> ";
+            } else {
+                $content = '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
+                $content .= (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> " : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-red.gif' /> ";
+
+            }
+            $content.= $aRow[$aColumns[$i]];
+            $row[]=$content;
 	    }
 	    else if ( $aColumns[$i] == "authorized" ) {
-		$row[] = ($aRow[$aColumns[$i]] == 0) ? "<img src='img/lock.png' width='16' height='16' />" : "<img src='img/unlock.png' width='16' height='16' /> ";
+		    $content=($aRow[$aColumns[$i]] == 0) ? "<img src='img/lock.png' width='16' height='16' />" : "<img src='img/unlock.png' width='16' height='16' /> ";
+            $content.=($aRow[$aColumns[$i]] == 1 && $aRow['hlr_auth'] == 0 ) ? "<img title='"._('Not authorized on HLR!')."' src='img/lock.png' width='16' height='16' />" : "";
+         $row[] = $content;
 	    }
 	    else if ( $aColumns[$i] == "created" ) {
 		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
@@ -210,7 +236,7 @@
         }
         $output['aaData'][] = $row;
     }
-     
+
     echo json_encode( $output );
      
     // Free resultset
