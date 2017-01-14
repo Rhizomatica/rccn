@@ -52,12 +52,14 @@ header('Content-Type: text/html; charset=utf-8');
 			    @import "css/form.css";
                 @import "js/fancybox/jquery.fancybox-1.3.4.css";
                 </style>
-                <link rel="stylesheet" href="css/jquery-ui.min.css" type="text/css" />   
+                <link rel="stylesheet" href="css/jquery-ui.min.css" type="text/css" />
+                <link rel="stylesheet" type="text/css" href="css/dd.css" />
                 <script type="text/javascript" language="javascript" src="js/jquery.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery-ui.min.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dataTables.columnFilter.js"></script>
                 <script type="text/javascript" language="javascript" src="js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
+                <script type="text/javascript" language="javascript" src="js/jquery.dd.min.js"></script>
                 <script type="text/javascript" language="javascript" src="js/rai.js"></script>
         </head>
         <body id="dt_example">

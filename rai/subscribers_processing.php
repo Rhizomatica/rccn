@@ -13,7 +13,7 @@
 
     include('include/locale.php');
 
-
+    $rai_filter='';
 
     /*
      * Script:    DataTables server-side script for PHP and PostgreSQL
@@ -32,7 +32,7 @@
     $aColumns = array( 'created', 'subscription_date', 'subscription_status', 'authorized', 'msisdn', 'name', 'balance', 'location' );
 
     /* Use a different set of columns to build the query. */
-    $aqColumns = array( 'subscribers.created AS created', 'subscribers.subscription_date AS subscription_date', 'subscription_status', 'subscribers.authorized AS authorized', 'subscribers.msisdn AS msisdn', 'name', 'balance', 'location', 'hlr.created AS hlr_created', 'hlr.authorized AS hlr_auth', 'current_bts', 'home_bts' );
+    $aqColumns = array( 'subscribers.created AS created', 'subscribers.subscription_date AS subscription_date', 'subscription_status', 'subscribers.authorized AS authorized', 'subscribers.msisdn as msisdn', 'name', 'balance', 'location', 'hlr.created AS hlr_created', 'hlr.authorized AS hlr_auth', 'current_bts', 'home_bts' );
 
     /* Indexed column (used for fast and accurate table cardinality) */
     $sIndexColumn = "subscribers.id";
@@ -113,6 +113,10 @@
      * on which ILIKE can be used). Boolean fields etc will need a modification here.
      */
     $sWhere = "";
+    if ( substr($_GET['sSearch'],0,4) == "RAI-" ) {
+       $rai_filter=$_GET['sSearch']; 
+       $_GET['sSearch'] = '';
+    }
     if ( $_GET['sSearch'] != "" )
     {
         $sWhere = "WHERE (";
@@ -120,14 +124,14 @@
         {
             if ( $_GET['bSearchable_'.$i] == "true" )
             {
-                $sWhere .= "CAST(".$aColumns[$i]." AS TEXT) ILIKE '%".pg_escape_string( $_GET['sSearch'] )."%' OR ";
+                $sWhere .= "CAST(subscribers.".$aColumns[$i]." AS TEXT) ILIKE '%".pg_escape_string( $_GET['sSearch'] )."%' OR ";
             }
         }
         $sWhere = substr_replace( $sWhere, "", -3 );
-        $sWhere .= ") AND subscribers.msisdn ILIKE '$internalprefix%' ";
+        $sWhere .= ") AND subscribers.msisdn LIKE '$internalprefix%' ";
     }
     if ($sWhere == "") {
-	$sWhere = "WHERE subscribers.msisdn ILIKE '$internalprefix%' ";
+	$sWhere = "WHERE subscribers.msisdn LIKE '$internalprefix%' ";
     }
      
     /* Individual column filtering */
@@ -195,6 +199,14 @@
      
     while ( $aRow = pg_fetch_array($rResult, null, PGSQL_ASSOC) )
     {
+
+        if (in_array($aRow['msisdn'],$connected_subscribers) && $rai_filter == 'RAI-all-disconnected') {    
+            continue;
+        }
+        if (!in_array($aRow['msisdn'],$connected_subscribers) && $rai_filter == 'RAI-all-connected') {
+            continue;
+        }
+
         $row = array();
         for ( $i=0 ; $i<count($aColumns) ; $i++ )
         {

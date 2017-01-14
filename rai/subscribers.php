@@ -7,13 +7,14 @@ require_once('modules/subscriber.php');
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
-            $('#example').dataTable( {
+            var oTable = $('#subscribers').dataTable( {
                 <?
                 $lang_file = 'js/'.$_SESSION['lang'].'.txt';
                 if (file_exists($lang_file)) {
                     echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
                 }
                 ?>
+                "aLengthMenu": [ [ 10, 25, 50, -1 ], [ 10, 25, 50, "<?=_("All")?>" ] ],
                 "sPaginationType": "full_numbers",
                 "bProcessing": true,
                 "bServerSide": true,
@@ -26,10 +27,14 @@ require_once('modules/subscriber.php');
                             sub = full[4].match(/\d\d\d\d\d\d\d\d\d\d\d/);
                             return '<a href="subscriber_edit.php?id='+sub+'" class="pop"><img src="img/edit.png" alt="Edit" valign="middle" /></a> | <a href="subscriber_delete.php?id='+sub+'" class="pop"><img src="img/delete.png" alt="Delete" valign="middle" /></a>';
                         }
-                    }
+                    },
+                    { "bSearchable": false, "aTargets": [0] },
+                    { "bSearchable": false, "aTargets": [1] },
+                    { "bSearchable": false, "aTargets": [2] },
+                    { "bSearchable": false, "aTargets": [3] }
                 ],
                 "aoColumns": [
-                        {},{},{"sClass": "center"},{"sClass": "center"},{},{},{}
+                        {},{},{"sClass": "center"},{"sClass": "center"},{},{},{},{}
                 ],
                 "fnDrawCallback": function () {
                         $(".pop").fancybox({
@@ -42,7 +47,18 @@ require_once('modules/subscriber.php');
                             }
                         });
                 },
-                "sAjaxSource": "subscribers_processing.php"
+                "sAjaxSource": "subscribers_processing.php",
+                "fnInitComplete": function() {
+                    sel='<select id="conSelect" style="width:50px">' +
+                    '<option value="RAI-all">&nbsp;</option>' +
+                    '<option value="RAI-all-connected" data-image="img/led-green.gif"></option>' +
+                    '<option value="RAI-all-disconnected" data-image="img/led-red.gif"></option> </select>'
+                    $('#subscribers thead tr th:nth-child(5)').prepend(sel)
+                    $('#conSelect').msDropDown()
+                    $('#conSelect').change(function() {
+                        oTable.fnFilter (this.value, null,false,false,false)
+                      })
+                }
             } );
         });
                         
@@ -70,7 +86,7 @@ require_once('modules/subscriber.php');
 
 			<h1><?= _('Subscribers Phones') ?></h1><br/>
 			<div id="dynamic">
-<table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="subscribers">
 	<thead>
 		<tr>
 			<th align='left' width='12%'><?= _("Activation date") ?></th>
