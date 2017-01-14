@@ -3,7 +3,7 @@ CREATE TABLE meta (
 	key varchar not null,
 	value varchar not null
 );
-INSERT INTO meta(key,value) VALUES ('db_revision','10');
+INSERT INTO meta(key,value) VALUES ('db_revision','11');
 INSERT INTO meta(key,value) VALUES ('hlr_sync', '0');
 
 CREATE TABLE cdr (
@@ -57,6 +57,7 @@ CREATE TABLE subscribers (
 	balance		decimal not null default 0.00,
 	subscription_status	smallint not null default 0,
         subscription_date       timestamp default current_timestamp,
+	location 	varchar,
 	created		timestamp default current_timestamp
 );
 CREATE UNIQUE INDEX msisdn_index ON subscribers(msisdn);
