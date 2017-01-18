@@ -11,11 +11,19 @@ require_once('include/menu.php');
 			<?php
 				$age = (isset($_GET['a'])) ? $_GET['a'] : '12h';
 
-				$graphs = array('calls','chans','broken');
-                                for ($i=0;$i<6;$i++) {
+				$graphs = array('fs_calls','calls','chanr','chans');
+				if (file_exists('/var/rhizomatica/rrd/mybts')) {
+                                  $mybts=file('/var/rhizomatica/rrd/mybts');
+				} else {
+				  $mybts=array();
+                                  for ($i=0;$i<6;$i++) { array_push($mybts,$i); }
+				}
+				
+                                foreach ($mybts as $i) {
 				  array_push($graphs,"chans-".$i);
 				}
-				array_push($graphs,  'hlr_onlinereg','hlr_onlinenoreg');
+				
+				array_push($graphs,  'broken','lur','sms','hlr_onlinereg','hlr_onlinenoreg');
 				foreach ($graphs as &$g) {
 					echo "<img src='graphs/$g-$age.png' /><br/><br/>";
 				}

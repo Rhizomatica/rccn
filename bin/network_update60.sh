@@ -7,6 +7,7 @@ for default in 0 1 2 3 4 5 ; do
 done
 
 mybts=`echo "show bts" | nc -q1 localhost 4242 | grep BTS | awk '{ print $2 }'`
+echo $mybts > $RHIZO_DIR/mybts
 
 for bts in $mybts ; do
   eval _channels_$bts=`echo "show bts $bts" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\/F/ {tch=substr($0,33,1)}; /SDCCH8/ {sdcch=substr($0,33,1)} END {print tch":"sdcch}'`

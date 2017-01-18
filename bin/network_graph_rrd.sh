@@ -8,7 +8,7 @@ AGES="3h 12h 1d 1w 1m 1y"
 
 for age in $AGES; do
 
-rrdtool graph --start -$age -v 'calls' -w 600 -t "Active Calls" $RHIZO_DIR/graphs/calls-$age.png \
+rrdtool graph --start -$age -v 'calls' -w 600 -t "Active Calls" $RHIZO_DIR/graphs/fs_calls-$age.png \
 "DEF:active_callsu=$RHIZO_DIR/fs_calls.rrd:calls:AVERAGE" \
 'CDEF:active_calls=active_callsu,FLOOR' \
 'AREA:active_calls#94D239:Calls' \
