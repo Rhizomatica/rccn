@@ -13,7 +13,7 @@ require_once('include/menu.php');
 
 				$graphs = array('fs_calls','calls','chanr','chans');
 				if (file_exists('/var/rhizomatica/rrd/mybts')) {
-                                  $mybts=file('/var/rhizomatica/rrd/mybts');
+				  $mybts=explode(' ',file_get_contents('/var/rhizomatica/rrd/mybts'));
 				} else {
 				  $mybts=array();
                                   for ($i=0;$i<6;$i++) { array_push($mybts,$i); }
