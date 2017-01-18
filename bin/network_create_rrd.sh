@@ -44,6 +44,23 @@ RRA:MIN:0.5:10080:1 \
 RRA:MAX:0.5:10080:1
 fi
 
+
+if [ ! -f $RHIZO_DIR/stats.rrd ]; then
+rrdtool create $RHIZO_DIR/stats.rrd --step 300 \
+DS:cr:COUNTER:600:0:U \
+DS:crn:COUNTER:600:0:U \
+DS:lur:COUNTER:600:0:U \
+DS:lurr:COUNTER:600:0:U \
+DS:sms_mo:COUNTER:600:0:U \
+DS:sms_mt:COUNTER:600:0:U \
+DS:moc:COUNTER:600:0:U \
+DS:moca:COUNTER:600:0:U \
+DS:mtc:COUNTER:600:0:U \
+DS:mtca:COUNTER:600:0:U \
+RRA:AVERAGE:0.5:1:2016 \
+RRA:AVERAGE:0.5:30:3504
+fi
+
 if [ ! -f $RHIZO_DIR/bts_channels60.rrd ]; then
 rrdtool create $RHIZO_DIR/bts_channels60.rrd --step 60 \
 DS:tch0:GAUGE:120:0:U \
