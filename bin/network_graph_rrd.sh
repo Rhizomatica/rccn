@@ -114,7 +114,7 @@ rrdtool graph --start -$age -v 'calls' -w 600 -t 'Call Setup per minute' $RHIZO_
 'CDEF:cmtca=amtca,60,*' \
 'LINE1:cmoa#333300: Mobile Originated' \
 'LINE1:cmta#669900: MO Connected' \
-'LINE1:cmoca#993366: Mobile Terminated' \
+'LINE1:cmoca#FF0000: Mobile Terminated' \
 'LINE1:cmtca#CC0099: MT Connected' \
 'GPRINT:cmoa:LAST:Mobile Originated\:%6.0lf %s' \
 'GPRINT:cmta:LAST:Mobile Terminated\:%6.0lf %s'
