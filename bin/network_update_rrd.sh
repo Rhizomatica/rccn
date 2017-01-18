@@ -11,7 +11,7 @@ rrdtool update $RHIZO_DIR/broken.rrd N:$broken
 calls=`fs_cli --timeout=5000 --connect-timeout=5000 -x 'show calls count' | grep total | awk '{print $1}'`
 rrdtool update $RHIZO_DIR/fs_calls.rrd N:$calls
 
-stats=`echo "show statistics" | nc -q1 localhost 4242 | awk 'BEGIN {cr=0;crn=0;lura=0;lurr=0;sms_mo=0;sms_mt=0;moc=0;moca=0;mtc=0;mtca=0}; /Channel Requests/ {cr=$4;crn=$6} /Location Update Response/ {lur=$4;lurr=$6} /SMS MO/ {sms_mo=$4}; /SMS MT/ {sms_mt=$4} /MO Calls/ {moc=$4;moca=$6}; /MT Calls/ {mtc=$4;mtca=$6} END {print cr":"crn":"lur":"lurr":"sms_mo":"sms_mt":"moc":"moca":"mtc":"mtca}' `
+stats=`echo "show statistics" | nc -q1 localhost 4242 | awk 'BEGIN {cr=0;crn=0;lur=0;lurr=0;sms_mo=0;sms_mt=0;moc=0;moca=0;mtc=0;mtca=0}; /Channel Requests/ {cr=$4;crn=$6} /Location Update Response/ {lur=$4;lurr=$6} /SMS MO/ {sms_mo=$4}; /SMS MT/ {sms_mt=$4} /MO Calls/ {moc=$4;moca=$6}; /MT Calls/ {mtc=$4;mtca=$6} END {print cr":"crn":"lur":"lurr":"sms_mo":"sms_mt":"moc":"moca":"mtc":"mtca}' `
 
 online_reg_subs=`echo "select count(*) from Subscriber where length(extension) = 11 and lac>0;" | sqlite3 -init <(echo .timeout 1000) /var/lib/osmocom/hlr.sqlite3`
 online_noreg_subs=`echo "select count(*) from Subscriber where length(extension) = 5 and lac>0;" | sqlite3 -init <(echo .timeout 1000) /var/lib/osmocom/hlr.sqlite3`
