@@ -76,12 +76,11 @@ rrdtool graph --start -$age -v 'subscribers' -w 600 -t "Online not registered su
 'GPRINT:onlinenoreg:AVERAGE:Average\:%6.0lf %s' \
 'GPRINT:onlinenoreg:MAX:Maximum\:%6.0lf %s'
 
-
 rrdtool graph --start -$age -v 'requests' -w 600 -t 'Chan Requests per minute' $RHIZO_DIR/graphs/chanr-$age.png \
 "DEF:cra=$RHIZO_DIR/stats.rrd:cr:AVERAGE" \
 "DEF:crna=$RHIZO_DIR/stats.rrd:crn:AVERAGE" \
-'CDEF:ccra=cra,60,*' \ 
-'CDEF:ccrna=crna,60,*'  \
+'CDEF:ccra=cra,60,*' \
+'CDEF:ccrna=crna,60,*' \
 'LINE1:ccra#0066FF:Channel Requests' \
 'LINE1:ccrna#ff0066:No Channel' \
 
@@ -96,8 +95,8 @@ rrdtool graph --start -$age -v 'lur' -w 600 -t 'LUR per minute' $RHIZO_DIR/graph
 rrdtool graph --start -$age -v 'sms' -w 600 -t 'SMS per minute' $RHIZO_DIR/graphs/sms-$age.png \
 "DEF:moa=$RHIZO_DIR/stats.rrd:sms_mo:AVERAGE" \
 "DEF:mta=$RHIZO_DIR/stats.rrd:sms_mt:AVERAGE" \
-'CDEF:cmoa=moa,60,*' \ 
-'CDEF:cmta=mta,60,*'  \
+'CDEF:cmoa=moa,60,*' \
+'CDEF:cmta=mta,60,*' \
 'LINE1:cmoa#0066FF:Mobile Originated' \
 'LINE1:cmta#ff0066:Mobile Terminated' \
 'GPRINT:cmoa:LAST:Most Recent\:%6.0lf %s' \
@@ -106,20 +105,19 @@ rrdtool graph --start -$age -v 'sms' -w 600 -t 'SMS per minute' $RHIZO_DIR/graph
  
 rrdtool graph --start -$age -v 'calls' -w 600 -t 'Call Setup per minute' $RHIZO_DIR/graphs/calls-$age.png \
 "DEF:amoc=$RHIZO_DIR/stats.rrd:moc:AVERAGE" \
-"DEF:amoca=$RHIZO_DIR/stats.rrd:moca:AVERAGE" \ 
+"DEF:amoca=$RHIZO_DIR/stats.rrd:moca:AVERAGE" \
 "DEF:amtc=$RHIZO_DIR/stats.rrd:mtc:AVERAGE" \
-"DEF:amtca=$RHIZO_DIR/stats.rrd:mtca:AVERAGE" \ 
+"DEF:amtca=$RHIZO_DIR/stats.rrd:mtca:AVERAGE" \
 'CDEF:cmoa=amoc,60,*' \
 'CDEF:cmta=amtc,60,*' \
 'CDEF:cmoca=amoca,60,*' \
 'CDEF:cmtca=amtca,60,*' \
-'LINE1:cmoa#333300: Mobile Originated' \ 
+'LINE1:cmoa#333300: Mobile Originated' \
 'LINE1:cmta#669900: MO Connected' \
 'LINE1:cmoca#993366: Mobile Terminated' \
 'LINE1:cmtca#CC0099: MT Connected' \
-'GPRINT:cmoa:LAST:Mobile Originated\:%6.0lf %s' 
+'GPRINT:cmoa:LAST:Mobile Originated\:%6.0lf %s' \
 'GPRINT:cmta:LAST:Mobile Terminated\:%6.0lf %s'
-
 
 done
 
