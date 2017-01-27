@@ -76,25 +76,31 @@ rrdtool graph --start -$age -v 'subscribers' -w 600 -t "Online not registered su
 'GPRINT:onlinenoreg:AVERAGE:Average\:%6.0lf %s' \
 'GPRINT:onlinenoreg:MAX:Maximum\:%6.0lf %s'
 
-rrdtool graph --start -$age -v 'requests' -w 600 -t 'Chan Requests per minute' $RHIZO_DIR/graphs/chanr-$age.png \
-"DEF:cra=$RHIZO_DIR/stats.rrd:cr:AVERAGE" \
-"DEF:crna=$RHIZO_DIR/stats.rrd:crn:AVERAGE" \
+rrdtool graph --start -$age -v 'requests' -N -E -w 600 -t 'Chan Requests per minute' $RHIZO_DIR/graphs/chanr-$age.png \
+"DEF:Dcra=$RHIZO_DIR/stats.rrd:cr:AVERAGE" \
+"DEF:Dcrna=$RHIZO_DIR/stats.rrd:crn:AVERAGE" \
+'CDEF:cra=Dcra,0,GT,Dcra,3,LT,Dcra,0,IF,0,IF' \
+'CDEF:crna=Dcrna,0,GT,Dcrna,3,LT,Dcrna,0,IF,0,IF' \
 'CDEF:ccra=cra,60,*' \
 'CDEF:ccrna=crna,60,*' \
 'LINE1:ccra#0066FF:Channel Requests' \
 'LINE1:ccrna#ff0066:No Channel' \
 
-rrdtool graph --start -$age -v 'lur' -w 600 -t 'LUR per minute' $RHIZO_DIR/graphs/lur-$age.png \
-"DEF:lura=$RHIZO_DIR/stats.rrd:lur:AVERAGE" \
-"DEF:lurra=$RHIZO_DIR/stats.rrd:lurr:AVERAGE" \
+rrdtool graph --start -$age -v 'lur' -N -E -w 600 -t 'LUR per minute' $RHIZO_DIR/graphs/lur-$age.png \
+"DEF:Dlura=$RHIZO_DIR/stats.rrd:lur:AVERAGE" \
+"DEF:Dlurra=$RHIZO_DIR/stats.rrd:lurr:AVERAGE" \
+'CDEF:lura=Dlura,0,GT,Dlura,3,LT,Dlura,0,IF,0,IF' \
+'CDEF:lurra=Dlurra,0,GT,Dlurra,3,LT,Dlurra,0,IF,0,IF' \
 'CDEF:clura=lura,60,*' \
 'CDEF:clurra=lurra,60,*' \
 'LINE1:clura#0066FF:Accepted' \
 'LINE1:clurra#ff0066:Rejected' \
 
-rrdtool graph --start -$age -v 'sms' -w 600 -t 'SMS per minute' $RHIZO_DIR/graphs/sms-$age.png \
-"DEF:moa=$RHIZO_DIR/stats.rrd:sms_mo:AVERAGE" \
-"DEF:mta=$RHIZO_DIR/stats.rrd:sms_mt:AVERAGE" \
+rrdtool graph --start -$age -v 'sms' -N -E -w 600 -t 'SMS per minute' $RHIZO_DIR/graphs/sms-$age.png \
+"DEF:Dmoa=$RHIZO_DIR/stats.rrd:sms_mo:AVERAGE" \
+"DEF:Dmta=$RHIZO_DIR/stats.rrd:sms_mt:AVERAGE" \
+'CDEF:moa=Dmoa,0,GT,Dmoa,3,LT,Dmoa,0,IF,0,IF' \
+'CDEF:mta=Dmta,0,GT,Dmta,3,LT,Dmta,0,IF,0,IF' \
 'CDEF:cmoa=moa,60,*' \
 'CDEF:cmta=mta,60,*' \
 'LINE1:cmoa#0066FF:Mobile Originated' \
@@ -103,11 +109,15 @@ rrdtool graph --start -$age -v 'sms' -w 600 -t 'SMS per minute' $RHIZO_DIR/graph
 'GPRINT:cmta:LAST:Most Recent\:%6.0lf %s'    
 
  
-rrdtool graph --start -$age -v 'calls' -w 600 -t 'Call Setup per minute' $RHIZO_DIR/graphs/calls-$age.png \
-"DEF:amoc=$RHIZO_DIR/stats.rrd:moc:AVERAGE" \
-"DEF:amoca=$RHIZO_DIR/stats.rrd:moca:AVERAGE" \
-"DEF:amtc=$RHIZO_DIR/stats.rrd:mtc:AVERAGE" \
-"DEF:amtca=$RHIZO_DIR/stats.rrd:mtca:AVERAGE" \
+rrdtool graph --start -$age -N -E -v 'calls' -w 600 -t 'Call Setup per minute' $RHIZO_DIR/graphs/calls-$age.png \
+"DEF:Damoc=$RHIZO_DIR/stats.rrd:moc:AVERAGE" \
+"DEF:Damoca=$RHIZO_DIR/stats.rrd:moca:AVERAGE" \
+"DEF:Damtc=$RHIZO_DIR/stats.rrd:mtc:AVERAGE" \
+"DEF:Damtca=$RHIZO_DIR/stats.rrd:mtca:AVERAGE" \
+'CDEF:amoc=Damoc,0,GT,Damoc,3,LT,Damoc,0,IF,0,IF' \
+'CDEF:amoca=Damoca,0,GT,Damoca,3,LT,Damoca,0,IF,0,IF' \
+'CDEF:amtc=Damtc,0,GT,Damtc,3,LT,Damtc,0,IF,0,IF' \
+'CDEF:amtca=Damtca,0,GT,Damtca,3,LT,Damtca,0,IF,0,IF' \
 'CDEF:cmoa=amoc,60,*' \
 'CDEF:cmta=amtc,60,*' \
 'CDEF:cmoca=amoca,60,*' \
