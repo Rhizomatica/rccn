@@ -100,15 +100,14 @@ class SubscriberRESTService:
 
     # put subscriber offline
     @route('/offline', Http.PUT)
-    def offline(self, request, imsi=''):
-        api_log.info('%s - [PUT] %s/offline Data: imsi:"%s"' % (request.getHost().host, self.path, imsi))
+    def offline(self, request, msisdn=''):
+        api_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"' % (request.getHost().host, self.path, msisdn))
         try:
             sub = Subscriber()
-            sub.set_lac(imsi, 0)
+            sub.expire_lu(msisdn)
             data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
-
         api_log.info(data)
         return data
 

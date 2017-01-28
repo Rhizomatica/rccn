@@ -375,16 +375,30 @@ class Subscriber:
             raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
 
     def set_lac(self, imsi, lac):
+        ''' I fixed this, but don't use it. Dont write to the sqlite3. '''
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             print 'Update lac %s %s' % (imsi, lac)
-            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', [(imsi, lac)])
+            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', (lac, imsi) )
             sq_hlr.commit()
-            sq_hlr_cursor.execute('UPDATE subscriber set lac=? where imsi=?', [(imsi, lac)])
-            sq_hlr.commit()
+            sq_hlr.close()
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error updating subscriber lac: %s' % e.args[0])
+
+    def expire_lu(self, msisdn):
+        appstring = 'OpenBSC'
+        appport = 4242
+        try:
+            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+            cmd = 'enable'
+            vty.command(cmd)
+            cmd = 'subscriber extension %s expire' % (msisdn)
+            ret = vty.command(cmd)
+            api_log.debug('VTY: %s' % ret)
+        except Exception as e:
+            api_log.debug('Exception in expire_lu! %s' % e)
+            pass
 
     def add(self, msisdn, name, balance, location=''):
         if len(msisdn) == 15:
