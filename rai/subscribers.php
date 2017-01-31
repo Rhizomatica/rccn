@@ -48,6 +48,7 @@ require_once('modules/subscriber.php');
                         });
                 },
                 "sAjaxSource": "subscribers_processing.php",
+                "bStateSave": true,
                 "fnInitComplete": function() {
                     sel='<select id="conSelect" style="width:50px">' +
                     '<option value="RAI-all">&nbsp;</option>' +
