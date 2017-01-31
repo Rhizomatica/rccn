@@ -49,7 +49,7 @@ function print_form($post_data,$errors) {
 				<label><?= _("Subscriber number") ?>
 				<span class="small"><?= _("Subscriber number") ?></span>
 				</label>
-				<input type="text" name="callerid" id="callerid" value="<?=$callerid?>"/>
+				<input type="text" name="callerid" id="callerid" value="<?=$callerid?>" readonly/>
 				
 <?php
                                 if (count($locations) > 1) {
