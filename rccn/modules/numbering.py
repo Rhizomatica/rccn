@@ -22,12 +22,44 @@
 import sys
 sys.path.append("..")
 from config import *
+from ESL import *
 
 class NumberingException(Exception):
     pass
 
 class Numbering:
     
+    def is_number_sip_connected(self, session, number):
+        try:
+            session.execute('set', "sofia_contact_=${sofia_contact("+number+")}")
+            _sofia_contact=session.getVariable("sofia_contact_")
+            if _sofia_contact == 'error/user_not_registered':
+                session.execute('set', "sofia_contact_=${sofia_contact(*/"+number+"@"+wan_ip_address+")}")
+                _sofia_contact=session.getVariable("sofia_contact_")
+            log.info('Sofia Contact: %s' % _sofia_contact)
+            if _sofia_contact == '' or _sofia_contact == 'error/user_not_registered':
+                return False
+            return _sofia_contact
+        except Exception as ex:
+            log.info('Exception: %s' % ex)
+
+    def is_number_sip_connected_no_session(self, number):
+        # Carefult with this, seems to lock up FS console if called from chatplan.
+        # That is to say, don't connect back via ESL from the chatplan.
+        try:
+            con = ESLconnection("127.0.0.1", "8021", "ClueCon")
+            e = con.api("sofia_contact "+str(number))
+            _sofia_contact=e.getBody()
+            if _sofia_contact == 'error/user_not_registered':
+                e = con.api( "sofia_contact */" + str(number) + "@" + str(wan_ip_address) )
+                _sofia_contact=e.getBody()
+            log.info('Sofia Contact: %s' % _sofia_contact)
+            if _sofia_contact == '' or _sofia_contact == 'error/user_not_registered':
+                return False
+            return _sofia_contact
+        except Exception as ex:
+            log.info('Exception: %s' % ex)
+
     def is_number_did(self, destination_number):
         try:
             cur = db_conn.cursor()
@@ -85,6 +117,18 @@ class Numbering:
             return False
         except psycopg2.DatabaseError as e:
             raise NumberingException('PG_HLR error checking if number is in roaming:' % e)
+
+    def get_dhlr_entry(self,imsi):
+        try:
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
+            if not subscriber.exists:
+                raise NumberingException('RK_DB imsi %s not found' % imsi)
+            return subscriber.data
+        except riak.RiakError as e:
+            raise NumberingException('RK_HLR error getting the msisdn from an imsi: %s' % e)
+        except socket.error:
+            raise NumberingException('RK_HLR error: unable to connect')
 
     def get_msisdn_from_imsi(self, imsi):
         try:
