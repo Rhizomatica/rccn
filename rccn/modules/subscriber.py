@@ -724,6 +724,14 @@ class Subscriber:
         except socket.error:
             raise SubscriberException('RK_HLR error: unable to connect')
 
+    def delete_in_dhlr_imsi(self, imsi):
+        try:
+            rk_hlr = riak_client.bucket('hlr')            
+            rk_hlr.delete(str(imsi))
+        except riak.RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
+        except socket.error:
+            raise SubscriberException('RK_HLR error: unable to connect')
 
 if __name__ == '__main__':
     sub = Subscriber()

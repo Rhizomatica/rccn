@@ -28,8 +28,9 @@ def update_foreign_subscribers():
     sub = Subscriber()
     try:
         unregistered = sub.get_all_unregistered()
+        roaming_log.info('Got %s Unregistered Subscribers' % len(unregistered))
         if len(unregistered) == 0:
-            roaming_log.info('No Unregisted Subscribers')
+            roaming_log.info('No Unregistered Subscribers')
             return
         update_list(unregistered, True)
     except SubscriberException as e:
@@ -37,6 +38,7 @@ def update_foreign_subscribers():
 
     try:
         foreign = sub.get_all_foreign()
+        roaming_log.info('Got %s Foreign Subscribers' % len(foreign))
         if len(foreign) == 0:
             roaming_log.info('No Foreign Subscribers')
             return
@@ -55,13 +57,22 @@ def update_list(subscribers, welcome=False):
 
 
             # check if subscriber pg_hlr[current_bts] != rk_hlr[current_bts]
-            pg_hlr_current_bts = numbering.get_current_bts(number)
-            rk_hlr_current_bts = numbering.get_bts_distributed_hlr(str(imsi), 'current_bts')
+            try:
+                pg_hlr_current_bts = numbering.get_current_bts(number)
+            except NumberingException as e:
+                if len(msisdn) == 5 and str(e) == 'PG_DB subscriber not found: '+number:
+                    # We have an imsi in osmo subs and riak, but not in local hlr
+                    # so delete the riak entry for this imsi.
+                    sub.delete_in_dhlr_imsi(imsi)
+                    continue
+
+            #rk_hlr_current_bts = numbering.get_bts_distributed_hlr(str(imsi), 'current_bts')
             rk_hlr_current_bts = riak_data["current_bts"]
 
             if pg_hlr_current_bts != rk_hlr_current_bts:
                 # riak has a different idea about current_bts to our local hlr.
                 # the rhs sync job should be making that not happen.
+                # this is weird. why check != ? and then not send welcome text here?
                 # update subscriber location
                 roaming_log.info('Subscriber %s in roaming, update location' % number)
                 roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
@@ -137,7 +148,21 @@ def update_local_connected():
     roaming_log.info("Got %s connected Subscribers" % len(c))
     try:
         for msisdn in c:
-            bts = num.get_current_bts(msisdn)
+            try:
+                bts = num.get_current_bts(msisdn)
+            except NumberingException as e:
+                if str(e) == 'PG_DB subscriber not found: '+msisdn[0]:
+                    # We have a connected imsi in osmo subs 
+                    # but not in local hlr
+                    try:
+                        sub_check=sub.get(msisdn[0])
+                    except SubscriberException as e:
+                        if str(e) == 'PG_HLR No subscriber found':
+                        # so delete.. 
+                        # (changes the osmo ext back to 5 digits and deletes from all db tables)
+                            roaming_log.info("Deleting %s !!" % msisdn[0])
+                            sub.delete(msisdn[0])
+                            continue
             roaming_log.info("%s is at %s acording to local hlr" % (msisdn[0], bts))
             if  bts != config['local_ip']:
                 try:
