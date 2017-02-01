@@ -165,7 +165,7 @@ if __name__ == '__main__':
     
     if options.recent:
         if options.cron:
-            wait=random.randint(0,5)
+            wait=random.randint(0,15)
             print "Waiting %s seconds..." % wait
             time.sleep(wait)
         check(1,options.recent)
