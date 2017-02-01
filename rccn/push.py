@@ -17,53 +17,94 @@
 #
 ############################################################################
 
-import sys
-import socket
-import datetime
-import obscvty
-#import riak
 from config import *
+import obscvty
+import smtplib
+import random
+from optparse import OptionParser
 
-def check(recent, days=10):
+def advise(msg):
+    from email.mime.text import MIMEText
+    text = """
+Favor de intervenir y arreglar esta situacion manualmente.
+Un IMSI no deberia de estar registrado y autorizado al mismo tiempo
+en mas que una comunidad:
+
+    """
+    mail = MIMEText(text + msg )
+    mail['Subject'] = msg
+    mail['From'] = 'postmaster@rhizomatica.org'
+    mail['To'] = 'postmaster@rhizomatica.org'
+    s = smtplib.SMTP('mail')
+    s.sendmail('postmaster@rhizomatica.org', advice_email, mail.as_string())
+    s.quit()
+
+def check(recent, hours=2):
     """ Get sub from the local PG db and see their status in riak """
     cur = db_conn.cursor()
     if recent == 0:
         cur.execute("SELECT msisdn,name from Subscribers where authorized=1")
     if recent == 1:
-        sql = "SELECT msisdn,created FROM Subscribers WHERE created > NOW() -interval '%s days'" % days
+        sql = "SELECT msisdn,created FROM Subscribers WHERE created > NOW() -interval '%s hours'" % hours
         cur.execute(sql)
     if cur.rowcount > 0:
         print 'Subscriber Count: %s ' % (cur.rowcount)
         _subs=cur.fetchall()
+        n=cur.rowcount
         for msisdn,name in _subs:
             print '----------------------------------------------------'
-            print "Checking %s %s" % (msisdn, name)
-	    imsi=osmo_ext2imsi(msisdn)
-	    if imsi:
+            print "%s: Checking %s %s" % (n, msisdn, name)
+            imsi=osmo_ext2imsi(msisdn)
+            if imsi:
                 print "Local IMSI: \033[96m%s\033[0m" % (imsi)
                 get(msisdn, imsi)
             else:
                 print "\033[91;1mLocal Subscriber from PG Not Found on OSMO HLR!\033[0m"
-            print '----------------------------------------------------\n'
+            n=n-1
+        print '----------------------------------------------------\n'
+        
+
+def imsi_clash(imsi, ext1, ext2):
+    msg = "!! IMSI Clash between %s and %s for %s !! " % (ext1,ext2,imsi)
+    advise(msg)
+    print "\033[91;1m" + msg + "\033[0m" 
 
 def get(msisdn, imsi):
     """Do the thing"""
     riak_client = riak.RiakClient(
-    host='10.23.0.3',
+    host=riak_ip_address,
     pb_port=8087,
     protocol='pbc')
     bucket = riak_client.bucket('hlr')
     sub = Subscriber()
     num = Numbering()
     try:
-        riak_imsi = bucket.get_index('msisdn_bin', msisdn).results
+        # We can end up with indexes that point to non existent keys.
+        # so this might fail, even though later get_index() will return an IMSI key.
+        riak_obj = bucket.get(imsi, timeout=RIAK_TIMEOUT)
+        if riak_obj.exists:
+            riak_ext=riak_obj.data['msisdn']
+        else:
+            print "\033[91;1m!! Didn't get hlr key for imsi %s\033[0m" % imsi
+            riak_ext = False
+        if riak_ext and (riak_ext != msisdn):
+            imsi_clash(imsi, msisdn, riak_ext)
+            return
+        
+        riak_imsi = bucket.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT).results
+
+        if len(riak_imsi) > 1:
+            print "\033[91;1m More than ONE entry in this index! \033[0m"
+
         if not len(riak_imsi):
             print '\033[93mExtension %s not found\033[0m, adding to D_HLR' % (msisdn)
             sub._provision_in_distributed_hlr(imsi, msisdn)
         else:
+            # Already checked if the ext in the imsi key matches osmo extension.
+            # Now check if the key pointed to by the extension index matches the osmo imsi
             if imsi != riak_imsi[0]:
                 print "\033[91;1mIMSIs do not Match!\033[0m (%s)" % riak_imsi[0]  
-		print "%s Belongs to %s" % (riak_imsi[0], num.get_msisdn_from_imsi(riak_imsi[0]))
+                print "Riak's %s points to %s" % (riak_imsi[0], num.get_msisdn_from_imsi(riak_imsi[0]))
                 return False
             print 'Extension: \033[95m%s\033[0m-%s-\033[92m%s\033[0m ' \
                   'has IMSI \033[96m%s\033[0m' % (msisdn[:5], msisdn[5:6], msisdn[6:], riak_imsi[0])
@@ -71,7 +112,18 @@ def get(msisdn, imsi):
             if data['authorized']:
                 print "Extension: Authorised"
             else:
-                print "Extension: \033[91mNOT\033[0m Authorised"
+                print "Extension: \033[91mNOT\033[0m Authorised, Fixing"
+                data['authorized']=1
+                fix = bucket.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": data['current_bts'], "authorized": data['authorized'], "updated": int(time.time()) })
+                fix.add_index('msisdn_bin', msisdn)
+                fix.add_index('modified_int', int(time.time()))
+                fix.store()
+            if msisdn[:6] == config['internal_prefix'] and data['home_bts'] != config['local_ip']:
+                print "\033[91;1mHome BTS does not match my local IP! Fixing..\033[0m"
+                fix = bucket.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": data['current_bts'], "authorized": data['authorized'], "updated": int(time.time()) })
+                fix.add_index('msisdn_bin', msisdn)
+                fix.add_index('modified_int', int(time.time()))
+                fix.store()
             try:
                 host = socket.gethostbyaddr(data['home_bts'])
                 home = host[0]
@@ -103,13 +155,23 @@ def osmo_ext2imsi(ext):
         return False
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-	check(0)
-    else:
-        if sys.argv[1] == 'recent':
-            if len(sys.argv) == 3:
-                check(1,sys.argv[2])
-            else:
-                check(1)
-            
+    parser = OptionParser()
+    parser.add_option("-c", "--cron", dest="cron", action="store_true",
+        help="Running from cron, add a delay to not all hit riak at same time")
+    parser.add_option("-r", "--recent", dest="recent",
+        help="How many hours back to check for created Subscribers")
 
+    (options, args) = parser.parse_args()
+    
+    if options.recent:
+        if options.cron:
+            wait=random.randint(0,5)
+            print "Waiting %s seconds..." % wait
+            time.sleep(wait)
+        check(1,options.recent)
+    else:
+        if options.cron:
+            wait=random.randint(0,60)
+            print "Waiting %s seconds..." % wait
+            time.sleep(wait)
+        check(0)    
