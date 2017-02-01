@@ -480,6 +480,7 @@ class Subscriber:
         try:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
+            roaming_log.info('RIAK: pushing %s, was %s' % (onfig['local_ip'],subscriber.data['current_bts']))
             subscriber.data['current_bts'] = config['local_ip']
             if ts_update:
                 now = int(time.time())
@@ -559,8 +560,7 @@ class Subscriber:
     def authorized(self, msisdn, auth):
         # auth 0 subscriber disabled
         # auth 1 subscriber enabled
-        # disable/enable subscriber on the HLR sqlite DB
-        # !! FIXME !! We shouldn't be writing to sqlite.
+        # disable/enable subscriber in Osmo
         try:
             appstring = 'OpenBSC'
             appport = 4242
@@ -570,22 +570,10 @@ class Subscriber:
             cmd = 'subscriber extension %s authorized %s' % (msisdn, auth)
             vty.command(cmd)
         except:
+            print "VTY Exception"
             pass
                 
-            #sq_hlr = sqlite3.connect(sq_hlr_path)
-            #sq_hlr_cursor = sq_hlr.cursor()
-            #sq_hlr_cursor.execute('UPDATE Subscriber SET authorized=? WHERE extension=?', (auth, msisdn))
-            #if sq_hlr_cursor.rowcount > 0:
-            #    sq_hlr.commit()
-            #else:
-                # This breaks out of the loop and stops processing.
-            #    raise SubscriberException('SQ_HLR Subscriber not found')
-        #except sqlite3.Error as e:
-        #    raise SubscriberException('SQ_HLR error changing auth status: %s' % e.args[0])
-        #finally:
-        #    sq_hlr.close()
-
-        # disable/enable subscriber on PG_HLR
+        # disable/enable subscriber on PG Subscribers
         try:
             cur = db_conn.cursor()
             cur.execute('UPDATE subscribers SET authorized=%(auth)s WHERE msisdn=%(msisdn)s', {'auth': auth, 'msisdn': msisdn})
@@ -598,25 +586,23 @@ class Subscriber:
             db_conn.rollback()
             raise SubscriberException('PG_HLR error changing auth status: %s' % e)
 
-        #try:
-        #    now = int(time.time())
-        #    rk_hlr = riak_client.bucket('hlr')
-        #    subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
-        #    if len(subscriber.results) != 0:
-        #        subscriber = rk_hlr.get(subscriber.results[0], timeout=RIAK_TIMEOUT)
-        #        subscriber.data['authorized'] = auth
-        #        subscriber.data['updated'] = now
-        #        subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])])
-        #        subscriber.store()
-        #    else:
-        #        raise NumberingException('RK_DB subscriber %s not found' % msisdn)
-
-        #except riak.RiakError as e:
-        #    raise SubscriberException('RK_HLR error: %s' % e)
-        #except socket.error:
-        #    raise SubscriberException('RK_HLR error: unable to connect')
-
-
+        try:
+            now = int(time.time())
+            imsi=self._get_imsi(msisdn)
+            rk_hlr = riak_client.bucket('hlr')
+            subscriber = rk_hlr.get(imsi, timeout=RIAK_TIMEOUT)
+            if subscriber.exists:
+                subscriber.data['authorized'] = auth
+                subscriber.data['updated'] = now
+                subscriber.indexes = set([('modified_int', now), ('msisdn_bin', subscriber.data['msisdn'])])
+                subscriber.store()
+            else:
+                # There's no riak entry for this subscriber, add it.
+                self._provision_in_distributed_hlr(imsi, msisdn)
+        except riak.RiakError as e:
+            raise SubscriberException('RK_HLR error: %s' % e)
+        except socket.error:
+            raise SubscriberException('RK_HLR error: unable to connect')
 
     def subscription(self, msisdn, status):
         # status 0 - subscription not paid
@@ -632,22 +618,19 @@ class Subscriber:
             raise SubscriberException('PG_HLR error changing subscriber subscription status: %s' % e)
 
 
-
     def edit(self, msisdn, name, balance, location):
-        # edit subscriber data in the SQ_HLR
-        #try:
-        #   sq_hlr = sqlite3.connect(sq_hlr_path)
-        #   sq_hlr_cursor = sq_hlr.cursor()
-        #   sq_hlr_cursor.execute('UPDATE Subscriber set extension=?,name=? where extension=?', (msisdn, name, msisdn))
-        #   if sq_hlr_cursor.rowcount > 0:
-        #       sq_hlr.commit()
-        #   else:
-        #       raise SubscriberException('SQ_HLR No subscriber found')
-        #except sqlite3.Error as e:
-        #   raise SubscriberException('SQ_HLR error updating subscriber data: %s' % e.args[0])
-        #finally:
-        #   sq_hlr.close()
-
+        # edit subscriber data in the Osmo
+        try:
+            appstring = 'OpenBSC'
+            appport = 4242
+            vty = obscvty.VTYInteract(appstring, '127.0.0.1', appport)
+            cmd = 'enable'
+            vty.command(cmd)
+            cmd = 'subscriber extension %s name %s' % (msisdn, name)
+            vty.command(cmd)
+        except e:
+            raise SubscriberException('VTY error updating subscriber data: %s' % e.args[0])
+        
         # PG_HLR update subscriber data
         try:
             cur = db_conn.cursor()
