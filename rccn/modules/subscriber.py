@@ -396,7 +396,9 @@ class Subscriber:
             cmd = 'subscriber extension %s expire' % (msisdn)
             ret = vty.command(cmd)
             api_log.debug('VTY: %s' % ret)
-        except Exception as e:
+            if ret:
+                raise SubscriberException('VTY: %s' % ret)
+        except IOError as e:
             api_log.debug('Exception in expire_lu! %s' % e)
             pass
 
