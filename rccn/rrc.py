@@ -28,12 +28,18 @@ def update_foreign_subscribers():
     sub = Subscriber()
     try:
         unregistered = sub.get_all_unregistered()
+        if len(unregistered) == 0:
+            roaming_log.info('No Unregisted Subscribers')
+            return
         update_list(unregistered, True)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
 
     try:
         foreign = sub.get_all_foreign()
+        if len(foreign) == 0:
+            roaming_log.info('No Foreign Subscribers')
+            return
         update_list(foreign)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
@@ -44,26 +50,36 @@ def update_list(subscribers, welcome=False):
     sub = Subscriber()
     for msisdn,imsi in subscribers:
         try:
-            number =  numbering.get_msisdn_from_imsi(imsi)
+            riak_data =  numbering.get_dhlr_record(imsi)
+            number=riak_data["msisdn"]
+
 
             # check if subscriber pg_hlr[current_bts] != rk_hlr[current_bts]
             pg_hlr_current_bts = numbering.get_current_bts(number)
             rk_hlr_current_bts = numbering.get_bts_distributed_hlr(str(imsi), 'current_bts')
+            rk_hlr_current_bts = riak_data["current_bts"]
 
             if pg_hlr_current_bts != rk_hlr_current_bts:
+                # riak has a different idea about current_bts to our local hlr.
+                # the rhs sync job should be making that not happen.
                 # update subscriber location
                 roaming_log.info('Subscriber %s in roaming, update location' % number)
+                roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
                 sub.update(msisdn, "roaming number", number)
             else:
                 if welcome:
                     roaming_log.info('Subscriber %s in roaming, update location' % number)
+                    roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
+                    # Question this: we've already done it above:
                     sub.update(msisdn, "roaming number", number)
                     roaming_log.info('Send roaming welcome message to %s' % number)
                     send_welcome_sms(number)
-                    # update location to 0 in home bts
-                    #rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
+                    # They are here, so expire them in osmo on their home_bts
+                    # really, this needs to be the last place they were seen.
+                    rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
+                    print 'Would PUT to http://%s:8085/subscriber/offline with msisdn=%s' % (rk_hlr_home_bts, number)
                     #try:
-                    #    values = '{"imsi": "%s"}' % imsi
+                    #    values = '{"msisdn": "%s"}' % number
                     #    opener = urllib2.build_opener(urllib2.HTTPHandler)
                     #    request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_home_bts, data=values)
                     #    request.add_header('Content-Type', 'application/json')
@@ -72,9 +88,9 @@ def update_list(subscribers, welcome=False):
                     #    if 'success' in res:
                     #            roaming_log.info('LAC successfully updated on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
                     #    else:
-                    #            roaming_log.error('Updating LAC on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
+                    #            roaming_log.error('Error Updating LAC on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
                     #except IOError:
-                    #    roaming_log.error('Error connect to site %s to update LAC for %s' % server)
+                    #    roaming_log.error('Error connect to site %s to expire subscriber %s' % (server,number) )
 
                 else:
                     # update only location and not the timestamp in rk_hlr
