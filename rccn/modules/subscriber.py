@@ -480,7 +480,7 @@ class Subscriber:
         try:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
-            roaming_log.info('RIAK: pushing %s, was %s' % (onfig['local_ip'],subscriber.data['current_bts']))
+            roaming_log.info('RIAK: pushing %s, was %s' % (config['local_ip'],subscriber.data['current_bts']))
             subscriber.data['current_bts'] = config['local_ip']
             if ts_update:
                 now = int(time.time())
