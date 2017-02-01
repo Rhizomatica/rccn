@@ -214,8 +214,7 @@ class Dialplan:
                             log.info(
                                 'Destination subscriber is '
                                 'unauthorized to receive calls')
-                            # self.play_announcement(
-                            # '002_saldo_insuficiente.gsm')
+                            self.play_announcement('007_el_numero_no_es_corecto.gsm')
                             self.session.hangup()
                     else:
                         if self.subscriber.is_authorized(dest, 0):
@@ -225,6 +224,7 @@ class Dialplan:
                             log.info(
                                 'Destination subscriber is '
                                 'unauthorized to receive calls')
+                            self.play_announcement('007_el_numero_no_es_corecto.gsm')
                             self.session.hangup()
                 else:
                     # check if called number is an extension
