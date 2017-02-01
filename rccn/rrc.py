@@ -50,7 +50,7 @@ def update_list(subscribers, welcome=False):
     sub = Subscriber()
     for msisdn,imsi in subscribers:
         try:
-            riak_data =  numbering.get_dhlr_record(imsi)
+            riak_data =  numbering.get_dhlr_entry(imsi)
             number=riak_data["msisdn"]
 
 
