@@ -100,11 +100,11 @@ class Context:
                 self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
                 self.session.hangup()
                 
-            self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN")
-            self.session.execute('bridge', "{absolute_codec_string='G729',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
+            self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
+            self.session.execute('bridge', "{absolute_codec_string='PCMA',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
             _fail_cause=self.session.getVariable('originate_disposition')
             log.info('Gateway Finished with Call: %s' % _fail_cause)
-            if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN":
+            if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN" or _fail_cause == "CALL_REJECTED":
                 self.session.execute('playback', '010_no_puede_ser_enlazada.gsm')
             if _fail_cause == "USER_BUSY":
                 self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
@@ -142,6 +142,16 @@ class Context:
         except ConfigurationException as e:
             log.error(e)
                         
+        # Experimental local calls to SIP endpoint.
+        if use_sip == 'yes':
+          sip_endpoint=self.numbering.is_number_sip_connected(self.session,self.destination_number)
+          #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
+          if sip_endpoint:
+            self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
+            self.session.execute('bridge', "{absolute_codec_string='PCMA'}"+sip_endpoint)
+            _fail_cause=self.session.getVariable('originate_disposition')
+            log.info('SIP Finished with Call: %s' % _fail_cause)
+            return
         # check subscriber balance if charge local call is configured
         log.info('Send call to LCR')
         # Hangup after bridge is true in the dialplan.
