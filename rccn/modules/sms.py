@@ -31,6 +31,7 @@ from subscriber import Subscriber, SubscriberException
 from numbering import Numbering, NumberingException
 from threading import Thread
 
+
 import binascii
 
 class SMSException(Exception):
@@ -54,7 +55,10 @@ class SMS:
         self.numbering = Numbering()
 
     def filter(self):
-        drop_regexp = ['simchautosynchro.+','DSAX[0-9]+ND']
+        if len(self.destination) < 4:
+                sms_log.info('Dropping SMS on floor because destinaton: %s' % self.destination)
+                return True
+        drop_regexp = ['simchautosynchro.+','DSAX[0-9]+ND','Activate:dt=','REG-REQ?v=3;']
         for regexp in drop_regexp:
             if re.search(regexp,self.text):
                 sms_log.info('Dropping SMS on floor because text matched %s' % regexp)
@@ -76,8 +80,8 @@ class SMS:
         try:
             if self.filter():
                 return
-        except:
-            api_log.info('Caught an Error in sms:filter()')
+        except Exception as e:
+            api_log.info('Caught an Error in sms:filter %s' % e)
             pass
 
         try:
@@ -158,7 +162,7 @@ class SMS:
                                 self.coding = 2
                                 self.save_sms = 0
                                 self.context = 'SMS_UNAUTH'
-                                if not source_authorized:
+                                if not source_authorized and len(destination) != 3:
                                     sms_log.info('Sender unauthorized send notification message')
                                     self.send(config['smsc'], source, config['sms_source_unauthorized'])
                                 else:
