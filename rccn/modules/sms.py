@@ -55,10 +55,13 @@ class SMS:
         self.numbering = Numbering()
 
     def filter(self):
-        if len(self.destination) < 4:
-                sms_log.info('Dropping SMS on floor because destinaton: %s' % self.destination)
-                return True
-        drop_regexp = ['simchautosynchro.+','DSAX[0-9]+ND','Activate:dt=','REG-REQ?v=3;']
+        if len(self.destination) < 5:
+            sms_log.info('Dropping SMS on floor because destinaton: %s' % self.destination)
+            return True
+        if self.charset='8-BIT' and len(self.destination) < 7:
+            sms_log.info('Dropping 8-BIT SMS with destinaton: %s' % self.destination)
+            return True
+        drop_regexp = ['simchautosynchro.+','DSAX[0-9]+ND','Activate:dt=','REG-REQ?v=3;','^GWDR']
         for regexp in drop_regexp:
             if re.search(regexp,self.text):
                 sms_log.info('Dropping SMS on floor because text matched %s' % regexp)
