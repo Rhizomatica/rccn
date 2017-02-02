@@ -30,8 +30,7 @@ import urllib, obscvty, time
 from subscriber import Subscriber, SubscriberException 
 from numbering import Numbering, NumberingException
 from threading import Thread
-
-
+import ESL
 import binascii
 
 class SMSException(Exception):
@@ -98,13 +97,19 @@ class SMS:
             sms_log.info('SIP SMS? %s' % sip_endpoint)
 
             if sip_endpoint:
-                simple_dest=self.destination+'@'+wan_ip_address
+                m=re.compile('sofia/([a-z]*)/sip').search(sip_endpoint)
+                if m:
+                    sip_profile=m.group(1)
+                if sip_profile == 'internalvpn':
+                    simple_dest=self.destination+'@'+vpn_ip_address
+                else:
+                    simple_dest=self.destination+'@'+wan_ip_address
                 try:
-                    con = ESLconnection("127.0.0.1", "8021", "ClueCon")
-                    event = ESLevent("CUSTOM", "SMS::SEND_MESSAGE")
+                    con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
+                    event = ESL.ESLevent("CUSTOM", "SMS::SEND_MESSAGE")
                     event.addHeader("from", self.source)
                     event.addHeader("to", simple_dest)
-                    event.addHeader("sip_profile", "external");
+                    event.addHeader("sip_profile", sip_profile);
                     event.addHeader("dest_proto", "sip")
                     event.addHeader("type","text/plain")
                     sms_log.info('Text: %s' % self.text)
