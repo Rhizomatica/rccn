@@ -101,7 +101,7 @@ class SubscriberRESTService:
     # put subscriber offline
     @route('/offline', Http.PUT)
     def offline(self, request, msisdn=''):
-        api_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"' % (request.getClientIP(), self.path, msisdn))
+        roaming_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"' % (request.getClientIP(), self.path, msisdn))
         try:
             sub = Subscriber()
             sub.expire_lu(msisdn)
