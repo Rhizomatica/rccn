@@ -87,6 +87,41 @@ class SMS:
             api_log.info('Caught an Error in sms:filter %s' % e)
             pass
 
+        if use_sip == 'yes':
+            try:
+                sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination)
+            except Exception as e:
+                sms_log.info('SIP Exception: %s' % e)
+
+            sms_log.info('SIP SMS? %s' % sip_endpoint)
+
+            if sip_endpoint:
+                simple_dest=self.destination+'@'+wan_ip_address
+                try:
+                    con = ESLconnection("127.0.0.1", "8021", "ClueCon")
+                    event = ESLevent("CUSTOM", "SMS::SEND_MESSAGE")
+                    event.addHeader("from", self.source)
+                    event.addHeader("to", simple_dest)
+                    event.addHeader("sip_profile", "external");
+                    event.addHeader("dest_proto", "sip")
+                    event.addHeader("type","text/plain")
+                    sms_log.info('Text: %s' % self.text)
+                    sms_log.info('Text: %s' % type(self.text))
+                    sms_log.info('Coding: %s' % self.coding)
+                    if self.coding == '0':
+                        msg=self.text.encode('utf8','replace')
+                    else:
+                        msg=self.text.encode('utf-8')
+                        #msg=urllib.urlencode({'text': msg })
+                        #print binascii.hexlify(msg)
+                    sms_log.info('Text: %s' % type(msg))
+                    sms_log.info('Text: %s' % msg)
+                    event.addBody(msg)
+                    con.sendEvent(event)
+                    return
+                except Exception as e:
+                    api_log.info('Caught an Error in sms sip routine: %s' % e)
+
         try:
             # auth checks
             # get auth info
