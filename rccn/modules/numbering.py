@@ -188,6 +188,20 @@ class Numbering:
             sq_hlr.close()
             raise NumberingException('SQ_HLR error: %s' % e.args[0])
 
+    def get_local_hlr_btsinfo(self, number):
+        try:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT home_bts,current_bts FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
+            subscriber = cur.fetchone()
+            if subscriber != None:
+                return subscriber
+            else:
+                raise NumberingException('PG_DB subscriber not found: %s' % number)
+            return False
+        except psycopg2.DatabaseError as e:
+            raise NumberingException('PG_HLR error getting bts info for:' % e)
+
+
     def get_current_bts(self, number):
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
