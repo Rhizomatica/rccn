@@ -76,3 +76,30 @@ def xml_fetch(params):
 </document>
 '''
     return xml
+
+def chat(message, args):
+    source = message.getHeader("from_user")
+    destination = message.getHeader("to_user")
+    text = message.getBody()
+    charset = 'UTF-8'
+    coding = '2'
+    log.info("SIP Message from %s to %s: %s" % (source,destination,text) )
+    try:
+      # Can't seem to use ESL from within here, it locks up, so go immediatly to RAPI
+      # No that doesn't work either. Seems if you connect back to ESL, even from another process
+      # before this function has completed, the whole ESL blocks and we sit and wait.
+      # Probably I need to be dropping these messages into a queue anyway.
+      # For now, drop them to a RAPI that forks a thread so we can get outta here.
+      message.chat_execute('stop')
+      handler = urllib2.HTTPHandler()
+      opener = urllib2.build_opener(handler)
+      values = {'source': source, 'destination': destination, 'charset': charset, 'coding': coding, 'text': text}
+      data = urllib.urlencode(values)
+      request = urllib2.Request('http://192.168.11.202:8085/chat', data=data)
+      request.get_method = lambda: "POST"
+      connection = opener.open(request)
+      connection.read()
+    except:
+      e=sys.exc_info()[0]
+      log.info('ChatPlan Exception: %s %s' % (e, sys.exc_info()[1]))
+    log.info('Leaving rccn.chat()')

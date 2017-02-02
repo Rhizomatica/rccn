@@ -8,6 +8,7 @@ import unidecode
 import socket
 import time
 import datetime
+import urllib, urllib2
 from unidecode import unidecode
 from riak.transports.pbc.transport import RiakPbcTransport
 from logging import handlers as loghandlers

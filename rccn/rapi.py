@@ -285,6 +285,23 @@ class CreditRESTService:
         api_log.info(data)
         return data
 
+class ChatRESTService:
+    path = '/chat'
+
+    @route('/', Http.POST)
+    def receive(self, request, source, destination, charset, coding, text):
+        try:
+            sms = SMS()
+            import threading
+            thread = threading.Thread(target=sms.receive, args=(source, destination, text, charset, coding))
+            thread.daemon = True
+            api_log.info( 'Starting thread for chat message to %s via %s' % (destination, request.getClientIP()) )
+            thread.start()
+            data = {'status': 'success', 'error': ''}
+            return data
+        except Exception as e:
+            print str(e)
+
 class SMSRESTService:
     path = '/sms'
 
@@ -543,7 +560,7 @@ class ConfigurationRESTService:
 
 def run_rapi():
     api_log.info('Starting up RCCN API manager')
-    app = RESTResource((SubscriberRESTService(), ResellerRESTService(), CreditRESTService(), StatisticsRESTService(), SMSRESTService(), ConfigurationRESTService()))
+    app = RESTResource((SubscriberRESTService(), ResellerRESTService(), CreditRESTService(), StatisticsRESTService(), SMSRESTService(), ChatRESTService(), ConfigurationRESTService()))
     app.run(8085)
 
 if __name__ == "__main__":
