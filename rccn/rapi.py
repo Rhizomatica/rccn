@@ -108,7 +108,21 @@ class SubscriberRESTService:
             data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
-        api_log.info(data)
+            api_log.info(data)
+            return data
+        # Take advantage to point this subscriber to the new location in our hlr
+        # so we (at least) don't have to wait for the next hlr sync run
+        try:
+            cur = db_conn.cursor()
+            now = datetime.datetime.fromtimestamp(int(time.time()))
+            cur.execute('UPDATE hlr SET current_bts=%(current_bts)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
+            {'msisdn': msisdn, 'current_bts': request.getClientIP(), 'updated': now})
+            db_conn.commit()
+        except psycopg2.DatabaseError as e:
+            data = {'status': 'failed', 'error': str(e)}
+            api_log.info(data)    
+            return data
+        api_log.info(data)    
         return data
 
     # edit subscriber
