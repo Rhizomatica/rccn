@@ -55,6 +55,8 @@ class SMS:
         self.numbering = Numbering()
 
     def filter(self):
+        if self.destination in extensions_list:
+            return False
         if len(self.destination) < 5:
             sms_log.info('Dropping SMS on floor because destinaton: %s' % self.destination)
             return True
