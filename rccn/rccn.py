@@ -95,7 +95,7 @@ def chat(message, args):
       opener = urllib2.build_opener(handler)
       values = {'source': source, 'destination': destination, 'charset': charset, 'coding': coding, 'text': text}
       data = urllib.urlencode(values)
-      request = urllib2.Request('http://192.168.11.202:8085/chat', data=data)
+      request = urllib2.Request('http://127.0.0.1:8085/chat', data=data)
       request.get_method = lambda: "POST"
       connection = opener.open(request)
       connection.read()
