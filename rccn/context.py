@@ -101,7 +101,7 @@ class Context:
                 self.session.hangup()
                 
             self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
-            self.session.execute('bridge', "{absolute_codec_string='PCMA',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
+            self.session.execute('bridge', "{absolute_codec_string='G729,PCMA',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
             _fail_cause=self.session.getVariable('originate_disposition')
             log.info('Gateway Finished with Call: %s' % _fail_cause)
             if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN" or _fail_cause == "CALL_REJECTED":
