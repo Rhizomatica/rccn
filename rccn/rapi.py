@@ -332,7 +332,7 @@ class SMSRESTService:
             try:
                 gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
                 text=gsm_codec.decode(btext)[0]
-                api_log.info('GSM 03.38 decoded: "%s"' % text)            
+                api_log.info('GSM 03.38 decoded: "%s"' % str(text))
             except: # Catch Everything, try to not actually LOSE messages!  
                 e=sys.exc_info()[0]
                 api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
@@ -346,8 +346,16 @@ class SMSRESTService:
             except: # Catch Everything, try to not actually LOSE messages!  
                 e=sys.exc_info()[0]
                 api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
-                data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
-                text=btext        
+                # Some phones are sending multi part messages with different charsets.
+                # Kannel concatenates and sends as UTF-16BE coding 2
+                try:
+                    api_log.info('Trying multi part trick')
+                    a=btext[:134]
+                    b=btext[134:]
+                    text=a.decode('utf-16be')+b.decode('utf8')
+                except:
+                    api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
+                    text=btext
         try:
             sms = SMS()
             sms.receive(source, destination, text, charset, coding)

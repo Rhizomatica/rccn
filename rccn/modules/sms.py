@@ -253,23 +253,34 @@ class SMS:
         sms_log.info('SMS Send: Text: <%s> Charset: %s' % (text, charset) )
         try:
             # because we might be called without charset and sent something unknown.
+            # If we decoded in RAPI we have unicode, if not a str.
             sms_log.info('Type of text: %s', (type(text)) )  
             if (charset == 'UTF-8' or charset == 'utf-8') and type(text) != unicode:
-                utext=unicode(text,charset).encode('utf-8')
-            elif charset == 'UTF-16BE':
-                utext=text.encode('utf-16be')                                   
+                str_text=unicode(text,charset).encode('utf-8')
+            elif charset == 'UTF-16BE' and type(text) == unicode:
+                str_text=text.encode('utf-8')
+                self.charset='UTF-8'
             else:
-                utext=text.encode('utf-8')
+                str_text=text.encode('utf-8','replace')
                 
-            sms_log.info('Type: %s', (type(utext)) )
+            sms_log.info('Type: %s', (type(str_text)) )
 
             # I think we ALWAYS need to send coding=2 to kannel.
             if type(text) == unicode:
-		self.coding = 2
-    
-            enc_text = urllib.urlencode({'text': utext })
+		self.coding = 2    
+            enc_text = urllib.urlencode({'text': str_text })
         except:
-            sms_log.info('Encoding Error: %s Line:%s' % (sys.exc_info()[1], sys.exc_info()[2].tb_lineno))             
+            sms_log.info('Encoding Error: %s Line:%s' % (sys.exc_info()[1], sys.exc_info()[2].tb_lineno))
+            # Was still dropping messages here because we go on without defining enc_text
+            # Some phones are sending some kind of fucked up mix of charset. 
+            # I think multi segment messages with two charsets.
+            # kannel is munging before it gets here.
+            # Must send something now that kannel won't puke on.
+            str_text=text.decode('UTF-8','replace').encode('utf-8')
+            self.charset='UTF-8'
+            enc_text = urllib.urlencode({'text': str_text})
+            self.coding = 2
+
         if server == config['local_ip']:
             try:
                 sms_log.info('Send SMS: %s %s %s %s' % (source, destination, text, enc_text))
