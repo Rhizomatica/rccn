@@ -332,7 +332,7 @@ class SMSRESTService:
             try:
                 gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
                 text=gsm_codec.decode(btext)[0]
-                api_log.info('GSM 03.38 decoded: "%s"' % str(text))
+                api_log.info('GSM 03.38 decoded: "%s"' % text)
             except: # Catch Everything, try to not actually LOSE messages!  
                 e=sys.exc_info()[0]
                 api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
