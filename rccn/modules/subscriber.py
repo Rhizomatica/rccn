@@ -248,7 +248,6 @@ class Subscriber:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
             _sql=("select extension from subscriber where length(extension) = 11 and extension not like \"%(prefix)s%%\" and lac = 0 and updated < date('now', '-%(days)s days')" % {'days': days, 'prefix': config['internal_prefix']})
-            print _sql
             sq_hlr_cursor.execute(_sql)
             inactive = sq_hlr_cursor.fetchall()
             sq_hlr.close()

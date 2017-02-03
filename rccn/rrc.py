@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ############################################################################
 #
 # Copyright (C) 2014 Ruben Pollan <meskio@sindominio.net>
@@ -22,6 +23,8 @@ rhizomatica roaming checker
 """
 
 from config import *
+from optparse import OptionParser
+import random
 import urllib2
 
 def update_foreign_subscribers():
@@ -31,8 +34,8 @@ def update_foreign_subscribers():
         roaming_log.info('Got %s Unregistered Subscribers' % len(unregistered))
         if len(unregistered) == 0:
             roaming_log.info('No Unregistered Subscribers')
-            return
-        update_list(unregistered, True)
+        else:
+            update_list(unregistered, True)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
 
@@ -41,8 +44,8 @@ def update_foreign_subscribers():
         roaming_log.info('Got %s Foreign Subscribers' % len(foreign))
         if len(foreign) == 0:
             roaming_log.info('No Foreign Subscribers')
-            return
-        update_list(foreign)
+        else: 
+            update_list(foreign)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
 
@@ -54,8 +57,6 @@ def update_list(subscribers, welcome=False):
         try:
             riak_data =  numbering.get_dhlr_entry(imsi)
             number=riak_data["msisdn"]
-
-
             # check if subscriber pg_hlr[current_bts] != rk_hlr[current_bts]
             try:
                 pg_hlr_current_bts = numbering.get_current_bts(number)
@@ -70,29 +71,28 @@ def update_list(subscribers, welcome=False):
             rk_hlr_current_bts = riak_data["current_bts"]
 
             if pg_hlr_current_bts != rk_hlr_current_bts:
-                # riak has a different idea about current_bts to our local hlr.
-                # the rhs sync job should be making that not happen.
-                # this is weird. why check != ? and then not send welcome text here?
-                # update subscriber location
+                # This ismi is maybe connected here 
                 roaming_log.info('Subscriber %s in roaming, update location' % number)
                 roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
-                sub.update(msisdn, "roaming number", number)
+                #sub.update(msisdn, "roaming number", number)
             else:
+                # riak and our hlr had the same location.
                 if welcome:
                     roaming_log.info('Subscriber %s in roaming, update location' % number)
                     roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
-                    # Question this: we've already done it above:
+                    # Change this so it doesn't update riak:
                     sub.update(msisdn, "roaming number", number)
                     roaming_log.info('Send roaming welcome message to %s' % number)
                     send_welcome_sms(number)
                     # They are here, so expire them in osmo on their home_bts
+                    # Shouldn't do this based on possibly outdated info on connected.
                     # really, this needs to be the last place they were seen.
-                    rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
-                    print 'Would PUT to http://%s:8085/subscriber/offline with msisdn=%s' % (rk_hlr_home_bts, number)
+                    #rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
+                    #print 'Would PUT to http://%s:8085/subscriber/offline with msisdn=%s' % (rk_hlr_home_bts, number)
                     #try:
                     #    values = '{"msisdn": "%s"}' % number
                     #    opener = urllib2.build_opener(urllib2.HTTPHandler)
-                    #    request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_home_bts, data=values)
+                    #    request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_current_bts, data=values)
                     #    request.add_header('Content-Type', 'application/json')
                     #    request.get_method = lambda: 'PUT'
                     #    res = opener.open(request).read()
@@ -105,9 +105,8 @@ def update_list(subscribers, welcome=False):
 
                 else:
                     # update only location and not the timestamp in rk_hlr
-                    sub.update_location(imsi, number, False)
+                    #sub.update_location(imsi, number, False)
                     roaming_log.info('Subscriber %s is roaming' % number)
-
 
         except NumberingException as e:
             roaming_log.debug("Couldn't retrieve msisdn %s from the imsi: %s" % (msisdn,e))
@@ -141,14 +140,15 @@ def update_local_connected():
     num = Numbering()
     roaming_log.info('Getting all local (our) connected subscribers')
     try:
-        c = sub.get_all_connected()
+        connected = sub.get_all_connected()
     except SubscriberException as e:
         roaming_log.info("Error getting Connected Subscribers: %s" % e)
         return
     roaming_log.info("Got %s connected Subscribers" % len(c))
     try:
-        for msisdn in c:
+        for msisdn in connected:
             try:
+                # From Local HLR
                 bts = num.get_current_bts(msisdn)
             except NumberingException as e:
                 if str(e) == 'PG_DB subscriber not found: '+msisdn[0]:
@@ -158,27 +158,33 @@ def update_local_connected():
                         sub_check=sub.get(msisdn[0])
                     except SubscriberException as e:
                         if str(e) == 'PG_HLR No subscriber found':
-                        # so delete.. 
+                        # We don't have this in the subscriber table so delete.. 
                         # (changes the osmo ext back to 5 digits and deletes from all db tables)
-                            roaming_log.info("Deleting %s !!" % msisdn[0])
-                            sub.delete(msisdn[0])
+                        # Don't do this for the moment..
+                            #roaming_log.info("Deleting %s !!" % msisdn[0])
+                            #sub.delete(msisdn[0])
                             continue
+            # extension is in pg_hlr
             roaming_log.info("%s is at %s acording to local hlr" % (msisdn[0], bts))
+            
             if  bts != config['local_ip']:
                 try:
+                    # From SQLite
                     imsi = sub._get_imsi(msisdn[0])
                 except SubscriberException as e:
                     roaming_log.info("Error getting IMSI for %s: %s" % (str(msisdn[0]), e))
                     continue
-                roaming_log.info("Moving %s IMSI:%s home (was %s)" % (msisdn[0], imsi, bts))
-                sub.update_location(imsi, msisdn[0], True)
+                # We may have a false positive in connected if we missed an "offline"
+                # and our hlr may be out of date if we missed an rhs
+                #roaming_log.info("Moving %s IMSI:%s home (was %s)" % (msisdn[0], imsi, bts))
+                #sub.update_location(imsi, msisdn[0], True)
     except SubscriberException as e:
         roaming_log.info("Error updating DHLR for %s: %s" % (msisdn[0], e))
 
-def purge_inactive_subscribers():
+def purge_inactive_subscribers(since):
     sub = Subscriber()
     try:
-        inactive = sub.get_all_inactive_roaming_since(3)
+        inactive = sub.get_all_inactive_roaming_since(since)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of inactive: %s" % e)
         return
@@ -191,16 +197,38 @@ def purge_inactive_subscribers():
             roaming_log.error("An error ocurred on %s purge: %s" % (msisdn, e))
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        update_foreign_subscribers()
-        update_local_connected()
-        purge_inactive_subscribers()
+    parser = OptionParser()
+    parser.add_option("-c", "--cron", dest="cron", action="store_true",
+        help="Running from cron, add a delay to not all hit riak at same time")
+    parser.add_option("-f", "--foreign", dest="foreign", action="store_true",
+        help="Update Foreign Subscribers")
+    parser.add_option("-l", "--local", dest="local", action="store_true",
+        help="Update Local Connected Subscribers")
+    parser.add_option("-p", "--purge", dest="purge", action="store_true",
+        help="Purge Inactive Subscribers")
+    parser.add_option("-s", "--since", dest="since",
+        help="Purge Inactive Subscribers since days")
+    parser.add_option("-d", "--debug", dest="debug", action="store_true",
+        help="Turn on debug logging")
+    (options, args) = parser.parse_args()
+    
+    if options.debug:
+        roaming_log.setLevel(logging.DEBUG)
     else:
-        if sys.argv[1] == 'f':
-            update_foreign_subscribers()
-        elif sys.argv[1] == 'u':
-            update_local_connected()
-        elif sys.argv[1] == 'p':
-            purge_inactive_subscribers()
+        roaming_log.setLevel(logging.INFO)    
+    
+    if options.cron:
+        wait=random.randint(0,30)
+        print "Waiting %s seconds..." % wait
+        time.sleep(wait)
+
+    if options.foreign:
+        update_foreign_subscribers()
+    if options.local:
+        update_local_connected()
+    if options.purge:
+        if options.since:
+            purge_inactive_subscribers(int(options.since))
         else:
-            print ("Unknown Option: %s" % sys.argv[1])
+            purge_inactive_subscribers(21)
+    
