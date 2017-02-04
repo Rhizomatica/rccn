@@ -38,6 +38,7 @@ class Dialplan:
         self.destination_number = self.session.getVariable(
             'destination_number')
         self.calling_number = self.session.getVariable('caller_id_number')
+        self.calling_host = self.session.getVariable("sip_network_ip")
 
         self.subscriber = Subscriber()
         self.numbering = Numbering()
@@ -113,11 +114,11 @@ class Dialplan:
                 last = emg_numbers[-1]
                 for emg in emg_numbers:
                     if emg == last:
-                        dial_str += 'sofia/internal/sip:'+emg+'@172.16.0.1:5050'
+                        dial_str += 'sofia/internal/sip:'+emg+'@'+mncc_ip_address+':5050'
                     else:
-                        dial_str += 'sofia/internal/sip:'+emg+'@172.16.0.1:5050,'
+                        dial_str += 'sofia/internal/sip:'+emg+'@'+mncc_ip_address+':5050,'
             else:
-                dial_str = 'sofia/internal/sip:'+emergency_contact+'@172.16.0.1:5050'
+                dial_str = 'sofia/internal/sip:'+emergency_contact+'@'+mncc_ip_address+':5050'
             
             self.session.setVariable('context','EMERGENCY')
             self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
@@ -127,10 +128,9 @@ class Dialplan:
             # lookup dest number in DID table.
             try:
                 if (self._n.is_number_did(self.destination_number)):
-                    origin_host = self.session.getVariable("sip_network_ip")
                     log.info('Called number is a DID')
-                    log.info("Caller from: %s" % origin_host)
-                    if origin_host == '172.16.0.1':
+                    log.info("Caller from: %s" % self.calling_host)
+                    if self.calling_host == mncc_ip_address:
                         log.info("Call to DID has local origin!")
                         self.play_announcement(self.WRONG_NUMBER)
                         return

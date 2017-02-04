@@ -157,10 +157,10 @@ class Context:
         # Hangup after bridge is true in the dialplan.
         #self.session.execute('set','hangup_after_bridge=false')
         self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
         _fail_cause=self.session.getVariable('originate_disposition')
         log.info('LCR Finished with Call: %s' % _fail_cause)
-        if _fail_cause == "DESTINATION_OUT_OF_ORDER":
+        if _fail_cause == "DESTINATION_OUT_OF_ORDER" or _fail_cause == "NO_ANSWER":
             self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
         if _fail_cause == "USER_BUSY":
             self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
@@ -189,7 +189,7 @@ class Context:
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
                     log.info('Send call to internal subscriber %s' % subscriber_number)
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@'+mncc_ip_address+':5050')
                 else:
                     log.info('Subscriber %s doesn\'t exists or is not authorized' % subscriber_number)
             except SubscriberException as e:
@@ -239,7 +239,7 @@ class Context:
                         self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
                         self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
                         self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+dest_num+'@172.16.0.1:5050')
+                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+dest_num+'@'+mncc_ip_address+':5050')
                         _fail_cause=self.session.getVariable('originate_disposition')
                         log.info('LCR Finished with Call: %s' % _fail_cause)
                         if _fail_cause == "DESTINATION_OUT_OF_ORDER":
@@ -284,7 +284,7 @@ class Context:
                     # if current_bts is the same as local site, send the call to the local LCR
                     if site_ip == config['local_ip']:
                         log.info('Currentbts same as local site send call to LCR')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
                     else:
                         self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
                 except NumberingException as e:
@@ -306,8 +306,19 @@ class Context:
                             log.error(e)
         
                         log.info('Send call to LCR')
+                        # Need to remove duplicate code here.
                         self.session.setVariable('context','ROAMING_LOCAL')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                        self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
+                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
+                        _fail_cause=self.session.getVariable('originate_disposition')
+                        log.info('LCR Finished with Call: %s' % _fail_cause)
+                        if _fail_cause == "DESTINATION_OUT_OF_ORDER" or _fail_cause == "NO_ANSWER":
+                            self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
+                        if _fail_cause == "USER_BUSY":
+                            self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
+                        if _fail_cause == "UNALLOCATED_NUMBER":
+                            self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
+                        self.session.hangup()
                     else:
                         # local destination subscriber unauthorized
                         # TODO: play message destination unauthorized to receive call
@@ -348,11 +359,11 @@ class Context:
                 if site_ip == config['local_ip']:
                     log.info('Called number is roaming on our site send call to LCR')
                     self.session.setVariable('context','ROAMING_LOCAL')
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@172.16.0.1:5050')
+                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
                 else:
                     log.info('Called number is roaming, bridge call here + current_bts: %s' % site_ip)
                     self.session.setVariable('context','ROAMING_INTERNAL')
-                    self.session.execute('bridge', "{absolute_codec_string='GSM,G729'} sofia/internal/sip:"+str(self.destination_number)+"@172.16.0.1:5050, sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                    self.session.execute('bridge', "{absolute_codec_string='GSM,G729'} sofia/internal/sip:"+str(self.destination_number)+"@'+mncc_ip_address+':5050, sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
             except NumberingException as e:
                 log.error(e)
         elif roaming_subject == 'inbound':
