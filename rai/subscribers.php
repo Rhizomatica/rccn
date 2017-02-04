@@ -31,7 +31,7 @@ require_once('modules/subscriber.php');
                     { "bSearchable": false, "aTargets": [0] },
                     { "bSearchable": false, "aTargets": [1] },
                     { "bSearchable": false, "aTargets": [2] },
-                    { "bSearchable": false, "aTargets": [3] }
+                    { "bSearchable": false, "aTargets": [6] }
                 ],
                 "aoColumns": [
                         {},{},{"sClass": "center"},{"sClass": "center"},{},{},{},{}
@@ -50,14 +50,33 @@ require_once('modules/subscriber.php');
                 "sAjaxSource": "subscribers_processing.php",
                 "bStateSave": true,
                 "fnInitComplete": function() {
-                    sel='<select id="conSelect" style="width:50px">' +
-                    '<option value="RAI-all">&nbsp;</option>' +
+                    sel='<div style="display:table"><select id="conSelect" style="width:50px">' +
+                    '<option value="">&nbsp;</option>' +
                     '<option value="RAI-all-connected" data-image="img/led-green.gif"></option>' +
-                    '<option value="RAI-all-disconnected" data-image="img/led-red.gif"></option> </select>'
+                    '<option value="RAI-all-disconnected" data-image="img/led-red.gif"></option> </select></div>'
                     $('#subscribers thead tr th:nth-child(5)').prepend(sel)
                     $('#conSelect').msDropDown()
                     $('#conSelect').change(function() {
+                        $("#dynamic [name='subscribers_length']").val('-1')
+                        $('#subscribers_filter input').val('')
+                        if (this.value=='') {
+                                oTable.fnSettings()._iDisplayLength = 10;
+                                $("#dynamic [name='subscribers_length']").val('10')
+                        } else {
+                                oTable.fnSettings()._iDisplayLength = -1;
+                        }
                         oTable.fnFilter (this.value, null,false,false,false)
+                      })
+                    sel='<div style="display:table"><select id="authSelect" style="width:50px">' +
+                    '<option value="">&nbsp;</option>' +
+                    '<option value="1" data-image="img/unlock.gif"></option>' +
+                    '<option value="0" data-image="img/lock.gif"></option> </select></div>'
+                    $('#subscribers thead tr th:nth-child(4)').prepend(sel)
+                    $('#authSelect').msDropDown()
+                    $('#authSelect').change(function() {
+                        //$("#dynamic [name='subscribers_length']").val('-1')
+                        //$('#subscribers_filter input').val('')
+                        oTable.fnFilter (this.value, 3,false,false,false)
                       })
                 }
             } );

@@ -137,6 +137,10 @@
     /* Individual column filtering */
     for ( $i=0 ; $i<count($aColumns) ; $i++ )
     {
+    if ( substr($_GET['sSearch_'.$i],0,4) == "RAI-" ) {
+       $rai_filters[$i]=$_GET['sSearch_'.$i];
+       $_GET['sSearch_'.$i] = '';
+    }
         if ( $_GET['bSearchable_'.$i] == "true" && $_GET['sSearch_'.$i] != '' )
         {
             if ( $sWhere == "" )
@@ -147,7 +151,7 @@
             {
                 $sWhere .= " AND ";
             }
-            $sWhere .= "CAST(".$aColumns[$i]." AS TEXT) ILIKE '%".pg_escape_string($_GET['sSearch_'.$i])."%' ";
+            $sWhere .= "CAST(subscribers.".$aColumns[$i]." AS TEXT) ILIKE '%".pg_escape_string($_GET['sSearch_'.$i])."%' ";
         }
     }
      
@@ -227,7 +231,7 @@
             $row[]=$content;
 	    }
 	    else if ( $aColumns[$i] == "authorized" ) {
-		    $content=($aRow[$aColumns[$i]] == 0) ? "<img src='img/lock.png' width='16' height='16' />" : "<img src='img/unlock.png' width='16' height='16' /> ";
+		    $content=($aRow[$aColumns[$i]] == 0) ? "<img src='img/lock.png' width='16' height='16' />" : "<img src='img/unlock.png' width='16' height='16' />";
             $content.=($aRow[$aColumns[$i]] == 1 && $aRow['hlr_auth'] == 0 ) ? "<img title='"._('Not authorized on HLR!')."' src='img/lock.png' width='16' height='16' />" : "";
          $row[] = $content;
 	    }

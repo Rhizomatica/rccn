@@ -88,12 +88,26 @@
     $sWhere = "";
     if ( $_GET['sSearch'] != "" )
     {
+        // Do something to make these queries a little more realistic
+        if ( is_numeric($_GET['sSearch']) ) {
+            $_GET['bSearchable_4'] = "false";
+            $_GET['bSearchable_6'] = "false";
+            $_GET['bSearchable_7'] = "false";
+        } else {
+            $_GET['bSearchable_2'] = "false";
+            $_GET['bSearchable_3'] = "false";
+        }
         $sWhere = "WHERE (";
         for ( $i=0 ; $i<count($aColumns) ; $i++ )
         {
             if ( $_GET['bSearchable_'.$i] == "true" )
             {
-                $sWhere .= "CAST(".$aColumns[$i]." AS TEXT) ILIKE '%".pg_escape_string( $_GET['sSearch'] )."%' OR ";
+                if ( is_numeric($_GET['sSearch']) ) {
+                    $sWhere .= $aColumns[$i]." LIKE '%".pg_escape_string( $_GET['sSearch'] )."%' OR ";
+                } else {
+                    #loose the first % - we can assume tpying a search has to start from beginning.
+                    $sWhere .= "CAST(".$aColumns[$i]." AS TEXT) ILIKE '".pg_escape_string( $_GET['sSearch'] )."%' OR ";
+                }
             }
         }
         $sWhere = substr_replace( $sWhere, "", -3 );

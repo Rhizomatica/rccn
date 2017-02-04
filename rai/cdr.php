@@ -5,23 +5,28 @@ require_once('include/menu.php');
 
 ?> 
 
-                <script type="text/javascript" charset="utf-8">
-                        $(document).ready(function() {
-                                $('#example').dataTable( {
-                                        <?
-                                        $lang_file = 'js/'.$_SESSION['lang'].'.txt';
-                                        if (file_exists($lang_file)) {
-                                                echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
-                                        }
-                                        ?>
-                                        "sPaginationType": "full_numbers",
-                                        "bProcessing": true,
-                                        "bServerSide": true,
-                                        "aaSorting": [[ 1, "desc" ]],
-                                        "sAjaxSource": "cdr_processing.php"
+    <script type="text/javascript" charset="utf-8">
+            $(document).ready(function() {
+                    $('#example').dataTable( {
+                            <?
+                            $lang_file = 'js/'.$_SESSION['lang'].'.txt';
+                            if (file_exists($lang_file)) {
+                                    echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
+                            }
+                            ?>
+                            "sPaginationType": "full_numbers",
+                            "bProcessing": true,
+                            "bServerSide": true,
+                            "aaSorting": [[ 0, "desc" ]],
+                            "sAjaxSource": "cdr_processing.php",
+                            "aoColumnDefs": [
+			                    { "bSearchable": false, "aTargets": [0] },
+			                    { "bSearchable": false, "aTargets": [1] },
+			                    { "bSearchable": false, "aTargets": [5] },
+			                    { "bSearchable": false, "aTargets": [8] } ]
                                 } ).columnFilter();
                         } );
-                </script>
+    </script>
 			<? print_menu('cdr'); ?>	
 
 
