@@ -144,7 +144,7 @@ def update_local_connected():
     except SubscriberException as e:
         roaming_log.info("Error getting Connected Subscribers: %s" % e)
         return
-    roaming_log.info("Got %s connected Subscribers" % len(c))
+    roaming_log.info("Got %s connected Subscribers" % len(connected))
     try:
         for msisdn in connected:
             try:
