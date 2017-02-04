@@ -49,11 +49,21 @@ require_once('modules/subscriber.php');
                 },
                 "sAjaxSource": "subscribers_processing.php",
                 "bStateSave": true,
-                "fnInitComplete": function() {
+
+                "fnInitComplete": function(oSettings, json) {
+                    sVal=oSettings.oLoadedState.oSearch.sSearch
+                    consel=''
+                    dissel=''
+                    rsel=''
+                    if (sVal == 'RAI-all-connected') { consel="selected" }
+                    if (sVal == 'RAI-all-disconnected') { dissel="selected" }
+                    if (sVal == 'RAI-all-roaming') { rsel="selected" }
                     sel='<div style="display:table"><select id="conSelect" style="width:50px">' +
                     '<option value="">&nbsp;</option>' +
-                    '<option value="RAI-all-connected" data-image="img/led-green.gif"></option>' +
-                    '<option value="RAI-all-disconnected" data-image="img/led-red.gif"></option> </select></div>'
+                    '<option '+consel+' value="RAI-all-connected" data-image="img/led-green.gif"></option>' +
+                    '<option '+dissel+' value="RAI-all-disconnected" data-image="img/led-red.gif"></option>' +
+                    '<option '+rsel+' value="RAI-all-roaming" data-image="img/led-roam.gif"></option>' +
+                    '</select></div>'
                     $('#subscribers thead tr th:nth-child(5)').prepend(sel)
                     $('#conSelect').msDropDown()
                     $('#conSelect').change(function() {
@@ -67,10 +77,15 @@ require_once('modules/subscriber.php');
                         }
                         oTable.fnFilter (this.value, null,false,false,false)
                       })
+                    sVal=oSettings.oLoadedState.aoSearchCols[3].sSearch
+                    authsel=''
+                    noauthsel=''
+                    if (sVal == '1') { authsel="selected" }
+                    if (sVal == '0') { noauthsel="selected" }
                     sel='<div style="display:table"><select id="authSelect" style="width:50px">' +
                     '<option value="">&nbsp;</option>' +
-                    '<option value="1" data-image="img/unlock.gif"></option>' +
-                    '<option value="0" data-image="img/lock.gif"></option> </select></div>'
+                    '<option '+authsel+' value="1" data-image="img/unlock.gif"></option>' +
+                    '<option '+noauthsel+' value="0" data-image="img/lock.gif"></option> </select></div>'
                     $('#subscribers thead tr th:nth-child(4)').prepend(sel)
                     $('#authSelect').msDropDown()
                     $('#authSelect').change(function() {

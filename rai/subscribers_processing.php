@@ -210,6 +210,10 @@
         if (!in_array($aRow['msisdn'],$connected_subscribers) && $rai_filter == 'RAI-all-connected') {
             continue;
         }
+        if ($aRow['current_bts'] == $aRow['home_bts'] && $rai_filter == 'RAI-all-roaming') {
+            continue;
+        }
+
 
         $row = array();
         for ( $i=0 ; $i<count($aColumns) ; $i++ )
@@ -224,7 +228,7 @@
                 $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> " : "<img src='img/led-red.gif' /> ";
             } else {
                 $content = '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
-                $content .= (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> " : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-red.gif' /> ";
+                $content .= (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> " : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-roam.gif' /> ";
 
             }
             $content.= $aRow[$aColumns[$i]];
