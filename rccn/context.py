@@ -363,7 +363,7 @@ class Context:
                 else:
                     log.info('Called number is roaming, bridge call here + current_bts: %s' % site_ip)
                     self.session.setVariable('context','ROAMING_INTERNAL')
-                    self.session.execute('bridge', "{absolute_codec_string='GSM,G729'} sofia/internal/sip:"+str(self.destination_number)+"@'+mncc_ip_address+':5050, sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                    self.session.execute('bridge', "{absolute_codec_string='GSM,G729'} sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050, sofia/internalvpn/sip:'+self.destination_number+'@'+site_ip+':5040')
             except NumberingException as e:
                 log.error(e)
         elif roaming_subject == 'inbound':
