@@ -92,11 +92,11 @@ def update_list(subscribers):
                     request.get_method = lambda: 'PUT'
                     res = opener.open(request).read()
                     if 'success' in res:
-                        log.info('Roaming Subscriber %s expired on %s' % (number,current_bts))
+                        log.info('Roaming Subscriber %s expired on %s' % (number,rk_hlr_current_bts))
                     else:
-                        log.error('Error Expiring Roaming Subscriber %s at %s' % (number,current_bts))
+                        log.error('Error Expiring Roaming Subscriber %s at %s' % (number,rk_hlr_current_bts))
                 except IOError:
-                    log.error('Error connect to site %s to expire subscriber %s' % (current_bts,number) )
+                    log.error('Error connect to site %s to expire subscriber %s' % (rk_hlr_current_bts,number) )
                 continue
             # end if len(msisdn) == 5
 
