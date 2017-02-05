@@ -39,10 +39,13 @@ class Subscriber:
             cur.execute("SELECT balance FROM subscribers WHERE msisdn=%(number)s AND authorized=1", {'number': subscriber_number})
             balance = cur.fetchone()
             if balance != None:
+                cur.close()
                 return balance[0]
             else:
+                cur.close()
                 raise SubscriberException("Error in getting subscriber balance")
         except psycopg2.DatabaseError, e:
+            cur.close()
             raise SubscriberException('Database error in getting subscriber balance: %s' % e)
 
     def set_balance(self, subscriber_number, balance):
@@ -54,6 +57,7 @@ class Subscriber:
             cur.execute("UPDATE subscribers SET balance=%(balance)s WHERE msisdn=%(number)s", {'balance': Decimal(str(balance)), 'number': subscriber_number})
             db_conn.commit()
         except psycopg2.DatabaseError, e:
+            cur.close()
             raise SubscriberException('Database error updating balance: %s' % e)
 
 
@@ -210,7 +214,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension,imsi from subscriber where length(extension) = 11 and extension not like '%s%%' and lac > 0" % config['internal_prefix'])
+            sq_hlr_cursor.execute("select extension,imsi from subscriber where length(extension) = 11 and extension not like ? and lac > 0", ( [config['internal_prefix']+'%']) )
             foreign = sq_hlr_cursor.fetchall()
             sq_hlr.close()
             return foreign
@@ -333,6 +337,19 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
+    def get_roaming(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select count(*) from subscriber where length(extension) = 11 and extension not like ? and lac > 0", ([config['internal_prefix']+'%']) )
+            roaming = sq_hlr_cursor.fetchone()
+            sq_hlr.close()
+            return roaming[0]
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
 
     def get_unpaid_subscription(self):
         try:
@@ -533,7 +550,9 @@ class Subscriber:
             cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
             if cur.rowcount > 0:
                db_conn.commit()
+            cur.close()
         except psycopg2.DatabaseError as e:
+            cur.close()
 	    pass
 
         self._delete_in_distributed_hlr(msisdn)

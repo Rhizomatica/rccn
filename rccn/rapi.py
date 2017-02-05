@@ -60,6 +60,10 @@ class SubscriberRESTService:
                 data = json.dumps(sub.get_online(), cls=PGEncoder)
             elif msisdn == 'offline':
                 data = json.dumps(sub.get_offline(), cls=PGEncoder)
+            elif msisdn == 'all_roaming':
+                data = json.dumps(sub.get_roaming(), cls=PGEncoder)
+            elif msisdn == 'all_foreign':
+                data = json.dumps(sub.get_all_foreign(), cls=PGEncoder)
             else:
                 data = json.dumps(sub.get(msisdn), cls=PGEncoder)
         except SubscriberException as e:

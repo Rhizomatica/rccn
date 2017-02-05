@@ -11,8 +11,6 @@
         $access->checkAuth();
     }
 
-    include('include/locale.php');
-
     $rai_filter='';
 
     /*
@@ -65,6 +63,7 @@
     try {
     	$sub = new Subscriber();
 	$connected_subscribers = $sub->getAllConnected();
+        $roaming = $sub->getAllConnected(true);
     }
     catch (SubscriberException $e) { }
 
@@ -128,10 +127,10 @@
             }
         }
         $sWhere = substr_replace( $sWhere, "", -3 );
-        $sWhere .= ") AND subscribers.msisdn LIKE '$internalprefix%' ";
+        $sWhere .= ")"; // AND subscribers.msisdn LIKE '$internalprefix%' ";
     }
     if ($sWhere == "") {
-	$sWhere = "WHERE subscribers.msisdn LIKE '$internalprefix%' ";
+	$sWhere = ""; //WHERE subscribers.msisdn LIKE '$internalprefix%' ";
     }
      
     /* Individual column filtering */
@@ -159,16 +158,41 @@
     $sQuery = "
         SELECT ".str_replace(" , ", " ", implode(", ", $aqColumns))."
         FROM   $sTable
-        $sWhere
+        $sWhere";
+
+   if (sizeof($roaming) > 0) {
+        $sql="where msisdn IN (";
+        foreach ($roaming as $key => $value) {
+                if ( $_GET['sSearch'] == "" || strpos($value,$_GET['sSearch']) !== False ) {
+                       $sql.="'".$value."',";
+                } else {
+                        $sql.="'',";
+                }
+        }
+        $rWhereSql=rtrim($sql,",").")";
+
+    $sQuery.= "
+    UNION SELECT created, created AS subscription_date, '1' AS subscription_status, '1' AS authorized,
+    msisdn, 'Roaming User' AS name, NULL AS balance, '' AS location, created AS hlr_created,
+    authorized AS hlr_auth, current_bts, home_bts FROM hlr ".$rWhereSql;
+    }
+
+    $sQuery .= "
         $sOrder
         $sLimit
     ";
+
     $rResult = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
      
     $sQuery = "
         SELECT $sIndexColumn
-        FROM   $sTable WHERE subscribers.msisdn ILIKE '$internalprefix%'
-    ";
+        FROM   $sTable WHERE subscribers.msisdn ILIKE '$internalprefix%'";
+
+    if (sizeof($roaming) > 0 ) {
+        $sQuery .= "
+        UNION SELECT id+5000 FROM hlr ".$rWhereSql;
+    }
+
     $rResultTotal = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
     $iTotal = pg_num_rows($rResultTotal);
     pg_free_result( $rResultTotal );
@@ -180,6 +204,10 @@
             FROM   $sTable
             $sWhere
         ";
+        if (sizeof($roaming) > 0 ) {
+        $sQuery .= "
+        UNION SELECT id+5000 FROM hlr ".$rWhereSql;
+        }
         $rResultFilterTotal = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
         $iFilteredTotal = pg_num_rows($rResultFilterTotal);
         pg_free_result( $rResultFilterTotal );
@@ -227,7 +255,8 @@
             if ($aRow['current_bts'] == $aRow['home_bts']) {
                 $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> " : "<img src='img/led-red.gif' /> ";
             } else {
-                $content = '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
+                $content =  (in_array($aRow[$aColumns[$i]],$roaming)) ? '' :
+                   '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
                 $content .= (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> " : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-roam.gif' /> ";
 
             }

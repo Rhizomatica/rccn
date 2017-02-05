@@ -2,6 +2,12 @@
 require_once('include/header.php');
 require_once('include/menu.php');
 require_once('modules/subscriber.php');
+require_once('modules/configuration.php');
+
+$site = new Configuration();
+$info = $site->getSite();
+$internalprefix = $info->postcode.$info->pbxcode;
+
 ?>
 	<? print_menu('subscribers'); ?>
 
@@ -25,7 +31,8 @@ require_once('modules/subscriber.php');
                         "mData": null,
                         "mRender": function (data, type, full) {
                             sub = full[4].match(/\d\d\d\d\d\d\d\d\d\d\d/);
-                            return '<a href="subscriber_edit.php?id='+sub+'" class="pop"><img src="img/edit.png" alt="Edit" valign="middle" /></a> | <a href="subscriber_delete.php?id='+sub+'" class="pop"><img src="img/delete.png" alt="Delete" valign="middle" /></a>';
+                            if (sub[0].substr(0,6) != <?=$internalprefix?>) return '';
+                            return '<a href="subscriber_edit.php?id='+sub[0]+'" class="pop"><img src="img/edit.png" alt="Edit" valign="middle" /></a> | <a href="subscriber_delete.php?id='+sub+'" class="pop"><img src="img/delete.png" alt="Delete" valign="middle" /></a>';
                         }
                     },
                     { "bSearchable": false, "aTargets": [0] },
@@ -106,11 +113,13 @@ require_once('modules/subscriber.php');
                                 $paid_subscribers = $sub->get('paid_subscription');
                                 $online = $sub->get('online');
                                 $offline = $sub->get('offline');
+                                $roaming = $sub->get('all_roaming');
+
                                 echo "<div>";
                                 echo "<div class='left_box' style='margin-left:10px;'>"._("Unpaid subscription").": <b>$unpaid_subscribers</b></div>";
                                 echo "<div class='left_box'>"._("Unauthorized").": <b>$unauthorized_subscribers</b></div>";
                                 echo "<div class='left_box'>"._("Paid subscription").": <b>$paid_subscribers</b></div>";
-                                echo "<div class='left_box'>"._("Online").": <b>$online</b></div>";
+                                echo "<div class='left_box'>"._("Online").": <b>$online</b> ("._("Roaming").": <b>$roaming</b>)</div>";
                                 echo "<div class='left_box'>"._("Offline").": <b>$offline</b></div>";
                                 echo "</div>";
 

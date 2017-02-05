@@ -34,12 +34,11 @@ class Subscriber
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
 			throw new SubscriberException($e->getMessage());
 		}
-			
 		if (!is_array($data)) {
 			if ($data->status == 'failed') {
 				throw new SubscriberException($data->error);
 			} else {
-				return $data;
+				return $response->raw_body;
 			}
 		} else {
 			$this->id = $data[0];
@@ -73,10 +72,10 @@ class Subscriber
         }
 
 
-
-	public function getAllConnected() {
+	public function getAllConnected($roaming=false) {
 		try {
-			$response = \Httpful\Request::get($this->path."/all_connected")->expectsJson()->send();
+			$mypath = ($roaming == true) ? '/all_foreign' : '/all_connected';  
+			$response = \Httpful\Request::get($this->path.$mypath)->expectsJson()->send();
 			$data = $response->body;
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
 			throw new SubscriberException($e->getMessage());
