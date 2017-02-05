@@ -35,7 +35,7 @@ class Subscriber
 			throw new SubscriberException($e->getMessage());
 		}
 		if (!is_array($data)) {
-			if ($data->status == 'failed') {
+			if (is_object($data) && $data->status == 'failed') {
 				throw new SubscriberException($data->error);
 			} else {
 				return $response->raw_body;

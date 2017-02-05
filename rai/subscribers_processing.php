@@ -11,6 +11,8 @@
         $access->checkAuth();
     }
 
+    include('include/locale.php');
+
     $rai_filter='';
 
     /*
@@ -255,10 +257,14 @@
 	    else if ( $aColumns[$i] == "msisdn" ) {
             if ($aRow['current_bts'] == $aRow['home_bts']) {
                 $content = (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img src='img/led-green.gif' /> " : "<img src='img/led-red.gif' /> ";
-            } else {
-                $content =  (in_array($aRow[$aColumns[$i]],$roaming)) ? '' :
-                   '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
-                $content .= (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> " : "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-roam.gif' /> ";
+            } else { 
+                $content =  (in_array($aRow[$aColumns[$i]],$roaming)) ? 
+                 "<img title='"._('Roaming from')." ".$aRow['home_bts']."' src='img/led-roam.gif' /> " :
+                 '<div style="position:relative;top:6px;font-weight:bold;font-size:8px;">R</div>';
+                $content .= (in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? 
+                "<img title='"._('Tagged as roaming on')." ".$aRow['current_bts']."' src='img/led-green.gif' /> ": '';
+                $content .= (!in_array($aRow[$aColumns[$i]],$roaming) && !in_array($aRow[$aColumns[$i]],$connected_subscribers)) ? 
+                "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-roam.gif' /> " : '';
 
             }
             $content.= $aRow[$aColumns[$i]];

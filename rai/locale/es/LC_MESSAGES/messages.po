@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-04 16:02+0200\n"
+"POT-Creation-Date: 2017-02-05 22:29+0100\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
 "Last-Translator: Keith <keith@rhizomatica.org>\n"
 "Language: es\n"
@@ -16,71 +16,79 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: subscribers.php:59
+#: subscribers.php:23
+msgid "All"
+msgstr "Todos"
+
+#: subscribers.php:119
 msgid "Unpaid subscription"
 msgstr "Suscripción no pagada"
 
-#: subscribers.php:60
+#: subscribers.php:120
 msgid "Unauthorized"
 msgstr "No autorizado"
 
-#: subscribers.php:61
+#: subscribers.php:121
 msgid "Paid subscription"
 msgstr "Suscripción pagada"
 
-#: subscribers.php:62
+#: subscribers.php:122
 msgid "Online"
 msgstr "Conectado"
 
-#: subscribers.php:63
+#: subscribers.php:122
+msgid "Roaming"
+msgstr "'Roaming'"
+
+#: subscribers.php:123
 msgid "Offline"
 msgstr "Desconectado"
 
-#: subscribers.php:71
+#: subscribers.php:131
 msgid "Subscribers Phones"
 msgstr "Usuarios de la Red"
 
-#: subscribers.php:76 subscribers.php:94
+#: subscribers.php:136 subscribers.php:154
 msgid "Activation date"
 msgstr "Fecha de Activación"
 
-#: subscribers.php:77 subscribers.php:95
+#: subscribers.php:137 subscribers.php:155
 msgid "Subscription date"
 msgstr "Fecha de Suscripción"
 
-#: subscribers.php:78 subscribers.php:96
+#: subscribers.php:138 subscribers.php:156
 msgid "Subscription Status"
 msgstr "Estado de la Suscripción"
 
-#: subscribers.php:79 subscribers.php:97 subscriber_edit.php:81
+#: subscribers.php:139 subscribers.php:157 subscriber_edit.php:81
 msgid "Authorized"
 msgstr "Autorizado"
 
-#: subscribers.php:80 subscribers.php:98 send_sms.php:33
+#: subscribers.php:140 subscribers.php:158 send_sms.php:33
 msgid "Number"
 msgstr "Número Telefónico"
 
-#: subscribers.php:81 subscribers.php:99 provisioning.php:66
+#: subscribers.php:141 subscribers.php:159 provisioning.php:66
 #: provisioning.php:100 subscriber_edit.php:43
 msgid "Name"
 msgstr "Nombre"
 
-#: subscribers.php:82 subscribers.php:100 resellers.php:57 resellers.php:72
+#: subscribers.php:142 subscribers.php:160 resellers.php:57 resellers.php:72
 msgid "Balance"
 msgstr "Saldo"
 
 #
-#: subscribers.php:83 subscribers.php:101 provisioning.php:79
-#: subscriber_edit.php:57
+#: subscribers.php:143 subscribers.php:161 provisioning.php:79
+#: provisioning.php:112 subscriber_edit.php:57
 msgid "Location"
 msgstr "Ubicación"
 
-#: subscribers.php:84 subscribers.php:102 resellers.php:59 resellers.php:74
+#: subscribers.php:144 subscribers.php:162 resellers.php:59 resellers.php:74
 msgid "Actions"
 msgstr "Acciones"
 
-#: subscribers.php:89 resellers.php:64 sms.php:40 credit_history.php:41
-#: cdr.php:46 rates.php:37 resellers_credit_history.php:41
+#: subscribers.php:149 resellers.php:64 sms.php:45 credit_history.php:41
+#: cdr.php:51 rates.php:37 resellers_credit_history.php:41
 #: resellers_transactions.php:39
 msgid "Loading data from server"
 msgstr "Cargardo datos desde el servidor"
@@ -110,8 +118,8 @@ msgstr "¡Error al cargar la información!"
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 send_sms.php:84 send_sms.php:95
 #: send_sms.php:99 send_sms.php:107 send_sms.php:111 resellers_credit.php:83
-#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:203
-#: provisioning.php:208 resellers_provisioning.php:85
+#: resellers_credit.php:87 credit.php:83 credit.php:87 provisioning.php:217
+#: provisioning.php:222 resellers_provisioning.php:85
 #: resellers_provisioning.php:89
 msgid "Go Back"
 msgstr "Regresar"
@@ -172,29 +180,29 @@ msgstr "¡Mensajes guardados!"
 msgid "ERROR SAVING MESSAGES!"
 msgstr "Error al guardar los mensajes!"
 
-#: sms.php:26
+#: sms.php:31
 msgid "SMS History"
 msgstr "Historial de los SMS"
 
-#: sms.php:31 sms.php:45
+#: sms.php:36 sms.php:50
 msgid "ID"
 msgstr "ID"
 
-#: sms.php:32 sms.php:46 credit_history.php:31 credit_history.php:46
+#: sms.php:37 sms.php:51 credit_history.php:31 credit_history.php:46
 #: resellers_credit_history.php:31 resellers_credit_history.php:46
 #: resellers_transactions.php:31 resellers_transactions.php:44
 msgid "Date"
 msgstr "Fecha"
 
-#: sms.php:33 sms.php:47
+#: sms.php:38 sms.php:52
 msgid "Source"
 msgstr "Origen"
 
-#: sms.php:34 sms.php:48 cdr.php:40 cdr.php:58 rates.php:30 rates.php:42
+#: sms.php:39 sms.php:53 cdr.php:45 cdr.php:63 rates.php:30 rates.php:42
 msgid "Destination"
 msgstr "Destino"
 
-#: sms.php:35 sms.php:49 cdr.php:37 cdr.php:55
+#: sms.php:40 sms.php:54 cdr.php:42 cdr.php:60
 msgid "Context"
 msgstr "Contexto"
 
@@ -265,7 +273,7 @@ msgstr "Número de Recibo"
 
 #: credit_history.php:33 credit_history.php:48 credit.php:27 credit.php:28
 #: credit.php:32 credit.php:61 credit.php:64 provisioning.php:72
-#: provisioning.php:201 subscriber_edit.php:49 subscriber_edit.php:50
+#: provisioning.php:215 subscriber_edit.php:49 subscriber_edit.php:50
 #: subscriber_edit.php:132
 msgid "Subscriber number"
 msgstr "Teléfono del usuario"
@@ -286,31 +294,51 @@ msgstr "Monto de recarga"
 msgid "Balance after Recharge"
 msgstr "Saldo después de la recarga"
 
-#: cdr.php:28
+#: subscribers_processing.php:260
+msgid "Roaming from"
+msgstr "En roaming desde"
+
+#: subscribers_processing.php:263
+msgid "Tagged as roaming on"
+msgstr "Parece estar en roaming en"
+
+#: subscribers_processing.php:265
+msgid "Roaming on"
+msgstr "En roaming en"
+
+#: subscribers_processing.php:273
+msgid "Not authorized on HLR!"
+msgstr "Mo autorizado en HLR!"
+
+#: subscribers_processing.php:274
+msgid "Authorized on HLR!"
+msgstr "Autorizado en HLR!"
+
+#: cdr.php:33
 msgid "Calls Details Records"
 msgstr "Detalle del registro de llamadas"
 
-#: cdr.php:34 cdr.php:52
+#: cdr.php:39 cdr.php:57
 msgid "Call Date"
 msgstr "Fecha de llamada"
 
-#: cdr.php:35 cdr.php:53
+#: cdr.php:40 cdr.php:58
 msgid "Caller Number"
 msgstr "Número de Origen"
 
-#: cdr.php:36 cdr.php:54
+#: cdr.php:41 cdr.php:59
 msgid "Called Number"
 msgstr "Número de Destino"
 
-#: cdr.php:38 cdr.php:56
+#: cdr.php:43 cdr.php:61
 msgid "Duration"
 msgstr "Duración"
 
-#: cdr.php:39 cdr.php:57
+#: cdr.php:44 cdr.php:62
 msgid "Hangup Cause"
 msgstr "Fin de la llamada"
 
-#: cdr.php:41 cdr.php:59 rates.php:32 rates.php:44
+#: cdr.php:46 cdr.php:64 rates.php:32 rates.php:44
 msgid "Cost"
 msgstr "Costo"
 
@@ -454,7 +482,7 @@ msgid "Amount to add"
 msgstr "Cantidad de recarga"
 
 #: resellers_credit.php:42 credit.php:42 provisioning.php:92
-#: provisioning.php:110 resellers_provisioning.php:43
+#: provisioning.php:125 resellers_provisioning.php:43
 msgid "Add"
 msgstr "Añadir"
 
@@ -621,7 +649,7 @@ msgstr "SMS"
 msgid "CDRs"
 msgstr "CDR"
 
-#: include/header.php:47 include/header.php:67
+#: include/header.php:47 include/header.php:69
 msgid "RAI - Rhizomatica Administration Interface"
 msgstr "RAI - Interfaz de Administración"
 
@@ -638,7 +666,7 @@ msgid "Subscriber number or IMSI"
 msgstr "Teléfono del usuario o IMSI"
 
 #
-#: provisioning.php:80 subscriber_edit.php:58
+#: provisioning.php:80 provisioning.php:113 subscriber_edit.php:58
 msgid "Subscriber location"
 msgstr "Ubicación del usuario"
 
@@ -646,42 +674,42 @@ msgstr "Ubicación del usuario"
 msgid "The phone must be connected or have recently attempted to connect"
 msgstr "El teléfono debe o estar conectado o haber recien intentado conectar"
 
-#: provisioning.php:138 provisioning.php:165 subscriber_edit.php:105
+#: provisioning.php:155 provisioning.php:183 subscriber_edit.php:105
 msgid "Name is empty"
 msgstr "Nombre está vacío"
 
-#: provisioning.php:148
+#: provisioning.php:166
 msgid "Subscriber already exists:"
 msgstr "Usuario ya existe:"
 
 #
-#: provisioning.php:150
+#: provisioning.php:168
 msgid "Subscriber not found"
 msgstr "Usuario no encontrado"
 
-#: provisioning.php:153
+#: provisioning.php:171
 msgid "Invalid IMEI"
 msgstr "IMEI no valido"
 
 #
-#: provisioning.php:168
+#: provisioning.php:186
 msgid "Subscriber number is empty"
 msgstr "Teléfono del usuario vacío"
 
 #
-#: provisioning.php:170
+#: provisioning.php:188
 msgid "Invalid number"
 msgstr "Número inválido"
 
-#: provisioning.php:199
+#: provisioning.php:213
 msgid "Subscriber already exists! New subscriber number"
 msgstr "El usuario ya existe! Número de nuevo usuario"
 
-#: provisioning.php:199 provisioning.php:201 resellers_provisioning.php:84
+#: provisioning.php:213 provisioning.php:215 resellers_provisioning.php:84
 msgid "Successfully provisioned with an initial balance of"
 msgstr "Se ha dado de alta con éxito con un saldo inicial de"
 
-#: provisioning.php:206
+#: provisioning.php:220
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr "ERROR AL DAR DE ALTA AL USUARIO"
 
