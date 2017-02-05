@@ -67,10 +67,12 @@ def check(auth, recent, hours=2):
 
 def imsi_clash(imsi, ext1, ext2):
     msg = """
+    !! IMSI Clash between %s and %s for %s !! 
+
     Un IMSI no deberia de estar registrado y autorizado al mismo tiempo
     en mas que una comunidad.
 
-    !! IMSI Clash between %s and %s for %s !! """ % (ext1,ext2,imsi)
+    """ % (ext1,ext2,imsi)
     advise(msg)
     print "\033[91;1m" + msg + "\033[0m" 
 
@@ -92,7 +94,7 @@ def get(msisdn, imsi, auth):
         else:
             print "\033[91;1m!! Didn't get hlr key for imsi %s\033[0m" % imsi
             riak_ext = False
-        if riak_ext and (riak_ext != msisdn):
+        if riak_ext and auth == 1 and (riak_ext != msisdn):
             imsi_clash(imsi, msisdn, riak_ext)
             return
         
@@ -100,6 +102,7 @@ def get(msisdn, imsi, auth):
 
         if len(riak_imsi) > 1:
             print "\033[91;1m More than ONE entry in this index! \033[0m"
+            advise("!!More than ONE entry in this index: %s" % msisdn)
 
         if not len(riak_imsi):
             print '\033[93mExtension %s not found\033[0m, adding to D_HLR' % (msisdn)
