@@ -29,7 +29,7 @@ to classes, possibly existing classes within RCCN
 
 '''
 import config
-import obscvty, urllib2
+import obscvty, urllib2, time
 import smpplib.client
 import smpplib.consts
 
@@ -69,7 +69,7 @@ def rx_alert_notification(pdu):
                 try:
                     rk_hlr = riak_client.bucket('hlr')
                     subscriber = rk_hlr.get(str(imsi), timeout=config.RIAK_TIMEOUT)
-                    roaming_log.info('RIAK: pushing %s, was %s' % (subscriber.data['home_bts'],subscriber.data['current_bts']))
+                    log.info('RIAK: pushing %s, was %s' % (subscriber.data['home_bts'],subscriber.data['current_bts']))
                     subscriber.data['current_bts'] = subscriber.data['home_bts']
                     now = int(time.time())
                     subscriber.data['updated'] = now
@@ -80,7 +80,7 @@ def rx_alert_notification(pdu):
                     print str(e)
 
     if pdu.ms_availability_status == '0':
-        log.info('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
+        log.debug('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
         if mode=='EXT':
             extension=pdu.source_addr
             if len(extension) == 5:

@@ -27,9 +27,6 @@ def advise(msg):
     from email.mime.text import MIMEText
     text = """
 Favor de intervenir y arreglar esta situacion manualmente.
-Un IMSI no deberia de estar registrado y autorizado al mismo tiempo
-en mas que una comunidad:
-
     """
     mail = MIMEText(text + msg )
     mail['Subject'] = msg
@@ -59,13 +56,21 @@ def check(recent, hours=2):
                 print "Local IMSI: \033[96m%s\033[0m" % (imsi)
                 get(msisdn, imsi)
             else:
+                msg="""
+                Local Subscriber %s from PG Not Found on OSMO HLR!
+                """ % msisdn
+                advise(msg)
                 print "\033[91;1mLocal Subscriber from PG Not Found on OSMO HLR!\033[0m"
             n=n-1
         print '----------------------------------------------------\n'
         
 
 def imsi_clash(imsi, ext1, ext2):
-    msg = "!! IMSI Clash between %s and %s for %s !! " % (ext1,ext2,imsi)
+    msg = """
+    Un IMSI no deberia de estar registrado y autorizado al mismo tiempo
+    en mas que una comunidad.
+
+    !! IMSI Clash between %s and %s for %s !! """ % (ext1,ext2,imsi)
     advise(msg)
     print "\033[91;1m" + msg + "\033[0m" 
 

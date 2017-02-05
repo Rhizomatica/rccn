@@ -35,7 +35,7 @@ def update_foreign_subscribers():
         if len(unregistered) == 0:
             roaming_log.info('No Unregistered Subscribers')
         else:
-            update_list(unregistered, True)
+            update_list(unregistered)
     except SubscriberException as e:
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
 
@@ -50,66 +50,65 @@ def update_foreign_subscribers():
         roaming_log.error("An error ocurred getting the list of unregistered: %s" % e)
 
 
-def update_list(subscribers, welcome=False):
+def update_list(subscribers):
     numbering = Numbering()
     sub = Subscriber()
     for msisdn,imsi in subscribers:
         try:
-            riak_data =  numbering.get_dhlr_entry(imsi)
+            try:
+                riak_data =  numbering.get_dhlr_entry(imsi)
+            except NumberingException as e:
+                if len(msisdn) == 11 and str(e) == 'RK_HLR imsi '+str(imsi)+' not found':
+                    # We have an imsi (connected) with full extension in osmo subs 
+                    # but not in riak
+                    # Must have been deleted.
+                    roaming_log.debug('Purging %s from local Osmo HLR' % msisdn)
+                    sub.purge(msisdn)
+                    continue
+                else:
+                    raise NumberingException(e)
             number=riak_data["msisdn"]
+            rk_hlr_current_bts = riak_data["current_bts"]
             # check if subscriber pg_hlr[current_bts] != rk_hlr[current_bts]
             try:
                 pg_hlr_current_bts = numbering.get_current_bts(number)
             except NumberingException as e:
-                if len(msisdn) == 5 and str(e) == 'PG_DB subscriber not found: '+number:
-                    # We have an imsi in osmo subs and riak, but not in local hlr
-                    # so delete the riak entry for this imsi.
-                    sub.delete_in_dhlr_imsi(imsi)
+                if len(msisdn) == 5 and str(e) == 'PG_HLR subscriber not found: '+number:
+                    # We have an imsi (connected) in osmo subs and riak, but not in local hlr
+                    # Maybe it didn't sync yet.
                     continue
-
-            #rk_hlr_current_bts = numbering.get_bts_distributed_hlr(str(imsi), 'current_bts')
-            rk_hlr_current_bts = riak_data["current_bts"]
+            if len(msisdn) == 5:
+                roaming_log.info('Subscriber %s is new in roaming' % number)
+                roaming_log.debug('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
+                sub.update(msisdn, "roaming number", number)
+                roaming_log.info('Send roaming welcome message to %s' % number)
+                send_welcome_sms(number)
+                # Expire this on where I think it was last.
+                try:
+                    values = '{"msisdn": "%s"}' % number
+                    opener = urllib2.build_opener(urllib2.HTTPHandler)
+                    request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_current_bts, data=values)
+                    request.add_header('Content-Type', 'application/json')
+                    request.get_method = lambda: 'PUT'
+                    res = opener.open(request).read()
+                    if 'success' in res:
+                        log.info('Roaming Subscriber %s expired on %s' % (number,current_bts))
+                    else:
+                        log.error('Error Expiring Roaming Subscriber %s at %s' % (number,current_bts))
+                except IOError:
+                    log.error('Error connect to site %s to expire subscriber %s' % (current_bts,number) )
+                continue
+            # end if len(msisdn) == 5
 
             if pg_hlr_current_bts != rk_hlr_current_bts:
-                # This ismi is maybe connected here 
-                roaming_log.info('Subscriber %s in roaming, update location' % number)
+                roaming_log.warn('Subscriber %s in roaming here:' % number)
                 roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
                 #sub.update(msisdn, "roaming number", number)
             else:
-                # riak and our hlr had the same location.
-                if welcome:
-                    roaming_log.info('Subscriber %s in roaming, update location' % number)
-                    roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
-                    # Change this so it doesn't update riak:
-                    sub.update(msisdn, "roaming number", number)
-                    roaming_log.info('Send roaming welcome message to %s' % number)
-                    send_welcome_sms(number)
-                    # They are here, so expire them in osmo on their home_bts
-                    # Shouldn't do this based on possibly outdated info on connected.
-                    # really, this needs to be the last place they were seen.
-                    #rk_hlr_home_bts = numbering.get_bts_distributed_hlr(str(imsi), 'home_bts')
-                    #print 'Would PUT to http://%s:8085/subscriber/offline with msisdn=%s' % (rk_hlr_home_bts, number)
-                    #try:
-                    #    values = '{"msisdn": "%s"}' % number
-                    #    opener = urllib2.build_opener(urllib2.HTTPHandler)
-                    #    request = urllib2.Request('http://%s:8085/subscriber/offline' % rk_hlr_current_bts, data=values)
-                    #    request.add_header('Content-Type', 'application/json')
-                    #    request.get_method = lambda: 'PUT'
-                    #    res = opener.open(request).read()
-                    #    if 'success' in res:
-                    #            roaming_log.info('LAC successfully updated on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
-                    #    else:
-                    #            roaming_log.error('Error Updating LAC on %s for roaming subscriber %s' % (rk_hlr_home_bts, number))
-                    #except IOError:
-                    #    roaming_log.error('Error connect to site %s to expire subscriber %s' % (server,number) )
-
-                else:
-                    # update only location and not the timestamp in rk_hlr
-                    #sub.update_location(imsi, number, False)
-                    roaming_log.info('Subscriber %s is roaming' % number)
-
+                roaming_log.info('Subscriber %s/%s is still roaming' % (msisdn,number))
         except NumberingException as e:
-            roaming_log.debug("Couldn't retrieve msisdn %s from the imsi: %s" % (msisdn,e))
+            roaming_log.debug("Couldn't retrieve Subscriber for IMSI (%s) %s" % (msisdn,e))
+
         except SubscriberException as e:
             roaming_log.error("An error ocurred adding the roaming number %s: %s" % (number, e))
 

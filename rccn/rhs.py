@@ -51,7 +51,7 @@ def get_last_sync_time():
         hlrsync_log.error('PG_HLR database error getting last sync time')
         sys.exit(1)
 
-def hlr_sync(hours):
+def hlr_sync(hours,until):
     try:
         rk_hlr = riak_client.bucket('hlr')
         # query riak and get list of all numbers modified since the last run
@@ -64,7 +64,10 @@ def hlr_sync(hours):
             hlrsync_log.info('Sync local HLR. last run: %s' % last_run_datetime)
         #if last_run == 0:
         #    last_run = int(time.time())
-        now = int(time.time())
+        if until > 0:
+            now = int(time.time() - (until*3600))
+        else:
+            now = int(time.time())
         hlrsync_log.debug('last %s now %s' % (last_run, now))
         subscribers = rk_hlr.get_index('modified_int', last_run, now)
         total_sub = len(subscribers)
@@ -97,8 +100,17 @@ def hlr_sync(hours):
                                 update_date = datetime.datetime.fromtimestamp(sub.data['updated'])
                                 cur.execute('UPDATE hlr SET home_bts=%(home_bts)s, current_bts=%(current_bts)s, authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
                                 {'msisdn': sub.data['msisdn'], 'home_bts': sub.data['home_bts'], 'current_bts': sub.data['current_bts'], 'authorized': sub.data['authorized'], 'updated': update_date})
-                            elif pg_ts > int(time.mktime(dt.timetuple())):
+                            elif pg_ts > sub.data['updated']:
                                 hlrsync_log.info('PG_HLR data is more recent for %s' % sub.data['msisdn'])
+                                try:
+                                    hlrsync_log.info('RIAK: pushing %s, was %s' % (pg_sub[4], sub.data['current_bts']))
+                                    sub.data['current_bts'] = pg_sub[4]
+                                    now = int(time.time())
+                                    sub.data['updated'] = now
+                                    sub.indexes = set([('modified_int', now), ('msisdn_bin', sub.data['msisdn'])])
+                                    sub.store()
+                                except Exception as e:
+                                    print str(e)
                             else:
                                 hlrsync_log.debug('Subscriber %s exists but no update necessary' % sub.data['msisdn'])
                         else:
@@ -129,8 +141,10 @@ if __name__ == '__main__':
         help="Running from cron, add a delay to not all hit riak at same time")
     parser.add_option("-s", "--since", dest="hours",
         help="Sync from the d_hlr since HOURS ago instead of last update")
+    parser.add_option("-u", "--until", dest="until",
+        help="Sync from the d_hlr until HOURS ago instead of now, requires -s")
     parser.add_option("-m", "--minutes", dest="minutes",
-        help="Sync from the d_hlr since MINUTES ago instead of last update")
+        help="Sync from the d_hlr since MINUTES ago (-s) instead of last update")
     parser.add_option("-d", "--debug", dest="debug", action="store_true",
         help="Turn on debug logging")
     (options, args) = parser.parse_args()
@@ -145,14 +159,18 @@ if __name__ == '__main__':
             wait=random.randint(0,120)
             print "Waiting %s seconds..." % wait
             time.sleep(wait)
+        if options.until:
+            until=int(options.until)
+        else:
+            until=0
         if options.minutes:
             hours=float(options.minutes+'.00')/60
         else:
             hours=int(options.hours)
-        hlr_sync(hours)
+        hlr_sync(hours,until)
     else:
         if options.cron:
             wait=random.randint(0,20)
             print "Waiting %s seconds..." % wait
             time.sleep(wait)
-        hlr_sync(0)    
+        hlr_sync(0,0)
