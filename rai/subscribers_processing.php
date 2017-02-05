@@ -172,8 +172,9 @@
         $rWhereSql=rtrim($sql,",").")";
 
     $sQuery.= "
-    UNION SELECT created, created AS subscription_date, '1' AS subscription_status, '1' AS authorized,
-    msisdn, 'Roaming User' AS name, NULL AS balance, '' AS location, created AS hlr_created,
+    UNION SELECT created, created AS subscription_date, authorized AS subscription_status,
+    authorized AS authorized, msisdn, 'Roaming User' AS name, NULL AS balance,
+    '' AS location, created AS hlr_created,
     authorized AS hlr_auth, current_bts, home_bts FROM hlr ".$rWhereSql;
     }
 
