@@ -99,7 +99,10 @@ def update_list(subscribers):
                     log.error('Error connect to site %s to expire subscriber %s' % (rk_hlr_current_bts,number) )
                 continue
             # end if len(msisdn) == 5
-
+            if riak_data['authorized'] == 0:
+                roaming_log.warn('Subscriber %s no longer authorized on HLR!' % number)
+                #roaming_log.debug('Purging %s from local Osmo HLR' % msisdn)
+                #sub.purge(msisdn)
             if pg_hlr_current_bts != rk_hlr_current_bts:
                 roaming_log.warn('Subscriber %s in roaming here:' % number)
                 roaming_log.info('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
