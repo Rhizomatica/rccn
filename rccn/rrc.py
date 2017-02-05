@@ -77,7 +77,7 @@ def update_list(subscribers):
                     # We have an imsi (connected) in osmo subs and riak, but not in local hlr
                     # Maybe it didn't sync yet.
                     continue
-            if len(msisdn) == 5:
+            if len(msisdn) == 5 and riak_data['authorized'] ==1:
                 roaming_log.info('Subscriber %s is new in roaming' % number)
                 roaming_log.debug('PG says %s, Riak says %s' % (pg_hlr_current_bts, rk_hlr_current_bts))
                 sub.update(msisdn, "roaming number", number)
