@@ -3,28 +3,33 @@
 	require_once('include/menu.php');
 ?>
 
-        	        <script type="text/javascript" charset="utf-8">
-                        $(document).ready(function() {
-                                $('#example').dataTable( {
-						                <?
-						                $lang_file = 'js/'.$_SESSION['lang'].'.txt';
-						                if (file_exists($lang_file)) {
-						                    echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
-						                }
-						                ?>
-                                        "sPaginationType": "full_numbers",
-                                        "bProcessing": true,
-                                        "bServerSide": true,
-                                        "aaSorting": [[ 0, "desc" ]],
-                                        "sAjaxSource": "sms_processing.php"
-                                } );
-                        } );
-	                </script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+                $('#example').dataTable( {
+		                <?
+		                $lang_file = 'js/'.$_SESSION['lang'].'.txt';
+		                if (file_exists($lang_file)) {
+		                    echo '"oLanguage": { "sUrl": "'.$lang_file.'" },';
+		                }
+		                ?>
+                        "sPaginationType": "full_numbers",
+                        "bProcessing": true,
+                        "bServerSide": true,
+                        "bStateSave": true,
+                        "aaSorting": [[ 0, "desc" ]],
+                        "aoColumnDefs": [
+		                    { "bSearchable": false, "aTargets": [0] },
+		                    { "bSearchable": false, "aTargets": [1] }
+		                ],
+                        "sAjaxSource": "sms_processing.php"
+                } );
+        } );
+    </script>
 
-			<? print_menu('sms'); ?>	
+	<? print_menu('sms'); ?>
 
-			<h1><?= _("SMS History") ?></h1><br/>
-			<div id="dynamic">
+<h1><?= _("SMS History") ?></h1><br/>
+<div id="dynamic">
 <table cellpadding="0" cellspacing="0" border="0" class="display" id="example">
 	<thead>
 		<tr>
