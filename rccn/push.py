@@ -29,20 +29,20 @@ def advise(msg):
 Favor de intervenir y arreglar esta situacion manualmente.
     """
     mail = MIMEText(text + msg )
-    mail['Subject'] = msg
+    mail['Subject'] = msg[:90]
     mail['From'] = 'postmaster@rhizomatica.org'
     mail['To'] = 'postmaster@rhizomatica.org'
     s = smtplib.SMTP('mail')
     s.sendmail('postmaster@rhizomatica.org', advice_email, mail.as_string())
     s.quit()
 
-def check(recent, hours=2):
+def check(auth, recent, hours=2):
     """ Get sub from the local PG db and see their status in riak """
     cur = db_conn.cursor()
     if recent == 0:
-        cur.execute("SELECT msisdn,name from Subscribers where authorized=1")
+        cur.execute("SELECT msisdn,name FROM Subscribers WHERE authorized=%s", str(auth))
     if recent == 1:
-        sql = "SELECT msisdn,created FROM Subscribers WHERE created > NOW() -interval '%s hours'" % hours
+        sql = "SELECT msisdn,created FROM Subscribers WHERE authorized=%s AND created > NOW() -interval '%s hours'" % (str(auth), hours)
         cur.execute(sql)
     if cur.rowcount > 0:
         print 'Subscriber Count: %s ' % (cur.rowcount)
@@ -54,7 +54,7 @@ def check(recent, hours=2):
             imsi=osmo_ext2imsi(msisdn)
             if imsi:
                 print "Local IMSI: \033[96m%s\033[0m" % (imsi)
-                get(msisdn, imsi)
+                get(msisdn, imsi, auth)
             else:
                 msg="""
                 Local Subscriber %s from PG Not Found on OSMO HLR!
@@ -74,7 +74,7 @@ def imsi_clash(imsi, ext1, ext2):
     advise(msg)
     print "\033[91;1m" + msg + "\033[0m" 
 
-def get(msisdn, imsi):
+def get(msisdn, imsi, auth):
     """Do the thing"""
     riak_client = riak.RiakClient(
     host=riak_ip_address,
@@ -114,11 +114,13 @@ def get(msisdn, imsi):
             print 'Extension: \033[95m%s\033[0m-%s-\033[92m%s\033[0m ' \
                   'has IMSI \033[96m%s\033[0m' % (msisdn[:5], msisdn[5:6], msisdn[6:], riak_imsi[0])
             data = bucket.get(riak_imsi[0]).data
-            if data['authorized']:
+            if data['authorized'] == 1:
                 print "Extension: Authorised"
-            else:
-                print "Extension: \033[91mNOT\033[0m Authorised, Fixing"
-                data['authorized']=1
+            if data['authorized'] == 0:
+                print "Extension: NOT Authorised"
+            if data['authorized'] != auth:
+                print "Extension: \033[91mAuthorisation Incorrect\033[0m, Fixing"
+                data['authorized']=auth
                 fix = bucket.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": data['current_bts'], "authorized": data['authorized'], "updated": int(time.time()) })
                 fix.add_index('msisdn_bin', msisdn)
                 fix.add_index('modified_int', int(time.time()))
@@ -165,18 +167,24 @@ if __name__ == '__main__':
         help="Running from cron, add a delay to not all hit riak at same time")
     parser.add_option("-r", "--recent", dest="recent",
         help="How many hours back to check for created Subscribers")
+    parser.add_option("-n", "--noauth", dest="noauth", action="store_true",
+        help="Push Not Authorized Subs to D_HLR")
 
     (options, args) = parser.parse_args()
     
+    if options.noauth:
+        auth=0
+    else:
+        auth=1
     if options.recent:
         if options.cron:
             wait=random.randint(0,15)
             print "Waiting %s seconds..." % wait
             time.sleep(wait)
-        check(1,options.recent)
+        check(auth,options.recent,1)
     else:
         if options.cron:
             wait=random.randint(0,60)
             print "Waiting %s seconds..." % wait
             time.sleep(wait)
-        check(0)    
+        check(auth,0)
