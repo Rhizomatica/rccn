@@ -217,9 +217,8 @@
     {
         $iFilteredTotal = $iTotal;
     }
-     
-     
-     
+
+
     /*
      * Output
      */
@@ -233,7 +232,9 @@
     while ( $aRow = pg_fetch_array($rResult, null, PGSQL_ASSOC) )
     {
 
-        if (in_array($aRow['msisdn'],$connected_subscribers) && $rai_filter == 'RAI-all-disconnected') {    
+        if (in_array($aRow['msisdn'],$connected_subscribers) ||
+            in_array($aRow['msisdn'],$roaming) &&
+            $rai_filter == 'RAI-all-disconnected') {
             continue;
         }
         if (!in_array($aRow['msisdn'],$connected_subscribers) && $rai_filter == 'RAI-all-connected') {
@@ -267,6 +268,7 @@
 	    else if ( $aColumns[$i] == "authorized" ) {
 		    $content=($aRow[$aColumns[$i]] == 0) ? "<img src='img/lock.png' width='16' height='16' />" : "<img src='img/unlock.png' width='16' height='16' />";
             $content.=($aRow[$aColumns[$i]] == 1 && $aRow['hlr_auth'] == 0 ) ? "<img title='"._('Not authorized on HLR!')."' src='img/lock.png' width='16' height='16' />" : "";
+            $content.=($aRow[$aColumns[$i]] == 0 && $aRow['hlr_auth'] == 1 ) ? "<img title='"._('Authorized on HLR!')."' src='img/unlock.png' width='16' height='16' />" : "";
          $row[] = $content;
 	    }
 	    else if ( $aColumns[$i] == "created" ) {
