@@ -232,15 +232,14 @@
     while ( $aRow = pg_fetch_array($rResult, null, PGSQL_ASSOC) )
     {
 
-        if (in_array($aRow['msisdn'],$connected_subscribers) ||
-            in_array($aRow['msisdn'],$roaming) &&
-            $rai_filter == 'RAI-all-disconnected') {
+        if ( $rai_filter == 'RAI-all-disconnected' &&
+            ( in_array($aRow['msisdn'],$connected_subscribers) || in_array($aRow['msisdn'],$roaming) ) ) {
             continue;
         }
-        if (!in_array($aRow['msisdn'],$connected_subscribers) && $rai_filter == 'RAI-all-connected') {
+        if ($rai_filter == 'RAI-all-connected' && !in_array($aRow['msisdn'],$connected_subscribers) ) {
             continue;
         }
-        if ($aRow['current_bts'] == $aRow['home_bts'] && $rai_filter == 'RAI-all-roaming') {
+        if ($rai_filter == 'RAI-all-roaming' && $aRow['current_bts'] == $aRow['home_bts'] ) {
             continue;
         }
 
