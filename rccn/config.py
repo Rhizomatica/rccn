@@ -60,50 +60,53 @@ hlrsynclog.setFormatter(formatter)
 
 logging.basicConfig()
 
+if not 'default_log_level' in locals():
+    default_log_level=logging.INFO
+
 # initialize logger RCCN
 log = logging.getLogger('RCCN')
 log.addHandler(smlog)
-log.setLevel( logging.DEBUG)
+log.setLevel(default_log_level)
 
 # initialize logger BILLING
 bill_log = logging.getLogger('RCCN_BILLING')
 bill_log.addHandler(blog)
-bill_log.setLevel(logging.DEBUG)
+bill_log.setLevel(default_log_level)
 
 # initialize logger API
 api_log = logging.getLogger('RCCN_API')
 api_log.addHandler(alog)
-api_log.setLevel(logging.DEBUG)
+api_log.setLevel(default_log_level)
 
 # initialize logger RSC
 subscription_log = logging.getLogger('RCCN_RSC')
 subscription_log.addHandler(slog)
-subscription_log.setLevel(logging.DEBUG)
+subscription_log.setLevel(default_log_level)
 
 # initialize logger SMS
 sms_log = logging.getLogger('RCCN_SMS')
 sms_log.addHandler(smslog)
-sms_log.setLevel(logging.DEBUG)
+sms_log.setLevel(default_log_level)
 
 # initialize logger RESELLER
 res_log = logging.getLogger('RCCN_RESELLER')
 res_log.addHandler(rlog)
-res_log.setLevel(logging.DEBUG)
+res_log.setLevel(default_log_level)
 
 # initialize logger ROAMING
 roaming_log = logging.getLogger('RCCN_ROAMING')
 roaming_log.addHandler(roaminglog)
-roaming_log.setLevel(logging.DEBUG)
+roaming_log.setLevel(default_log_level)
 
 # initialize logger PURGER
 purger_log = logging.getLogger('RCCN_PURGER')
 purger_log.addHandler(roaminglog)
-purger_log.setLevel(logging.DEBUG)
+purger_log.setLevel(default_log_level)
 
 # initialize logger HLR SYNC
 hlrsync_log = logging.getLogger('RCCN_HLRSYNC')
 hlrsync_log.addHandler(hlrsynclog)
-hlrsync_log.setLevel(logging.DEBUG)
+hlrsync_log.setLevel(default_log_level)
 
 
 # Extensions
