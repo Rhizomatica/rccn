@@ -63,6 +63,8 @@ class SubscriberRESTService:
             elif msisdn == 'all_roaming':
                 data = json.dumps(sub.get_roaming(), cls=PGEncoder)
             elif msisdn == 'all_foreign':
+                if request.getClientIP().find("10.23") > -1:
+                    request.setHeader('Access-Control-Allow-Origin','*')
                 data = json.dumps(sub.get_all_foreign(), cls=PGEncoder)
             else:
                 data = json.dumps(sub.get(msisdn), cls=PGEncoder)
