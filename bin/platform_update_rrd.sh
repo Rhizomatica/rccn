@@ -13,6 +13,7 @@ rrdtool update $RHIZO_DIR/temperature.rrd N:$temperature
 
 linev=`/sbin/apcaccess status 2>/dev/null | grep LINEV | head -1 | awk '{print $3}'`
 /usr/bin/rrdtool update $RHIZO_DIR/voltage.rrd N:$linev
+echo $linev > /tmp/voltage
 
 C=$(egrep ^Cached /proc/meminfo|awk '{print $2}')
 B=$(egrep ^Buffers /proc/meminfo|awk '{print $2}')

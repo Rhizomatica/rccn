@@ -20,12 +20,117 @@
 #
 ############################################################################
 
-import sys
+import sys, ESL, code
 sys.path.append("..")
 from config import *
+import xml.etree.ElementTree as ET
 
 class StatisticException(Exception):
     pass
+
+class LiveStatistics:
+
+    def monitor_feed(self):
+        data={}
+        sub = Subscriber()
+        data['mp']=config['internal_prefix']
+        data['o']=sub.get_online()
+        data['r']=sub.get_roaming()
+        data['sp']=self.get_sms_pending()
+        data['spr']=self.get_sms_pending_not_local()
+        data['lt']=self.get_recent_call_count('10 mins')
+        data['ld']=self.get_recent_call_count('1 day')
+        data['ls']=self.get_recent_call_count('7 days')
+        data['ut']=self.get_uptime()
+        data['la']=os.getloadavg()
+        data['v']=self.get_linev()
+        fs_con=ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
+        data['c']=self.get_fs_calls(fs_con)
+        data['gw']=self.get_fs_status(fs_con)
+        fs_con.disconnect()
+        return data
+
+    def get_fs_status(self,fs_con):
+        e = fs_con.api("sofia xmlstatus")
+        ss=ET.fromstring(e.getBody())
+        gwstat={}
+        try:
+            for gateway in ss.findall('gateway'):
+                gwstat[gateway.find('name').text]=gateway.find('state').text
+            return gwstat
+        except:
+            pass
+
+    def get_fs_calls(self,fs_con):
+
+        e = fs_con.api("show calls")
+        fs_calls=e.getBody()
+        calls=[]
+        lines=fs_calls.split('\n')
+        for line in lines:
+            if line != '' and line.find(' total.') == -1:
+                values=line.split(',')
+                if values[0]=='uuid':
+                    keys=values
+                    continue
+                call={}
+                for i,val in enumerate(values):
+                    call[keys[i]]=val
+                calls.append(call)
+        call_data_to_send=[]
+        for call in calls:
+            c={}
+            c['name']=call['name']
+            c['b_name']=call['b_name']
+            call_data_to_send.append(c)
+        return call_data_to_send
+
+    def get_sms_pending(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select count(*) from SMS where sent isnull")
+            pending = sq_hlr_cursor.fetchone()
+            sq_hlr.close()
+            return pending[0]
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise StatisticException('SQ_HLR error: %s' % e.args[0])
+
+    def get_sms_pending_not_local(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select count(*) from SMS where dest_addr not like ? and sent isnull", ([config['internal_prefix']+'%']) )
+            pending = sq_hlr_cursor.fetchone()
+            sq_hlr.close()
+            return pending[0]
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise StatisticException('SQ_HLR error: %s' % e.args[0])
+
+    def get_recent_call_count(self,ago):
+        try:
+            cur = db_conn.cursor()
+            cur.execute("SELECT count (id) FROM cdr WHERE end_stamp > current_timestamp - interval %(ago)s", { 'ago': ago } )
+            if cur.rowcount > 0:
+                sub = cur.fetchone()
+                return sub[0]
+            else:
+                raise StatisticException('PG_HLR No rows found')
+        except psycopg2.DatabaseError, e:
+            raise StatisticException('PG_HLR error: %s' % e)
+
+    def get_uptime(self):
+        with open('/proc/uptime', 'r') as f:
+            return float(f.readline().split()[0])
+
+    def get_linev(self):
+        try:
+            with open('/tmp/voltage', 'r') as f:
+                return f.readline()
+        except IOError:
+            return ''
 
 class CallsStatistics:
 

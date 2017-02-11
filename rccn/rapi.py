@@ -330,28 +330,32 @@ class SMSRESTService:
         
         t=binascii.hexlify(btext)
         
-        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s"  charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' % (request.getHost().host, self.path, source,
-        destination, charset, coding, text, t, dr, dcs))
+        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s" charset:"%s"' %
+            (request.getHost().host, self.path, source, destination, charset))
+        api_log.debug('Data: source:"%s" destination:"%s" charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' %
+            (source, destination, charset, coding, text, t, dr, dcs))
 
         # Kannel sends us GSM0338 but sets charset to UTF-8 and coding to 0
         if coding == '0':
             try:
                 gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
                 text=gsm_codec.decode(btext)[0]
-                api_log.info('GSM 03.38 decoded: "%s"' % text)
+                api_log.info('SMS Decoded as GSM 03.38')
+                api_log.debug('Decoded text:"%s"' % text)
             except: # Catch Everything, try to not actually LOSE messages!  
                 e=sys.exc_info()[0]
-                api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
+                api_log.debug('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
                 data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
                 text=btext
         # Kannel can have problems if we send back UTF-16BE, so let's standardise here:
         if coding == '2' and charset == 'UTF-16BE':
             try:
                 text=btext.decode('utf-16be')
-                api_log.info('UTF-16BE decoded: "%s"' % text)            
+                api_log.info('SMS decoded as UTF-16BE')
+                api_log.debug('Decoded text: "%s"' % text)
             except: # Catch Everything, try to not actually LOSE messages!  
                 e=sys.exc_info()[0]
-                api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
+                api_log.debug('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
                 # Some phones are sending multi part messages with different charsets.
                 # Kannel concatenates and sends as UTF-16BE coding 2
                 try:
@@ -360,7 +364,7 @@ class SMSRESTService:
                     b=btext[134:]
                     text=a.decode('utf-16be')+b.decode('utf8')
                 except:
-                    api_log.info('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
+                    api_log.debug('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
                     text=btext
         try:
             sms = SMS()
@@ -402,6 +406,22 @@ class SMSRESTService:
 class StatisticsRESTService:
     path = '/statistics'
 
+    @route('/feed')
+    def monitor_feed(self,request):
+        api_log.info('%s - [GET] %s/feed' % (request.getHost().host, self.path))
+        if request.getClientIP().find("10.23") > -1:
+            request.setHeader('Access-Control-Allow-Origin','*')
+        else:
+            return ''
+        try:
+            stats = LiveStatistics()
+            data = json.dumps(stats.monitor_feed(), cls=PGEncoder)
+        except StatisticException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        api_log.info(data)
+        return data
+
+
     # Calls statistics
     @route('/calls/total_calls')
     def total_calls(self, request):
@@ -412,7 +432,7 @@ class StatisticsRESTService:
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
         api_log.info(data)
-        return data
+        return str(data)
 
     @route('/calls/total_minutes')
     def total_minutes(self, request):
@@ -423,7 +443,7 @@ class StatisticsRESTService:
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
         api_log.info(data)
-        return data
+        return str(data)
 
     @route('/calls/average_call_duration')
     def average_call_duration(self, request):
@@ -552,38 +572,38 @@ class ConfigurationRESTService:
 
     @route('/site', Http.GET)
     def site(self, request):
-        api_log.info('%s - [GET] %s/site' % (request.getHost().host, self.path))
+        api_log.debug('%s - [GET] %s/site' % (request.getHost().host, self.path))
         try:
             config = Configuration()
             data = json.dumps(config.get_site(), cls=PGEncoder)
         except ConfigurationException as e:
             data = {'status': 'failed', 'error': str(e)}
     
-        api_log.info(data)
+        api_log.debug(data)
         return data
 
     @route('/locations', Http.GET)
     def locations(self, request):
-        api_log.info('%s - [GET] %s/locations' % (request.getHost().host, self.path))
+        api_log.debug('%s - [GET] %s/locations' % (request.getHost().host, self.path))
         try:
             config = Configuration()
             data = json.dumps(config.get_locations(), cls=PGEncoder)
         except ConfigurationException as e:
             data = {'status': 'failed', 'error': str(e)}
         
-        api_log.info(data)
+        api_log.debug(data)
         return data
     
     @route('/config', Http.GET)
     def config(self, request):
-        api_log.info('%s - [GET] %s/config' % (request.getHost().host, self.path))
+        api_log.debug('%s - [GET] %s/config' % (request.getHost().host, self.path))
         try:
             config = Configuration()
             data = json.dumps(config.get_site_config(), cls=PGEncoder)
         except ConfigurationException as e:
             data = {'status': 'failed', 'error': str(e)}
         
-        api_log.info(data)
+        api_log.debug(data)
         return data
 
 
@@ -593,4 +613,7 @@ def run_rapi():
     app.run(8085)
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        if sys.argv[1]=='debug':
+            api_log.setLevel(logging.DEBUG)
     run_rapi()

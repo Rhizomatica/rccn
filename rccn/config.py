@@ -63,6 +63,13 @@ logging.basicConfig()
 if not 'default_log_level' in locals():
     default_log_level=logging.INFO
 
+#CRITICAL 50
+#ERROR    40
+#WARNING  30
+#INFO     20
+#DEBUG    10
+#NOTSET   0
+
 # initialize logger RCCN
 log = logging.getLogger('RCCN')
 log.addHandler(smlog)
@@ -175,6 +182,7 @@ ConfigurationException = configuration.ConfigurationException
 from modules import statistics
 CallsStatistics = statistics.CallsStatistics
 CostsStatistics = statistics.CostsStatistics
+LiveStatistics = statistics.LiveStatistics
 StatisticException = statistics.StatisticException
 
 from modules import sms
