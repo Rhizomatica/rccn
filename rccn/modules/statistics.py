@@ -77,6 +77,7 @@ class LiveStatistics:
                 for i,val in enumerate(values):
                     call[keys[i]]=val
                 calls.append(call)
+        return calls
         call_data_to_send=[]
         for call in calls:
             c={}
