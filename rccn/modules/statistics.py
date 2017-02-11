@@ -110,6 +110,8 @@ class LiveStatistics:
             raise StatisticException('SQ_HLR error: %s' % e.args[0])
 
     def get_recent_call_count(self,ago):
+        # This is too hard on PS on sites with largc cdr. need to clean up 1st
+        return 0
         try:
             cur = db_conn.cursor()
             cur.execute("SELECT count (id) FROM cdr WHERE end_stamp > current_timestamp - interval %(ago)s", { 'ago': ago } )
