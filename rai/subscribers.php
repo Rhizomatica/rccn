@@ -58,7 +58,11 @@ $internalprefix = $info->postcode.$info->pbxcode;
                 "bStateSave": true,
 
                 "fnInitComplete": function(oSettings, json) {
-                    sVal=oSettings.oLoadedState.oSearch.sSearch
+                    if (oSettings.oLoadedState != null) {
+                      sVal=oSettings.oLoadedState.oSearch.sSearch
+                    } else {
+                      sVal = ''
+                    }
                     consel=''
                     dissel=''
                     rsel=''
@@ -84,7 +88,11 @@ $internalprefix = $info->postcode.$info->pbxcode;
                         }
                         oTable.fnFilter (this.value, null,false,false,false)
                       })
-                    sVal=oSettings.oLoadedState.aoSearchCols[3].sSearch
+                    if (oSettings.oLoadedState != null) {
+                        sVal=oSettings.oLoadedState.aoSearchCols[3].sSearch
+                    } else {
+                        sVal=''
+                    }
                     authsel=''
                     noauthsel=''
                     if (sVal == '1') { authsel="selected" }
