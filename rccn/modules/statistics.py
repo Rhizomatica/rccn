@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-import sys, ESL, code
+import sys, ESL, code, yaml
 sys.path.append("..")
 from config import *
 import xml.etree.ElementTree as ET
@@ -44,11 +44,24 @@ class LiveStatistics:
         data['ut']=self.get_uptime()
         data['la']=os.getloadavg()
         data['v']=self.get_linev()
+        data['p']=self.get_puppet_lr()
         fs_con=ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
         data['c']=self.get_fs_calls(fs_con)
         data['gw']=self.get_fs_status(fs_con)
         fs_con.disconnect()
         return data
+
+    def get_puppet_lr(self):
+        puppet_lr='/var/lib/puppet/state/last_run_summary.yaml'
+        with open(puppet_lr) as stream:
+            y=yaml.load(stream)
+        p={}
+        try:
+            p['lr']=y['time']['last_run']
+            p['f']=y['events']['failure']
+        except:
+            pass
+        return p
 
     def get_fs_status(self,fs_con):
         e = fs_con.api("sofia xmlstatus")
