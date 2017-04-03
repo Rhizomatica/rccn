@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-05 22:29+0100\n"
+"POT-Creation-Date: 2017-04-03 15:09+0200\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
 "Last-Translator: Keith <keith@rhizomatica.org>\n"
 "Language: es\n"
@@ -20,74 +20,74 @@ msgstr ""
 msgid "All"
 msgstr "Todos"
 
-#: subscribers.php:119
+#: subscribers.php:127
 msgid "Unpaid subscription"
 msgstr "Suscripción no pagada"
 
-#: subscribers.php:120
+#: subscribers.php:128
 msgid "Unauthorized"
 msgstr "No autorizado"
 
-#: subscribers.php:121
+#: subscribers.php:129
 msgid "Paid subscription"
 msgstr "Suscripción pagada"
 
-#: subscribers.php:122
+#: subscribers.php:130
 msgid "Online"
 msgstr "Conectado"
 
-#: subscribers.php:122
+#: subscribers.php:130
 msgid "Roaming"
 msgstr "'Roaming'"
 
-#: subscribers.php:123
+#: subscribers.php:131
 msgid "Offline"
 msgstr "Desconectado"
 
-#: subscribers.php:131
+#: subscribers.php:139
 msgid "Subscribers Phones"
 msgstr "Usuarios de la Red"
 
-#: subscribers.php:136 subscribers.php:154
+#: subscribers.php:144 subscribers.php:162
 msgid "Activation date"
 msgstr "Fecha de Activación"
 
-#: subscribers.php:137 subscribers.php:155
+#: subscribers.php:145 subscribers.php:163
 msgid "Subscription date"
 msgstr "Fecha de Suscripción"
 
-#: subscribers.php:138 subscribers.php:156
+#: subscribers.php:146 subscribers.php:164
 msgid "Subscription Status"
 msgstr "Estado de la Suscripción"
 
-#: subscribers.php:139 subscribers.php:157 subscriber_edit.php:81
+#: subscribers.php:147 subscribers.php:165 subscriber_edit.php:81
 msgid "Authorized"
 msgstr "Autorizado"
 
-#: subscribers.php:140 subscribers.php:158 send_sms.php:33
+#: subscribers.php:148 subscribers.php:166 send_sms.php:33
 msgid "Number"
 msgstr "Número Telefónico"
 
-#: subscribers.php:141 subscribers.php:159 provisioning.php:66
+#: subscribers.php:149 subscribers.php:167 provisioning.php:66
 #: provisioning.php:100 subscriber_edit.php:43
 msgid "Name"
 msgstr "Nombre"
 
-#: subscribers.php:142 subscribers.php:160 resellers.php:57 resellers.php:72
+#: subscribers.php:150 subscribers.php:168 resellers.php:57 resellers.php:72
 msgid "Balance"
 msgstr "Saldo"
 
 #
-#: subscribers.php:143 subscribers.php:161 provisioning.php:79
+#: subscribers.php:151 subscribers.php:169 provisioning.php:79
 #: provisioning.php:112 subscriber_edit.php:57
 msgid "Location"
 msgstr "Ubicación"
 
-#: subscribers.php:144 subscribers.php:162 resellers.php:59 resellers.php:74
+#: subscribers.php:152 subscribers.php:170 resellers.php:59 resellers.php:74
 msgid "Actions"
 msgstr "Acciones"
 
-#: subscribers.php:149 resellers.php:64 sms.php:45 credit_history.php:41
+#: subscribers.php:157 resellers.php:64 sms.php:45 credit_history.php:41
 #: cdr.php:51 rates.php:37 resellers_credit_history.php:41
 #: resellers_transactions.php:39
 msgid "Loading data from server"
@@ -294,25 +294,37 @@ msgstr "Monto de recarga"
 msgid "Balance after Recharge"
 msgstr "Saldo después de la recarga"
 
-#: subscribers_processing.php:260
+#: subscribers_processing.php:181
+msgid "Roaming User"
+msgstr "Usuario en Roaming"
+
+#: subscribers_processing.php:265
 msgid "Roaming from"
 msgstr "En roaming desde"
 
-#: subscribers_processing.php:263
+#: subscribers_processing.php:268
 msgid "Tagged as roaming on"
 msgstr "Parece estar en roaming en"
 
-#: subscribers_processing.php:265
+#: subscribers_processing.php:270
 msgid "Roaming on"
 msgstr "En roaming en"
 
-#: subscribers_processing.php:273
+#: subscribers_processing.php:278
 msgid "Not authorized on HLR!"
 msgstr "Mo autorizado en HLR!"
 
-#: subscribers_processing.php:274
+#: subscribers_processing.php:279
 msgid "Authorized on HLR!"
 msgstr "Autorizado en HLR!"
+
+#: subscribers_processing.php:289
+msgid "NOT_PAID"
+msgstr "NO_PAGADA"
+
+#: subscribers_processing.php:289
+msgid "PAID"
+msgstr "PAGADA"
 
 #: cdr.php:33
 msgid "Calls Details Records"
@@ -649,7 +661,7 @@ msgstr "SMS"
 msgid "CDRs"
 msgstr "CDR"
 
-#: include/header.php:47 include/header.php:69
+#: include/header.php:21 include/header.php:43
 msgid "RAI - Rhizomatica Administration Interface"
 msgstr "RAI - Interfaz de Administración"
 
@@ -793,19 +805,43 @@ msgstr "modificado con éxito"
 msgid "ERROR SAVING SUBSCRIBER!"
 msgstr "ERROR AL GUARDAR USUARIO!"
 
-#: account.php:15
+#: account.php:32
 msgid "Error loading VOIP Account Balance.. please try again later"
 msgstr ""
 "Error al cargar la cuenta de balance VOIP .. por favor intente de nuevo más "
 "tarde"
 
-#: account.php:18
+#: account.php:35
 msgid "Loading VOIP Account Balance.. please wait"
 msgstr "Cargando Saldo de la cuenta VOIP.. por favor espere"
 
-#: account.php:21
+#: account.php:38
 msgid "VOIP Account Balance:"
 msgstr "Saldo de la cuenta VOIP"
+
+#: account.php:43
+msgid "Credit Status"
+msgstr "Estatus de Crédito"
+
+#: account.php:57
+msgid "Credit Allocated"
+msgstr "Saldo Repartido"
+
+#: account.php:59
+msgid "Authorised"
+msgstr "Suscripción Autorizada"
+
+#: account.php:60
+msgid "Not Authorised"
+msgstr "No Autorizada"
+
+#: account.php:61
+msgid "Not Paid, Authorised"
+msgstr "No Pagada, Autorizada"
+
+#: account.php:63
+msgid "Total Sold to Authorised Users"
+msgstr "Total Saldo Vendido a Autorizados"
 
 #~ msgid "Edit"
 #~ msgstr "Edit"

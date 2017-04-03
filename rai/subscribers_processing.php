@@ -175,7 +175,7 @@
 
     $sQuery.= "
     UNION SELECT created, created AS subscription_date, authorized AS subscription_status,
-    authorized AS authorized, msisdn, 'Roaming User' AS name, NULL AS balance,
+    authorized AS authorized, msisdn, '"._('Roaming User')."' AS name, NULL AS balance,
     '' AS location, created AS hlr_created,
     authorized AS hlr_auth, current_bts, home_bts FROM hlr ".$rWhereSql;
     }
@@ -277,13 +277,13 @@
          $row[] = $content;
 	    }
 	    else if ( $aColumns[$i] == "created" ) {
-		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
+		$row[] =  date('d-m-Y', strtotime($aRow[$aColumns[$i]]));
 	    }
 	    else if ( $aColumns[$i] == "subscription_date") {
 		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
 	    }
 	    else if ( $aColumns[$i] == "subscription_status") {
-		$row[] =  ($aRow[$aColumns[$i]] == 0) ? "<font color='red'>NO_PAGADAS</font>" : "<font color='green'>PAGADO</font>";
+		$row[] =  ($aRow[$aColumns[$i]] == 0) ? "<font color='red'>"._('NOT_PAID')."</font>" : "<font color='green'>"._('PAID')."</font>";
             }
             else if ( $aColumns[$i] != ' ' )
             {
