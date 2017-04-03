@@ -4,6 +4,7 @@ require_once('include/menu.php');
 require_once('modules/credit.php');
 $cred = new Credit();
 $c_alloc=$cred->get_all_credit_allocated();
+$rate=$cred->get_rate();
 $c_both=$c_not_paid_auth=$c_paid_not_auth=$c_na=0;
 foreach ($c_alloc as $row) {
 	$auth=$row[0];
@@ -35,7 +36,14 @@ foreach ($c_alloc as $row) {
 			       $('#balance').html('<img src="img/loading.gif" alt="Loading..." /><br/><br/><span style="font-size: 20px"><?=_('Loading VOIP Account Balance.. please wait') ?></span>');
 			    },
 		            success: function (html) {
-			            $('#balance').html("<span style='font-size: 20px;'><?=_('VOIP Account Balance:')?> <b>" + html + "</b> USD</span>");
+                        rate=<?=$rate?>;
+                        mxn=html*rate
+			            $('#balance').html("<span style='font-size: 20px;'><?=_('VOIP Account Balance:')?> <b>" + html + "</b> USD / <b>" + mxn + "</b> MXN</span>");
+			            total=parseInt(<?=$c_both?>)
+			            diff=(mxn-total)
+			            c="green"
+			            if (diff<0) c="red"
+			            $('#diff').html('<?=_('Credit Status')?>: <span style="color:'+c+';font-weight:bold">' + Math.abs(html-total).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') + '</span> MXN');
 		            }
 			 });
 			
@@ -48,12 +56,18 @@ foreach ($c_alloc as $row) {
 				echo "<img src='img/account.png' width='150' height='150' /><br/><br/>";
 				echo "<div id='balance'></div>";
 			?>
-			<div id='credit' style="font-size: 16px;text-align: left; width: 300px; margin-top: 10px;"> 
-			<?=_('Credit Allocated:')?>
+			<div id='credit' style="font-size: 16px;text-align: left; width: 400px; margin-top: 10px; border-style: inset; border-width: 1px; border-radius: 7px;padding: 11px;"> 
+			<?=_('Credit Allocated')?>:
 			<div>
-				<div><?=_('Authorised:')?> <b><?=$c_both?></b> MXN</div>
-				<div><?=_('Not Authorised:')?> <b><?=$c_na?></b> MXN</div>
-				<div><?=_('Not Paid, Authorised:')?> <b><?=$c_not_paid_auth?></b> MXN</div>
+				<div><?=_('Authorised')?>: <b><?=number_format($c_both)?></b> MXN</div>
+				<div><?=_('Not Authorised')?>: <b><?=number_format($c_na)?></b> MXN</div>
+				<div><?=_('Not Paid, Authorised')?>: <b><?=number_format($c_not_paid_auth)?></b> MXN</div>
+				<br />
+				<div><?=_('Total Sold to Authorised Users')?>: <b><span id="ctotal"><?=number_format($c_both + $c_not_paid_auth)?></span></b> 
+				MXN</div>
+				<br />
+				<div id="diff"></div>
+
 			</div>
 			</div>
 
