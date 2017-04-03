@@ -91,6 +91,15 @@ class Credit:
         finally:
             db_conn.commit()
 
+    def get_all_credit_allocated(self):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT authorized,subscription_status,SUM(balance) FROM subscribers GROUP BY authorized,subscription_status')
+            result = cur.fetchall()
+        except psycopg2.DatabaseError as e:
+            raise CreditException('PG_HLR getting sum of balance: %s' % e)
+        return result
+
 if __name__ == '__main__':
     credit = Credit()
     #sub.set_balance('68820110010',3.86)

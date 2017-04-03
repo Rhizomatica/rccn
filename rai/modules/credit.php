@@ -12,6 +12,19 @@ class Credit
 	public $msisdn = "";
 	public $amount = "";
 
+    public function get_all_credit_allocated() {
+        try {
+            $response = \Httpful\Request::get($this->path)->expectsJson()->send();
+        } catch (Httpful\Exception\ConnectionErrorException $e) {
+            throw new CreditException($e->getMessage());
+        }
+        $data = $response->body;
+        if ($data->status == 'failed') {
+            throw new CreditException($data->error);
+        }
+        return $data;
+    }
+
 	public function add($msisdn,$amount) {
 		$data = array("msisdn" => $msisdn, "amount" => $amount);
 		try {

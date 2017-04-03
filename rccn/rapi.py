@@ -278,6 +278,15 @@ class ResellerRESTService:
 
 class CreditRESTService:
     path = '/credit'
+    @route('/', Http.GET)
+    def get(self, request):
+        api_log.info('%s - [GET] %s/' % (request.getHost().host, self.path))
+        try:
+            credit = Credit()
+            data = json.dumps(credit.get_all_credit_allocated(), cls=PGEncoder)
+        except CreditException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return data
 
     @route('/', Http.POST)
     def post(self, request, msisdn, amount):
