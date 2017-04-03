@@ -12,6 +12,12 @@ class Credit
 	public $msisdn = "";
 	public $amount = "";
 
+    public function get_rate() {
+        $url='http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22USDMXN%22)&env=store://datatables.org/alltableswithkeys';
+        $xml=simplexml_load_string(file_get_contents($url));
+        return $xml->results->rate->Rate;
+    }
+
     public function get_all_credit_allocated() {
         try {
             $response = \Httpful\Request::get($this->path)->expectsJson()->send();
