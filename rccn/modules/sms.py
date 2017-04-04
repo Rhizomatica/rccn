@@ -260,6 +260,14 @@ class SMS:
             elif charset == 'UTF-16BE' and type(text) == unicode:
                 str_text=text.encode('utf-8')
                 self.charset='UTF-8'
+            elif charset == 'unicode':
+                try:
+                    str_text = text.encode('utf-8')
+                    self.charset = 'UTF-8'
+                except:
+                    sms_log.error('UTF-8 encode failed')
+                    str_text = text.encode('utf-16be')
+                    self.charset = 'UTF-16BE'
             else:
                 str_text=text.encode('utf-8','replace')
                 
@@ -288,6 +296,7 @@ class SMS:
                     % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
                 sms_log.info('Kannel URL: %s' % (kannel_post))     
                 res = urllib.urlopen(kannel_post).read()
+                sms_log.info('Kannel Result: %s' % (res))
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)
@@ -295,10 +304,11 @@ class SMS:
                 raise SMSException('Error connecting to Kannel to send SMS')
         else:
             try:
-                sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, text))
-                values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': text, 'btext': '', 'dr': '', 'dcs': ''}
+                sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, str_text))
+                values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': str_text, 'btext': '', 'dr': '', 'dcs': ''}
                 data = urllib.urlencode(values)
                 res = urllib.urlopen('http://%s:8085/sms' % server, data).read()
+                sms_log.info('Remote RAPI Result: %s' % (res))
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)
@@ -321,7 +331,7 @@ class SMS:
                     if current_bts == config['local_ip']:
                         log.info('Current bts same as local site send call to local Kannel')
                         self.context = 'SMS_ROAMING_LOCAL'
-                        self.send(self.source, self.destination, self.text)
+                        self.send(self.source, self.destination, self.text, self.charset)
                     else:
                         # send sms to destination site
                         self.context = 'SMS_ROAMING_INTERNAL'
