@@ -261,6 +261,7 @@ def display_queue(smsq):
         coding = sms[8]
         n = n + 1
         text1 = ''
+        parts = str(mid.count(',')+1)
         if not options.brief:
             print "\033[34m------------------------------------\033[0m"
             print "SMSQ ID: " + mid
@@ -271,6 +272,7 @@ def display_queue(smsq):
             else:
                 print "Delivery Attempts: " + str(sms[3])
             print "Charset:" + charset
+            print "Parts: " + parts
         try:
             if options.unicode:
                 text1 = utext.encode('unicode_escape')
@@ -285,8 +287,9 @@ def display_queue(smsq):
             
         if options.brief:
             if options.colour:
+                idc=str(91+int(parts))
                 print (
-                '\033[93m%s\033[0m \033[95m%s\033[0m \033[91m%s\033[0m %s \033[1;92m%s \033[0m' 
+                '\033[' + idc + 'm%s\033[0m \033[95m%s\033[0m \033[91m%s\033[0m %s \033[1;92m%s \033[0m' 
                 % ( sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), text1[:100] ) )
             else:
                 print sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), text1[:100]
@@ -366,6 +369,7 @@ if __name__ == '__main__':
     if options.showq:
         smsq = read_queue()
         display_queue_summary(smsq)
+        exit()
     if options.msgid:
         smsq = read_queue(options.msgid)
         q=build_msgs(smsq)        
