@@ -8,6 +8,17 @@ require_once('include/header.php');
 			<? print_menu('credits'); ?>	
 			<br/><br/><br/><br/>
 
+<script type="text/javascript">
+	$(function() {
+		$('#add_credit').click(function() {
+			a=$('#amount').val()
+			n=($('#callerid1').val() == $('#callerid2').val() && a>0) ? $('#callerid1').val() : false
+			if (n) { return confirm('$'+a+' --> '+n+'?') }
+		});
+	});
+</script>
+
+
 			<?php
 
 
@@ -39,7 +50,7 @@ function print_form($post_data,$errors) {
 				</label>
 				<input type="text" name="amount" id="amount" value="<?=$amount?>"/><br/>
 			
-				<button type="submit" name="add_credit"><?= _("Add") ?></button>
+				<button type="submit" id="add_credit" name="add_credit"><?= _("Add") ?></button>
 				<div class="spacer"></div>
 				</form>
 			</div>
