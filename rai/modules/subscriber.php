@@ -83,7 +83,11 @@ class Subscriber
 			
 		if (!is_array($data)) {
 			if ($data->status == 'failed') {
-				throw new SubscriberException($data->error);
+			        if ($data->error  == 'No connected subscribers found') {
+			                return array();
+			        } else {
+				        throw new SubscriberException($data->error);
+                                }
 			}
 		}
 	        $entries = array();
