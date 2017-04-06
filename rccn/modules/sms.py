@@ -48,6 +48,7 @@ class SMS:
         self.context = 'SMS_LOCAL'
         self.source = ''
         self.destination = ''
+        self.internal_destination = ''
         self.text = ''
         self.save_sms = 1
 
@@ -73,8 +74,12 @@ class SMS:
         self.charset = charset
         self.coding = coding
         self.source = source
-        self.destination = destination
         self.text = text
+        self.internal_destination = destination
+        if "+" in destination:
+            self.destination = destination.split('+')[0]
+        else:
+            self.destination = destination
 
         sms_log.info('Received SMS: %s %s %s %s %s' % (source, destination, text, charset, coding))	
         #sms_log.info(binascii.hexlify(text))
@@ -305,10 +310,18 @@ class SMS:
         else:
             try:
                 sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, str_text))
+                if "+" not in self.internal_destination:
+                    destination = destination + '+1'
+                else:
+                    s = self.internal_destination.split('+')
+                    destination = s[0] + '+' + str(int(s[1]) + 1)
+                    if s[1] > 4:
+                        sms_log.error("SMS is LOOPING!!")
                 values = {'source': source, 'destination': destination, 'charset': self.charset, 'coding': self.coding, 'text': str_text, 'btext': '', 'dr': '', 'dcs': ''}
                 data = urllib.urlencode(values)
-                res = urllib.urlopen('http://%s:8085/sms' % server, data).read()
-                sms_log.info('Remote RAPI Result: %s' % (res))
+                t = Thread (target = self._t_urlopen, args = (server, data) )
+                t.start()
+                sms_log.info('Started Remote RAPI Thread')
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)
@@ -419,7 +432,15 @@ class SMS:
         t = Thread(target=self.broadcast_to_all_subscribers, args=(text, btype, ))
         t.start()
 
-    
+    def _t_urlopen(self, url, data):
+        try:
+            res = urllib.urlopen('http://%s:8085/sms' % url, data)
+            res.read()
+            res.close()
+            return res
+        except IOError as ex:
+            sms_log.error(ex)
+
 if __name__ == '__main__':
     sms = SMS()
     try:
