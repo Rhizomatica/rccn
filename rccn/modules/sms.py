@@ -77,9 +77,8 @@ class SMS:
         self.text = text
         self.internal_destination = destination
         if "+" in destination:
-            self.destination = destination.split('+')[0]
-        else:
-            self.destination = destination
+            destination = destination.split('+')[0]
+        self.destination = destination
 
         sms_log.info('Received SMS: %s %s %s %s %s' % (source, destination, text, charset, coding))	
         #sms_log.info(binascii.hexlify(text))
