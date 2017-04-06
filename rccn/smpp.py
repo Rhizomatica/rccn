@@ -78,6 +78,22 @@ def rx_alert_notification(pdu):
                     sub._update_location_pghlr(subscriber)
                 except Exception as e:
                     print str(e)
+                log.info('Tell home about it..')
+                if subscriber.data['current_bts']:
+                    current_bts = subscriber.data['current_bts']
+                    try:
+                        values = '{"msisdn": "%s", "local": "yes" }' % extension
+                        opener = urllib2.build_opener(urllib2.HTTPHandler)
+                        request = urllib2.Request('http://%s:8085/subscriber/offline' % current_bts, data=values)
+                        request.add_header('Content-Type', 'application/json')
+                        request.get_method = lambda: 'PUT'
+                        res = opener.open(request).read()
+                        if 'success' in res:
+                            log.info('Roaming Subscriber %s returned to %s' % (extension,current_bts))
+                        else:
+                            log.error('Error Returning Roaming Subscriber %s at %s' % (extension,current_bts))
+                    except IOError:
+                        log.error('Error connect to site %s to return subscriber %s' % (current_bts,extension) )
 
     if pdu.ms_availability_status == '0':
         log.debug('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
