@@ -106,29 +106,33 @@ class SubscriberRESTService:
 
     # put subscriber offline
     @route('/offline', Http.PUT)
-    def offline(self, request, msisdn=''):
-        roaming_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"' % (request.getClientIP(), self.path, msisdn))
+    def offline(self, request, msisdn='', local='no'):
+        api_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"' % (request.getClientIP(), self.path, msisdn))
         try:
             sub = Subscriber()
             sub.expire_lu(msisdn)
             data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
-            api_log.info(data)
+            api_log.debug(data)
             return data
         # Take advantage to point this subscriber to the new location in our hlr
         # so we (at least) don't have to wait for the next hlr sync run
         try:
+            if local == 'yes':
+                current_bts = config['local_ip']
+            else:
+                current_bts = request.getClientIP()
             cur = db_conn.cursor()
             now = datetime.datetime.fromtimestamp(int(time.time()))
             cur.execute('UPDATE hlr SET current_bts=%(current_bts)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
-            {'msisdn': msisdn, 'current_bts': request.getClientIP(), 'updated': now})
+            {'msisdn': msisdn, 'current_bts': current_bts, 'updated': now})
             db_conn.commit()
         except psycopg2.DatabaseError as e:
             data = {'status': 'failed', 'error': str(e)}
-            api_log.info(data)    
+            api_log.debug(data)
             return data
-        api_log.info(data)    
+        api_log.debug(data)
         return data
 
     # edit subscriber
