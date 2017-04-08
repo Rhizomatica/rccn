@@ -155,7 +155,7 @@ def update_local_connected():
             except NumberingException as e:
                 if str(e) == 'PG_DB subscriber not found: '+msisdn[0]:
                     # We have a connected imsi in osmo subs 
-                    # but not in local hlr
+                    # but not in local PG_hlr
                     try:
                         sub_check=sub.get(msisdn[0])
                     except SubscriberException as e:
@@ -178,8 +178,9 @@ def update_local_connected():
                     continue
                 # We may have a false positive in connected if we missed an "offline"
                 # and our hlr may be out of date if we missed an rhs
-                #roaming_log.info("Moving %s IMSI:%s home (was %s)" % (msisdn[0], imsi, bts))
-                #sub.update_location(imsi, msisdn[0], True)
+                if options.override:
+                    roaming_log.info("Moving %s IMSI:%s home (was %s)" % (msisdn[0], imsi, bts))
+                    sub.update_location(imsi, msisdn[0], True)
     except SubscriberException as e:
         roaming_log.info("Error updating DHLR for %s: %s" % (msisdn[0], e))
 
@@ -206,6 +207,8 @@ if __name__ == '__main__':
         help="Update Foreign Subscribers")
     parser.add_option("-l", "--local", dest="local", action="store_true",
         help="Update Local Connected Subscribers")
+    parser.add_option("-o", "--override", dest="overrdie", action="store_true",
+        help="Use Local HLR idea of Connected Subscribers (LAC > 0)")
     parser.add_option("-p", "--purge", dest="purge", action="store_true",
         help="Purge Inactive Subscribers")
     parser.add_option("-s", "--since", dest="since",
