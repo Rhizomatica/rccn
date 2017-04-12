@@ -36,6 +36,7 @@ class LiveStatistics:
         data['mp']=config['internal_prefix']
         data['o']=sub.get_online()
         data['r']=sub.get_roaming()
+        data['pa']=sub.get_paid_subscription()
         data['sp']=self.get_sms_pending()
         data['spr']=self.get_sms_pending_not_local()
         data['lt']=self.get_recent_call_count('10 mins')
