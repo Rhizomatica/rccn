@@ -142,6 +142,11 @@ CREATE TABLE rates (
 	cost			decimal not null
 );
 
+CREATE TABLE locations (
+        id              serial primary key,
+        name            varchar not null
+);
+
 CREATE TABLE configuration (
 	limit_local_calls		smallint not null default 0,
 	limit_local_minutes		integer,
