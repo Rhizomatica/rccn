@@ -127,8 +127,21 @@ class Context:
         # check if local call has to be billed
         try:
             if self.configuration.check_charge_local_calls() == 1:
-                log.info('LOCAL call will be billed')
-                self.session.setVariable('billing', '1')
+                log.debug('Check subscriber %s balance' % calling_number)
+                try:
+                    current_subscriber_balance = Decimal(self.subscriber.get_balance(calling_number))
+                except SubscriberException as e:
+                    log.error(e)
+                    current_subscriber_balance = 0
+                log.debug('Current subscriber balance: %.2f' % current_subscriber_balance)
+                rate = self.configuration.get_charge_local_calls()
+                if current_subscriber_balance >= rate[0]:
+                    log.info('LOCAL call will be billed at %s after %s seconds' % (rate[0], rate[1]))
+                    self.session.setVariable('billing', '1')
+                else:
+                    log.debug('Subscriber doesn\'t have enough balance to make a call')
+                    self.session.execute('playback', '002_saldo_insuficiente.gsm')
+                    self.session.hangup()
         except ConfigurationException as e:
                 log.error(e)
  

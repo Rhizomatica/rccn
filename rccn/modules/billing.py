@@ -113,9 +113,35 @@ class Billing:
             bill_log.info('LOCAL Context')
             bleg_connected = session.getVariable('bleg_uuid')
             hangup_cause = session.getVariable('hangup_cause')
-            subscriber = session.getVariable('bleg_destination_number')
+            #subscriber = session.getVariable('bleg_destination_number')
             #print session.getVariable('bleg_billsec')
+
             configuration = Configuration()
+            if configuration.check_charge_local_calls():
+                _charge = configuration.get_charge_local_calls()
+                if duration > int(_charge[1]):
+                    call_cost = _charge[0]
+                else:
+                    call_cost = 0
+
+            # set destination_name and cost for the CDR
+            session.setVariable('destination_name', 'Local')
+            session.setVariable('cost', str(call_cost))
+            bill_log.info('Call duration: %d sec Call cost: %.2f' % (duration, call_cost))
+
+            if call_cost > Decimal('0.00'):
+                sub = Subscriber()
+                try:
+                    previous_balance = sub.get_balance(subscriber)
+                    current_balance = previous_balance - call_cost
+                    real_balance = 0 if current_balance < 0 else current_balance
+                    bill_log.info('Previous balance: %.2f Current Balance: %.2f' % (previous_balance, real_balance))
+                    sub.set_balance(subscriber, real_balance)
+                    bill_log.info('Billing %s completed successfully' % subscriber)
+                except SubscriberException as e:
+                    bill_log.error('Error during billing the subscriber: %s' % e)
+            else:
+                bill_log.info('Call too short to Bill')
 
         if context == 'OUTBOUND':
             bill_log.info('===========================================================================')
