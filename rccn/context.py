@@ -264,7 +264,7 @@ class Context:
         try:
             site_ip = self.numbering.get_site_ip(self.destination_number)
             log.info('Send call to site IP: %s' % site_ip)
-            self.session.execute('bridge', "{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+            self.session.execute('bridge', str("{absolute_codec_string='G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040'))
         except NumberingException as e:
             log.error(e)
 
@@ -331,7 +331,7 @@ class Context:
                             site_ip = self.numbering.get_site_ip(self.destination_number)
                             log.info('Send call to site IP: %s' % site_ip)
                             self.session.setVariable('context','ROAMING_INTERNAL')
-                            self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                            self.session.execute('bridge', str("{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040'))
                         except NumberingException as e:
                             log.error(e)
                     else:
@@ -347,7 +347,7 @@ class Context:
                             else:
                                 log.info('Send call to home_bts %s of roaming user' % site_ip)
                                 self.session.setVariable('context','ROAMING_OUTBOUND')
-                                self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
+                                self.session.execute('bridge', str("{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040'))
                         else:
                             # called number must be wrong, hangup call
                             self.session.hangup()
