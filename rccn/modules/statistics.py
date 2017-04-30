@@ -39,6 +39,7 @@ class LiveStatistics:
         data['pa']=sub.get_paid_subscription()
         data['sp']=self.get_sms_pending()
         data['spr']=self.get_sms_pending_not_local()
+        data['sf']=self.get_sms_pending_five()
         data['lt']=self.get_recent_call_count('10 mins')
         data['ld']=self.get_recent_call_count('1 day')
         data['ls']=self.get_recent_call_count('7 days')
@@ -112,11 +113,23 @@ class LiveStatistics:
             sq_hlr.close()
             raise StatisticException('SQ_HLR error: %s' % e.args[0])
 
+    def get_sms_pending_five(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("SELECT count(*) FROM SMS WHERE length(dest_addr) = 5 AND sent isnull")
+            pending = sq_hlr_cursor.fetchone()
+            sq_hlr.close()
+            return pending[0]
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise StatisticException('SQ_HLR error: %s' % e.args[0])
+
     def get_sms_pending_not_local(self):
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select count(*) from SMS where dest_addr not like ? and sent isnull", ([config['internal_prefix']+'%']) )
+            sq_hlr_cursor.execute("SELECT count(*) from SMS WHERE length(dest_addr) = 11 AND dest_addr not like ? AND sent isnull", ([config['internal_prefix']+'%']) )
             pending = sq_hlr_cursor.fetchone()
             sq_hlr.close()
             return pending[0]
