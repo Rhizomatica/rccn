@@ -97,10 +97,27 @@ class Numbering:
         siteprefix = destination_number[:6]
         if siteprefix == config['internal_prefix']:
             return False
-        sites = riak_client.bucket('sites')
-        if sites.get(siteprefix).exists == True:
+        # Try to avoid going to RIAK here
+        cur = db_conn.cursor()
+        cur.execute('SELECT DISTINCT home_bts FROM hlr WHERE msisdn like %(prefix)s', {'prefix': siteprefix+'%'})
+        test = cur.fetchall()
+        if len(test) > 1:
+            log.warn('!!FIX THIS!! Got more than one home_bts from hlr for %s' % siteprefix)
+            sites = riak_client.bucket('sites')
+            if sites.get(siteprefix).exists == True:
+                return True
+            else:
+                return False
+        elif len(test) == 1:
             return True
         else:
+            return False
+
+    def is_number_here(self, number):
+        log.info('%s %s %s %s' % (self.calling_host,mncc_ip_address,number[:6],config['internal_prefix']))
+        if self.calling_host == mncc_ip_address and number[:6] == config['internal_prefix']:
+            # If we are here and are a local number, then we can't be roaming
+            log.warn('%s is here' % number)
             return False
 
     def is_number_roaming(self, number):
@@ -123,7 +140,7 @@ class Numbering:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
             if not subscriber.exists:
-                raise NumberingException('RK_DB imsi %s not found' % imsi)
+                raise NumberingException('RK_HLR imsi %s not found' % imsi)
             return subscriber.data
         except riak.RiakError as e:
             raise NumberingException('RK_HLR error getting the msisdn from an imsi: %s' % e)
