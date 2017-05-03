@@ -99,12 +99,14 @@ def get(msisdn, imsi, auth):
             return
         
         riak_imsi = bucket.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT).results
-
-        if len(riak_imsi) > 1:
+        indexes = []
+        for entry in riak_imsi:
+            if not entry in indexes:
+                indexes.append(entry)
+        if len(indexes) > 1:
             print "\033[91;1m More than ONE entry in this index! \033[0m"
             advise("!!More than ONE entry in this index: %s" % msisdn)
-
-        if not len(riak_imsi):
+        if not riak_ext or not len(riak_imsi):
             print '\033[93mExtension %s not found\033[0m, adding to D_HLR' % (msisdn)
             sub._provision_in_distributed_hlr(imsi, msisdn)
         else:
@@ -115,7 +117,7 @@ def get(msisdn, imsi, auth):
                 print "Riak's %s points to %s" % (riak_imsi[0], num.get_msisdn_from_imsi(riak_imsi[0]))
                 return False
             print 'Extension: \033[95m%s\033[0m-%s-\033[92m%s\033[0m ' \
-                  'has IMSI \033[96m%s\033[0m' % (msisdn[:5], msisdn[5:6], msisdn[6:], riak_imsi[0])
+                  'has IMSI \033[96m%s\033[0m in Index' % (msisdn[:5], msisdn[5:6], msisdn[6:], riak_imsi[0])
             data = bucket.get(riak_imsi[0]).data
             if data['authorized'] == 1:
                 print "Extension: Authorised"
