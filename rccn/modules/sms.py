@@ -32,6 +32,7 @@ from numbering import Numbering, NumberingException
 from threading import Thread
 import ESL
 import binascii
+import gsm0338
 
 class SMSException(Exception):
     pass
@@ -256,10 +257,9 @@ class SMS:
     def send(self, source, destination, text, charset='utf-8', server=config['local_ip']):
         sms_log.info('SMS Send: Text: <%s> Charset: %s' % (text, charset) )
         try:
-            # because we might be called without charset and sent something unknown.
-            # If we decoded in RAPI we have unicode, if not a str.
+            # In the case of single/broadcast from RAI, there's no charset passed
             sms_log.info('Type of text: %s', (type(text)) )  
-            if (charset == 'UTF-8' or charset == 'utf-8') and type(text) != unicode:
+            if (charset == 'UTF-8' or charset == 'utf-8' or charset == 'gsm03.38') and type(text) != unicode:
                 str_text=unicode(text,charset).encode('utf-8')
             elif charset == 'UTF-16BE' and type(text) == unicode:
                 str_text=text.encode('utf-8')
@@ -277,17 +277,30 @@ class SMS:
                 
             sms_log.info('Type: %s', (type(str_text)) )
 
-            # I think we ALWAYS need to send coding=2 to kannel.
             if type(text) == unicode:
-		self.coding = 2    
+                try:
+                    try:
+                        # Test if we can encode this as GSM03.38
+                        gsm_codec = gsm0338.Codec()
+                        test = gsm_codec.encode(text)
+                        self.coding = 0
+                    except:
+                        sms_log.debug('Using GSM03.38 default alphabet not possible. %s' % sys.exc_info()[1] )
+                    # Maybe we can see if we use the Spanish Char Set?
+                    gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
+                    test = gsm_codec.encode(text)
+                    # OK Passed, but still kannel will replace not default alphabet with '?'
+                    coding = 2
+                except:
+                    sms_log.debug('Using GSM03.38 Spanish Shift not possible. %s' % sys.exc_info()[1] )
+                    self.coding = 2
             enc_text = urllib.urlencode({'text': str_text })
         except:
             sms_log.info('Encoding Error: %s Line:%s' % (sys.exc_info()[1], sys.exc_info()[2].tb_lineno))
             # Was still dropping messages here because we go on without defining enc_text
-            # Some phones are sending some kind of fucked up mix of charset. 
-            # I think multi segment messages with two charsets.
-            # kannel is munging before it gets here.
-            # Must send something now that kannel won't puke on.
+            # Some phones are sending multipart messages with distinct charsets.
+            # kannel concatenates but sends the charset of 1st part (I think)
+            # Make best effort to send something now that kannel won't puke on.
             str_text=text.decode('UTF-8','replace').encode('utf-8')
             self.charset='UTF-8'
             enc_text = urllib.urlencode({'text': str_text})
