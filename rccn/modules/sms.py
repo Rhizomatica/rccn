@@ -260,11 +260,15 @@ class SMS:
             # In the case of single/broadcast from RAI, there's no charset passed
             sms_log.info('Type of text: %s', (type(text)) )  
             if (charset == 'UTF-8' or charset == 'utf-8' or charset == 'gsm03.38') and type(text) != unicode:
+                sms_log.info('1 case')
                 str_text=unicode(text,charset).encode('utf-8')
             elif charset == 'UTF-16BE' and type(text) == unicode:
+                sms_log.info('2 case')
                 str_text=text.encode('utf-8')
                 self.charset='UTF-8'
+                self.coding = 2
             elif charset == 'unicode':
+                sms_log.info('3 case')
                 try:
                     str_text = text.encode('utf-8')
                     self.charset = 'UTF-8'
@@ -273,6 +277,7 @@ class SMS:
                     str_text = text.encode('utf-16be')
                     self.charset = 'UTF-16BE'
             else:
+                sms_log.info('4 case')
                 str_text=text.encode('utf-8','replace')
                 
             sms_log.info('Type: %s', (type(str_text)) )
@@ -281,14 +286,15 @@ class SMS:
                 try:
                     try:
                         # Test if we can encode this as GSM03.38
-                        gsm_codec = gsm0338.Codec()
-                        test = gsm_codec.encode(text)
+                        #gsm_codec = gsm0338.Codec(single_shift_decode_map=BASIC_CHARACTER_SET_EXTENSION)
+                        test = text.encode('gsm03.38')
+                        sms_log.debug('GSM03.38! %s -> %s' % (text, test))
                         self.coding = 0
                     except:
                         sms_log.debug('Using GSM03.38 default alphabet not possible. %s' % sys.exc_info()[1] )
                     # Maybe we can see if we use the Spanish Char Set?
-                    gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
-                    test = gsm_codec.encode(text)
+                    gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
+                    test = gsm_shift_codec.encode(text)
                     # OK Passed, but still kannel will replace not default alphabet with '?'
                     coding = 2
                 except:
