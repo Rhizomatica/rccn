@@ -227,8 +227,9 @@ def build_msgs(smsq):
                         except KeyError:
                             log.error("Missing part %s of Multipart SMS %s for id %s" 
                             % ((i+1), udh['csms_ref'], sms[0]) )
-                    if csms[udh['csms_ref']]['not_decoded'][i] == 1:
-                        utext=utext+text.decode(charset)
+                            pass
+                    #if csms[udh['csms_ref']]['not_decoded'][i] == 1:
+                    #    utext=utext+text.decode(charset)
                     mid = mid.rstrip(', ')
                     #code.interact(local=locals())
                     csms[udh['csms_ref']] = None
@@ -237,7 +238,7 @@ def build_msgs(smsq):
                     continue
             except Exception as ex:
                 print ex
-                code.interact(local=locals())
+                #code.interact(local=locals())
         else:
             mid = str(sms[0])
             if coding == 0:
