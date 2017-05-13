@@ -146,14 +146,18 @@ def build_msgs(smsq):
         userdata = sms[16]
         header = sms[17]
         text = sms[18]
+        log.debug("Message ID: \033[93m" + str(sms[0]) + '\033[0m')
+        log.debug("Valid Until: " + str(sms[4]))
+        log.debug("Coding is \033[32m%s \033[0m" % str(coding))
+        log.debug("UD HDR Indicator: " + str( sms[9] ))
+        log.debug("User Data: " + binascii.hexlify( userdata ))
         
         dtext = _dbd_decode_bin(userdata)
 
         if udhdr == 64:
-            #h = dtext[:7]
+            h = dtext[:7]
             #for i in [0, 1, 2, 3, 4, 5, 6]:
             #    log.debug( ord(h[i]) )
-            #msg = text[7:]
             #udh=parse_udh(h)
             udhdr = 1
         
@@ -165,27 +169,49 @@ def build_msgs(smsq):
             log.debug("CSMS Reference: " + str(udh['csms_ref']))
             log.debug("Part No #" + str(udh['part_num']) + " of " + str(udh['parts']))
             log.debug("Part Coding:" + str(coding))
-            try:
-                msgpart = unicode(msg,'utf-8')
-                charset = 'UTF-8'
-            except UnicodeDecodeError:
+            not_decoded = 0
+            if coding == 0:
+                msg = str(unpackSeptets(msg,None,0,6).lstrip(chr(0)).rstrip(chr(0)))
                 try:
-                    msgpart = unicode(msg,'utf-16be','replace')
-                    charset = 'UTF-16BE'
+                    msgpart = unicode(msg,'gsm03.38')
+                    charset = 'GSM03.38'
                 except:
-                    code.interact(local=locals())
-            log.debug("Message Part:" + msgpart.encode('utf-8','replace'))
+                    log.debug("Multipart decode failed for gsm03.38")
+            else:
+                try:
+                    msgpart = unicode(msg,'utf-8')
+                    charset = 'UTF-8'
+                except UnicodeDecodeError:
+                    log.debug("Multipart decode failed for UTF-8")
+                    try:
+                        msgpart = unicode(msg,'utf-16be')
+                        charset = 'UTF-16BE'
+                    except:
+                        # Can't decode this segment on its own,
+                        # probably because truncated utf16 data.
+                        #code.interact(local=locals())
+                        msgpart = msg
+                        charset = 'utf-16be'
+                        not_decoded = 1
+                        if udh['part_num'] > 1 and csms[udh['csms_ref']]['not_decoded'][udh['part_num']-1] == 1:
+                            # try adding it to the last part..
+                            csms[udh['csms_ref']]['text'][udh['part_num']-1] += msg
+                            msgpart = ''
+
+            if not_decoded == 1:
+                log.debug("Message Part Not Decoded on its own")
+            else:
+                log.debug("Message Part:" + msgpart.encode('utf-8','replace'))
             try:
                 if not udh['csms_ref'] in csms or csms[udh['csms_ref']] == None:
                     csms[udh['csms_ref']] = {}
                     csms[udh['csms_ref']]['ids'] = {}
                     csms[udh['csms_ref']]['text'] = {}
+                    csms[udh['csms_ref']]['not_decoded'] = {}
                     csms[udh['csms_ref']]['parts'] = udh['parts']
-                    csms[udh['csms_ref']]['ids'][udh['part_num']] = sms[0]
-                    csms[udh['csms_ref']]['text'][udh['part_num']] = msgpart
-                else:
-                    csms[udh['csms_ref']]['ids'][udh['part_num']] = sms[0]
-                    csms[udh['csms_ref']]['text'][udh['part_num']] = msgpart
+                csms[udh['csms_ref']]['ids'][udh['part_num']] = sms[0]
+                csms[udh['csms_ref']]['text'][udh['part_num']] = msgpart
+                csms[udh['csms_ref']]['not_decoded'][udh['part_num']] = not_decoded
 
                 if csms[udh['csms_ref']]['parts'] and udh['part_num'] == csms[udh['csms_ref']]['parts']:
                     log.debug("Found Last Part of CSMS %s" % str(udh['csms_ref']))
@@ -193,15 +219,20 @@ def build_msgs(smsq):
                     mid = ''
                     for i in range (0, csms[udh['csms_ref']]['parts']):
                         try:
-                            utext += csms[udh['csms_ref']]['text'][i+1]
+                            if csms[udh['csms_ref']]['not_decoded'][i+1] == 1:
+                                text += csms[udh['csms_ref']]['text'][i+1]
+                            else:   
+                                utext += csms[udh['csms_ref']]['text'][i+1]
                             mid += str(csms[udh['csms_ref']]['ids'][i+1]) + ', '
                         except KeyError:
                             log.error("Missing part %s of Multipart SMS %s for id %s" 
                             % ((i+1), udh['csms_ref'], sms[0]) )
+                    if csms[udh['csms_ref']]['not_decoded'][i] == 1:
+                        utext=utext+text.decode(charset)
                     mid = mid.rstrip(', ')
                     #code.interact(local=locals())
                     csms[udh['csms_ref']] = None
-                    utext = utext.encode('utf-8') 
+                    #utext = unicode(utext.encode('utf-8'))
                 else:
                     continue
             except Exception as ex:
@@ -209,32 +240,28 @@ def build_msgs(smsq):
                 code.interact(local=locals())
         else:
             mid = str(sms[0])
-            utext = dtext
+            if coding == 0:
+                # unpackSeptets returns bytearray
+                text7 = unpackSeptets(dtext).rstrip(chr(0))
+                log.debug ("User Data Octets unpacked: " + binascii.hexlify(text7))
+                gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
+                gsm_codec = gsm0338.Codec()
+                utext = gsm_codec.decode(str(text7))[0]
+                charset = 'gsm03.38'
+            if coding == 8 or coding == 4:
+                # I don't have any indicator of what the actual charset is.
+                try:
+                    utext = unicode(dtext,'utf-8')
+                    charset = 'UTF-8'
+                    #utext = re.sub(r'[^\x01-\xFF]', '', utext)
+                except UnicodeDecodeError:
+                    utext = unicode(dtext,'utf-16be')
+                    charset = 'UTF-16BE'
+                log.debug ("Coding value is 4/8, Charset Determined %s", charset)
 
-        log.debug("Message ID: \033[93m" + str(sms[0]) + '\033[0m')
-        log.debug("Valid Until: " + str(sms[4]))
-        log.debug("Coding is \033[32m%s \033[0m" % str(coding))
-        log.debug("UD HDR Indicator: " + str( sms[9] ))
-        log.debug("User Data: " + binascii.hexlify( userdata ))
-        log.debug("User Data dbd_decoded: " + binascii.hexlify(utext))
-        # FIXME: have seen multipart messages with different charsets in each part.
-        if coding == 0:
-            utext7 = unpackSeptets(utext).rstrip(chr(0)) 
-            log.debug ("User Data Octets unpacked: " + binascii.hexlify(utext7))
-            utext = unicode(utext7)
-            gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
-            utext = gsm_codec.decode(utext)[0]
-            charset = 'gsm03.38'
-        if coding == 8 or coding == 4:
-            # I don't have any indicator of what the actual charset is.
-            try:
-                utext = unicode(utext,'utf-8')
-                charset = 'UTF-8'
-                utext = re.sub(r'[^\x01-\xFF]', '', utext) 
-            except UnicodeDecodeError:
-                utext = unicode(utext,'utf-16be')
-                charset = 'UTF-16BE'
-            log.debug ("Coding value is 4/8, Charset Determined %s", charset)            
+
+        log.debug("User Data dbd_decoded: " + binascii.hexlify(utext.encode(charset,'replace')))
+
         if header:
             log.debug("Header field: " + binascii.hexlify(header))
 
@@ -282,19 +309,19 @@ def display_queue(smsq):
                 text1 = utext.encode('utf-8')
         except:
             e = sys.exc_info()[0]
-            print 'Caught Exception Encoding: %s %s %s' % (e, sys.exc_info()[1], sys.exc_info()[2].tb_lineno)
+            print 'Caught Exception Encoding: %s %s on Line %s' % (e, sys.exc_info()[1], sys.exc_info()[2].tb_lineno)
             code.interact(local=locals())
             
         if options.brief:
             if options.colour:
                 idc=str(91+int(parts))
-                print (
-                '\033[' + idc + 'm%s\033[0m \033[95m%s\033[0m \033[91m%s\033[0m %s \033[1;92m%s \033[0m' 
-                % ( sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), text1[:100] ) )
+                sentc = '96' if sms[2] is None else '92'
+                print ( '\033[%sm%s\033[0m \033[95m%s\033[0m \033[91m%s\033[0m %s \033[1;%sm%s \033[0m'
+                % ( idc, sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), sentc, text1[:100] ) )
             else:
                 print sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), text1[:100]
         else:    
-            print ('\033[93mSMS:\033[0m [ \033[1;31m '
+            print ('\033[93mSMS:\033[0m ('+ str(len(text1)) + ') [ \033[1;31m'
             +text1+
             ' \033[0m ]')
             print "\033[34m------------------------------------\033[0m\n"
