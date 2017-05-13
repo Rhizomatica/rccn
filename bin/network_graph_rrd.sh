@@ -104,7 +104,7 @@ rrdtool graph --start -$age -v 'sms' -N -E -w 600 -t 'SMS per minute' $RHIZO_DIR
 'CDEF:cmoa=moa,60,*' \
 'CDEF:cmta=mta,60,*' \
 'LINE1:cmoa#0066FF:Mobile Originated' \
-'LINE1:cmta#ff0066:Mobile Terminated' \
+'LINE1:cmta#00FF66:Mobile Terminated' \
 'GPRINT:cmoa:LAST:Most Recent\:%6.0lf %s' \
 'GPRINT:cmta:LAST:Most Recent\:%6.0lf %s'    
 
