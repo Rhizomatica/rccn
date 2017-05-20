@@ -86,7 +86,7 @@
      * on which ILIKE can be used). Boolean fields etc will need a modification here.
      */
     $sWhere = "";
-    if ( $_GET['sSearch'] != "" )
+    if ( $_GET['sSearch'] != "" && strlen($_GET['sSearch']) > 3)
     {
         // Do something to make these queries a little more realistic
         if ( is_numeric($_GET['sSearch']) ) {
@@ -142,22 +142,22 @@
     $rResult = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
      
     $sQuery = "
-        SELECT $sIndexColumn
+        SELECT count($sIndexColumn)
         FROM   $sTable
     ";
     $rResultTotal = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
-    $iTotal = pg_num_rows($rResultTotal);
+    $iTotal = pg_fetch_row($rResultTotal)[0];
     pg_free_result( $rResultTotal );
      
     if ( $sWhere != "" )
     {
         $sQuery = "
-            SELECT $sIndexColumn
+            SELECT count($sIndexColumn)
             FROM   $sTable
             $sWhere
         ";
         $rResultFilterTotal = pg_query( $gaSql['link'], $sQuery ) or die(pg_last_error());
-        $iFilteredTotal = pg_num_rows($rResultFilterTotal);
+        $iFilteredTotal = pg_fetch_row($rResultFilterTotal)[0];
         pg_free_result( $rResultFilterTotal );
     }
     else
