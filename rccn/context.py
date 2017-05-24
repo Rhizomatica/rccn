@@ -80,6 +80,14 @@ class Context:
             except NumberingException as e:
                 log.error(e)
 
+            '''
+            try:
+                outbound_codec = self.configuration.get_meta('outbound_codec')
+            except ConfigurationException as e:
+                log.error(e)
+            '''
+            outbound_codec = 'G729'
+
             if caller_id != None:
                 log.info('Set caller id to %s' % caller_id)
                 self.session.setVariable('effective_caller_id_number', '%s' % caller_id)
@@ -101,7 +109,7 @@ class Context:
                 self.session.hangup()
                 
             self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
-            self.session.execute('bridge', "{absolute_codec_string='G729,PCMA',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
+            self.session.execute('bridge', "{absolute_codec_string='"+outbound_codec+"',sip_cid_type=pid}sofia/gateway/"+gw+'/99901'+str(self.destination_number))
             _fail_cause=self.session.getVariable('originate_disposition')
             log.info('Gateway Finished with Call: %s' % _fail_cause)
             if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN" or _fail_cause == "CALL_REJECTED":
@@ -141,6 +149,7 @@ class Context:
                         log.debug('Subscriber doesn\'t have enough balance to make a call')
                         self.session.execute('playback', '002_saldo_insuficiente.gsm')
                         self.session.hangup()
+                        return
             except ConfigurationException as e:
                     log.error(e)
  
@@ -160,7 +169,7 @@ class Context:
           #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
           if sip_endpoint:
             self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-            self.session.execute('bridge', "{absolute_codec_string='PCMA'}"+sip_endpoint)
+            self.session.execute('bridge', "{absolute_codec_string='PCMU,G729'}"+sip_endpoint)
             _fail_cause=self.session.getVariable('originate_disposition')
             log.info('SIP Finished with Call: %s' % _fail_cause)
             return
@@ -195,15 +204,47 @@ class Context:
         #    subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
         #except NumberingException as e:
         #    log.error(e)
-        subscriber_number = None
+        try:
+            log.debug('Check if Number is a Valid Local Number')
+            if (self.numbering.is_number_local(self.destination_number)):
+                subscriber_number = self.destination_number
+            else:
+                subscriber_number = None
+        except NumberingException as e:
+            log.error(e)
+
+        # FIXME: (soon) Remove all this code duplication from the dialplan
         if subscriber_number != None:
             log.info('DID assigned to: %s' % subscriber_number) 
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
                     log.info('Send call to internal subscriber %s' % subscriber_number)
+                    # Experimental local calls to SIP endpoint.
+                    if use_sip == 'yes':
+                      sip_endpoint=self.numbering.is_number_sip_connected(self.session,self.destination_number)
+                      #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
+                      if sip_endpoint:
+                        self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
+                        self.session.execute('bridge', "{absolute_codec_string='PCMU,G729,AMR'}"+sip_endpoint)
+                        _fail_cause=self.session.getVariable('originate_disposition')
+                        log.info('SIP Finished with Call: %s' % _fail_cause)
+                        return
+                    log.info('Send call to internal subscriber %s' % subscriber_number)
+                    self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
+                    self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
+                    self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
                     self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@'+mncc_ip_address+':5050')
+                    _fail_cause=self.session.getVariable('originate_disposition')
+                    log.info('LCR Finished with Call: %s' % _fail_cause)
+                    if _fail_cause == "DESTINATION_OUT_OF_ORDER":
+                      self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
+                    elif _fail_cause == "USER_BUSY":
+                      self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
+                    else:
+                      self.session.hangup()
+
                 else:
-                    log.info('Subscriber %s doesn\'t exists or is not authorized' % subscriber_number)
+                    log.info('Subscriber %s doesn\'t exist or is not authorized' % subscriber_number)
             except SubscriberException as e:
                 log.error(e)
                 # internal error
@@ -234,6 +275,18 @@ class Context:
                     log.error(e)
                     # TODO: play message of destination number unauthorized to receive call
                     self.session.hangup()
+
+                # Experimental local calls to SIP endpoint.
+                if use_sip == 'yes':
+                  sip_endpoint=self.numbering.is_number_sip_connected(self.session,self.destination_number)
+                  #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
+                  if sip_endpoint:
+                    self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
+                    self.session.execute('bridge', "{absolute_codec_string='PCMU,G729,AMR'}"+sip_endpoint)
+                    _fail_cause=self.session.getVariable('originate_disposition')
+                    log.info('SIP Finished with Call: %s' % _fail_cause)
+                    return
+
 
                 try:
                     if self.subscriber.is_authorized(dest_num, 1) and (len(dest_num) == 11 or len(dest_num) == 5):

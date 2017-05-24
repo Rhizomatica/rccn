@@ -140,14 +140,20 @@ class Dialplan:
                     self.session.setVariable('inbound_loop', '0')
                     self.context.inbound()
                     return
+                if self.calling_host == sip_central_ip_address:
+                    log.info("Incoming call from SIP server")
+                    processed = 1
+                    self.context.inbound()
             except NumberingException as e:
                 log.error(e)
 
             # check if calling number or destination number is a roaming subscriber
             log.info('Check if calling/called number is roaming')
             try:
+                self._n.calling_host = self.calling_host
                 if (self._n.is_number_roaming(self.calling_number)):
                     processed = 1
+                    # Even if we are local and local by originating ip, but hlr says roaming..
                     log.info('Calling number %s is roaming' % self.calling_number)
                     self.context.roaming('caller')
             except NumberingException as e:
@@ -197,8 +203,6 @@ class Dialplan:
                     log.info('Called number is a local number')
                     processed = 1
                     # check if calling number is another site
-
-
                     is_internal_number = self._n.is_number_internal(callin)
                     if is_internal_number and is_right_len(callin):
 
