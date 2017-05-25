@@ -109,7 +109,7 @@ class Context:
                 self.session.hangup()
                 
             self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
-            self.session.execute('bridge', "{absolute_codec_string='"+outbound_codec+"',sip_cid_type=pid}sofia/gateway/"+gw+'/99901'+str(self.destination_number))
+            self.session.execute('bridge', "{absolute_codec_string='"+outbound_codec+"',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
             _fail_cause=self.session.getVariable('originate_disposition')
             log.info('Gateway Finished with Call: %s' % _fail_cause)
             if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN" or _fail_cause == "CALL_REJECTED":
@@ -169,7 +169,7 @@ class Context:
           #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
           if sip_endpoint:
             self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-            self.session.execute('bridge', "{absolute_codec_string='PCMU,G729'}"+sip_endpoint)
+            self.session.execute('bridge', "{absolute_codec_string='PCMA,G729'}"+sip_endpoint)
             _fail_cause=self.session.getVariable('originate_disposition')
             log.info('SIP Finished with Call: %s' % _fail_cause)
             return
@@ -225,7 +225,7 @@ class Context:
                       #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
                       if sip_endpoint:
                         self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-                        self.session.execute('bridge', "{absolute_codec_string='PCMU,G729,AMR'}"+sip_endpoint)
+                        self.session.execute('bridge', "{absolute_codec_string='PCMA,G729,AMR'}"+sip_endpoint)
                         _fail_cause=self.session.getVariable('originate_disposition')
                         log.info('SIP Finished with Call: %s' % _fail_cause)
                         return
@@ -282,7 +282,7 @@ class Context:
                   #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
                   if sip_endpoint:
                     self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-                    self.session.execute('bridge', "{absolute_codec_string='PCMU,G729,AMR'}"+sip_endpoint)
+                    self.session.execute('bridge', "{absolute_codec_string='PCMA,G729,AMR'}"+sip_endpoint)
                     _fail_cause=self.session.getVariable('originate_disposition')
                     log.info('SIP Finished with Call: %s' % _fail_cause)
                     return
