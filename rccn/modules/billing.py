@@ -42,6 +42,7 @@ class Billing:
         for idx, val in enumerate(arr_prefixes):
             if num.startswith(val):
                 return (val, idx)
+        return False
 
     def get_call_duration(self, balance, cost):
         """ Calculate call duration
@@ -61,6 +62,8 @@ class Billing:
         
     def get_rate(self, destination_number):
         # DIRTY: identify which logger to use
+        # FIXME: Make this more readable and implement valid number prefix lookup.
+
         frame = sys._getframe(2)
         
         if frame.f_code.co_name == 'fsapi':
@@ -74,14 +77,16 @@ class Billing:
             dest = destination_number[1:]
         if re.search(r'^00', destination_number) != None:
             dest = destination_number[2:]
-        
+        if dest == "":
+            dest = destination_number
+
         # get prefix
         dd = dest[0:1]
 
         cur = db_conn.cursor()
         cur.execute("SELECT * FROM rates WHERE prefix = %(prefix)s OR prefix LIKE %(prefix2)s", {'prefix': dd, 'prefix2': dd+'%'})
         rates = cur.fetchall()
-        
+
         logz.info('Prefix to check: %s' % dd)
 
         if rates == None:
@@ -96,7 +101,11 @@ class Billing:
                 real_rate_index += 1
             prefixes.sort(key=len, reverse=True)
             myprefix = self.get_matching_prefix(prefixes, dest)
-            logz.info('Found matching prefix %s for destination %s' % (myprefix[0], dest))
+            if myprefix:
+                logz.info('Found matching prefix %s for destination %s' % (myprefix[0], dest))
+            else:
+                logz.info('Could not find matching prefix for destination %s', dest)
+                return ('0','Unknown','000', Decimal('20'))
 
             final_idx = 0
             for entry in real_rate_prefix:
