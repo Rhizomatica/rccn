@@ -8,7 +8,6 @@ if ($filename != "login.php") {
 	$access->checkAuth();
 }
 
-
 include('locale.php');
 
 header('Content-Type: text/html; charset=utf-8');
@@ -36,6 +35,9 @@ header('Content-Type: text/html; charset=utf-8');
                 <script type="text/javascript" language="javascript" src="js/fancybox/jquery.fancybox-1.3.4.pack.js"></script>
                 <script type="text/javascript" language="javascript" src="js/jquery.dd.min.js"></script>
                 <script type="text/javascript" language="javascript" src="js/rai.js"></script>
+        <script type="text/javascript" language="javascript">
+                 <? include("js/js_locale.php");?>
+        </script>
         </head>
         <body id="dt_example">
                 <div id="container">

@@ -1,6 +1,6 @@
 <?php
 
-require("httpful.phar");
+require_once("httpful.phar");
 
 class CreditException extends Exception { }
 
@@ -26,6 +26,34 @@ class Credit
         }
         $data = $response->body;
         if ($data->status == 'failed') {
+            throw new CreditException($data->error);
+        }
+        return $data;
+    }
+
+    public function get_credit_records($year) {
+        try {
+            $response = \Httpful\Request::get($this->path.'/records?year='.$year)->send();
+        } catch (Httpful\Exception\ConnectionErrorException $e) {
+            throw new CreditException($e->getMessage());
+        }
+        $data = $response->body;
+        if (is_object($data) && $data->status == 'failed') {
+            throw new CreditException($data->error);
+        }
+        return $data;
+    }
+
+    public function get_month_credit($year, $month) {
+        $data = array("year" => $year, "month" => $month);
+        try {
+            $response = \Httpful\Request::post($this->path.'/month')->body($data)->sendsJson()->send();
+        } catch (Httpful\Exception\ConnectionErrorException $e) {
+            throw new CreditException($e->getMessage());
+        }
+        //var_dump($response);
+        $data = $response->body;
+        if (is_object($data) && $data->status == 'failed') {
             throw new CreditException($data->error);
         }
         return $data;

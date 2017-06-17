@@ -3,6 +3,7 @@ require_once('include/header.php');
 require_once('include/menu.php');
 require_once('modules/subscriber.php');
 require_once('modules/configuration.php');
+require_once('modules/credit.php');
 
 $site = new Configuration();
 $info = $site->getSite();
@@ -113,27 +114,33 @@ $internalprefix = $info->postcode.$info->pbxcode;
         });
                         
 	</script><br/>
-                        <?php
-                            try {
-                                $sub = new Subscriber();
-                                $unpaid_subscribers = $sub->get('unpaid_subscription');
-                                $unauthorized_subscribers = $sub->get('unauthorized');
-                                $paid_subscribers = $sub->get('paid_subscription');
-                                $online = $sub->get('online');
-                                $offline = $sub->get('offline');
-                                $roaming = $sub->get('all_roaming');
+    <?php
+        try {
+            $sub = new Subscriber();
+            $unpaid_subscribers = $sub->get('unpaid_subscription');
+            $unauthorized_subscribers = $sub->get('unauthorized');
+            $paid_subscribers = $sub->get('paid_subscription');
+            $online = $sub->get('online');
+            $offline = $sub->get('offline');
+            $roaming = $sub->get('all_roaming');
+            $cred = new Credit();
+            $credit = json_decode($cred->get_month_credit(date('Y'),date('m')));
+            $credit_sold=$credit[0][0];
+            $credit_used=$credit[1][0];
 
-                                echo "<div>";
-                                echo "<div class='left_box' style='margin-left:10px;'>"._("Unpaid subscription").": <b>$unpaid_subscribers</b></div>";
-                                echo "<div class='left_box'>"._("Unauthorized").": <b>$unauthorized_subscribers</b></div>";
-                                echo "<div class='left_box'>"._("Paid subscription").": <b>$paid_subscribers</b></div>";
-                                echo "<div class='left_box'>"._("Online").": <b>$online</b> ("._("Roaming").": <b>$roaming</b>)</div>";
-                                echo "<div class='left_box'>"._("Offline").": <b>$offline</b></div>";
-                                echo "</div>";
+            echo "<div>";
+            echo "<div class='left_box' style='margin-left:10px;'>"._("Unpaid subscription").": <b>$unpaid_subscribers</b></div>";
+            echo "<div class='left_box'>"._("Unauthorized").": <b>$unauthorized_subscribers</b></div>";
+            echo "<div class='left_box'>"._("Paid subscription").": <b>$paid_subscribers</b></div>";
+            echo "<div class='left_box'>"._("Credit Sold").": <b>$$credit_sold</b></div>";
+            echo "<div class='left_box'>"._("Credit Used").": <b>$$credit_used</b></div>";                                
+            echo "<div class='left_box'>"._("Online").": <b>$online</b> ("._("Roaming").": <b>$roaming</b>)</div>";
+            echo "<div class='left_box'>"._("Offline").": <b>$offline</b></div>";
+            echo "</div>";
 
-                            }
-                            catch (SubscriberException $e) { }
-                        ?>
+        }
+        catch (SubscriberException $e) { }
+    ?>
 
 
 			<h1><?= _('Subscribers Phones') ?></h1><br/>
