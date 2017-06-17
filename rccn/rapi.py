@@ -293,7 +293,7 @@ class CreditRESTService:
         return data
 
     @route('/records', Http.GET)
-    def get(self, request, year):
+    def records(self, request, year):
         api_log.info('%s - [GET] %s/records %s' % (request.getHost().host, self.path, year))
         try:
             credit = Credit()
