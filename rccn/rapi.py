@@ -292,6 +292,26 @@ class CreditRESTService:
             data = {'status': 'failed', 'error': str(e)}
         return data
 
+    @route('/records', Http.GET)
+    def get(self, request, year):
+        api_log.info('%s - [GET] %s/records %s' % (request.getHost().host, self.path, year))
+        try:
+            credit = Credit()
+            data = json.dumps(credit.get_credit_records(year), cls=PGEncoder)
+        except CreditException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return data
+
+    @route('/month', Http.POST)
+    def month(self, request, year, month):
+        api_log.info('%s - [POST] %s/month %s %s' % (request.getHost().host, self.path, year, month))
+        try:
+            credit = Credit()
+            data = json.dumps(credit.get_month_credit(year, month), cls=PGEncoder)
+        except CreditException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return data
+
     @route('/', Http.POST)
     def post(self, request, msisdn, amount):
         api_log.info('%s - [POST] %s/add Data: msisdn:"%s" amount:"%s"' % (request.getHost().host, self.path, msisdn, amount))

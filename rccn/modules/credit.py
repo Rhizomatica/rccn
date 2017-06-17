@@ -100,6 +100,77 @@ class Credit:
             raise CreditException('PG_HLR getting sum of balance: %s' % e)
         return result
 
+    def get_month_credit(self, year, month):
+        try:
+            result=[]
+            cur = db_conn.cursor()
+            # Get credit allocated this month:
+            fr = year+'-'+month+'-01'
+            if month == '12':
+                to = str(int(year)+1)+'-01-01'
+            else:
+                to = year+'-'+str((int(month)+1)).zfill(2)+'-01'
+            cur.execute("SELECT COALESCE(SUM(amount),0) FROM credit_history "
+                        "WHERE created >= %s AND created < %s ", (fr, to) )
+            result.append(cur.fetchone())
+            cur.execute("SELECT COALESCE(sum(cost),0) FROM cdr "
+                        "WHERE end_stamp >= %s and end_stamp < %s", (fr, to) )
+            result.append(cur.fetchone())
+            db_conn.commit()
+        except psycopg2.DatabaseError as e:
+            raise CreditException('PG_HLR getting monthly credit details: %s' % e)
+        return result
+
+    def get_credit_records(self, year):
+        try:
+            result=[]
+            fr = year+'-01-01'
+            to = str(int(year)+1)+'-01-01'
+            cur = db_conn.cursor()
+            sql="""
+            SELECT b.y,b.m::int,COALESCE(recarga,0),COALESCE(gasto,0) FROM (
+            SELECT date_part('YEAR', created)::varchar AS y,
+            date_part('MONTH', created)::varchar AS m,
+            COALESCE(SUM(amount),0)::int AS recarga
+            FROM credit_history
+            WHERE created >= %(fr)s AND created < %(to)s
+            GROUP BY y,m) a
+            FULL OUTER JOIN (
+            SELECT date_part('YEAR', start_stamp)::varchar AS y,
+            date_part('MONTH', start_stamp)::varchar AS m,
+            COALESCE(sum(cost),0)::int AS gasto
+            FROM cdr
+            WHERE start_stamp >= %(fr)s AND start_stamp < %(to)s
+            GROUP BY y,m) b
+            ON a.y=b.y and a.m=b.m
+            ORDER BY y,m;
+            """
+            data={ 'fr': fr, 'to': to}
+            cur.execute(sql, data)
+            result = cur.fetchall()
+            """
+            cur.execute("SELECT date_part('YEAR', created)::varchar as y,"
+                        "date_part('MONTH', created)::varchar AS m,"
+                        "COALESCE(SUM(amount),0) as saldo "
+                        "FROM credit_history "
+                        "WHERE created >= %s AND created < %s "
+                        "GROUP BY y,m ORDER BY y,m;", (fr, to)
+                        )
+            result.append(cur.fetchall())
+            cur.execute("SELECT date_part('YEAR', start_stamp)::varchar AS y,"
+                        "date_part('MONTH', start_stamp)::varchar AS m,"
+                        "COALESCE(sum(cost),0) AS cost "
+                        "FROM cdr "
+                        "WHERE start_stamp >= %s AND start_stamp < %s "
+                        "GROUP BY y,m ORDER BY y,m", (fr, to)
+                        )
+            result.append(cur.fetchall())
+            """
+            #code.interact(local=dict(globals(),**locals()))
+
+        except psycopg2.DatabaseError as e:
+            raise CreditException('PG_HLR getting all credit records: %s' % e)
+        return result
 if __name__ == '__main__':
     credit = Credit()
     #sub.set_balance('68820110010',3.86)
