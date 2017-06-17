@@ -114,7 +114,7 @@ class Credit:
                         "WHERE created >= %s AND created < %s ", (fr, to) )
             result.append(cur.fetchone())
             cur.execute("SELECT COALESCE(sum(cost),0) FROM cdr "
-                        "WHERE end_stamp >= %s and end_stamp < %s", (fr, to) )
+                        "WHERE start_stamp >= %s and start_stamp < %s", (fr, to) )
             result.append(cur.fetchone())
             db_conn.commit()
         except psycopg2.DatabaseError as e:
@@ -128,7 +128,7 @@ class Credit:
             to = str(int(year)+1)+'-01-01'
             cur = db_conn.cursor()
             sql="""
-            SELECT b.y,b.m::int,COALESCE(recarga,0),COALESCE(gasto,0) FROM (
+            SELECT a.y,a.m::int,COALESCE(recarga,0),COALESCE(gasto,0) FROM (
             SELECT date_part('YEAR', created)::varchar AS y,
             date_part('MONTH', created)::varchar AS m,
             COALESCE(SUM(amount),0)::int AS recarga
