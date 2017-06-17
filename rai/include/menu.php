@@ -61,6 +61,7 @@ function print_menu($select) {
 	echo "<ul>";
 	echo "<li><a href='credit.php'>"._("Add Credit")."</a></li>";
 	echo "<li><a href='credit_history.php'>"._("History")."</a></li>";
+	echo "<li><a href='credit_status.php'>"._("Status")."</a></li>";
 	echo "</ul>";
 	echo "</li>";
 

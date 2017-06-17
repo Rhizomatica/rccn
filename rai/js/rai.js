@@ -10,4 +10,27 @@ $(function() {
 			newwindow=window.open(popurl,popupName,eval(popupSpecs));
 			return false;
 	});
+	$('.credit_status').change(function() {
+		y=$('#cs_year').val()
+		m=$('#cs_month').val()
+		$('#credit_report').html(tr.spinner)
+		$.getJSON("/rai/ajax.php", {'service': 'credit', 'year': y}, function(data) {
+			$('#credit_report').html('')
+			$.each( data, function( i,p ) {
+				var date = new Date(p[1]+"/01/2000")
+				locale=navigator.language
+				month = date.toLocaleString(locale, { month: "long" });
+				html='<div>'+
+				'<span class="cyear" style="display:none">'+p[0]+
+				'</span><span class="cmonth">'+month+'</span>' +
+				'<span class="camount">$'+
+				parseInt(p[2]).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') +
+				'</span><span class="camount">$'+
+				parseInt(p[3]).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,') +
+				'</span>'
+				'</span></div>'
+				$('#credit_report').append(html)
+			})
+		});
+	});
 })

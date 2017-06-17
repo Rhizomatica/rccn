@@ -22,7 +22,17 @@
 	padding: 0;
 }
 
-
+.spinner {
+    position: relative;
+    display: inline-block;
+    left: 52px;
+    top: 62px;
+    width: auto;
+	padding: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    border-width: 1px;
+}
 /*ul { 
 	margin: 0px; 
 	border-bottom: 1px solid black;
