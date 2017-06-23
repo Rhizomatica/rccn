@@ -207,7 +207,7 @@ if __name__ == '__main__':
         help="Update Foreign Subscribers")
     parser.add_option("-l", "--local", dest="local", action="store_true",
         help="Update Local Connected Subscribers")
-    parser.add_option("-o", "--override", dest="overrdie", action="store_true",
+    parser.add_option("-o", "--override", dest="override", action="store_true",
         help="Use Local HLR idea of Connected Subscribers (LAC > 0)")
     parser.add_option("-p", "--purge", dest="purge", action="store_true",
         help="Purge Inactive Subscribers")
