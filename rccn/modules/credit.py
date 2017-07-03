@@ -129,7 +129,7 @@ class Credit:
             to = str(int(year)+1)+'-01-01'
             cur = db_conn.cursor()
             sql="""
-            SELECT a.y,a.m::int,COALESCE(recarga,0),COALESCE(gasto,0) FROM (
+            SELECT COALESCE(a.y,b.y)::int as y,COALESCE(a.m,b.m)::int as m,COALESCE(recarga,0) as recarga,COALESCE(gasto,0) as gasto FROM (
             SELECT date_part('YEAR', created)::varchar AS y,
             date_part('MONTH', created)::varchar AS m,
             COALESCE(SUM(amount),0)::int AS recarga
