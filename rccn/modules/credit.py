@@ -140,7 +140,8 @@ class Credit:
             date_part('MONTH', start_stamp)::varchar AS m,
             COALESCE(sum(cost),0)::int AS gasto
             FROM cdr
-            WHERE start_stamp >= %(fr)s AND start_stamp < %(to)s
+            WHERE cost is not null
+            AND start_stamp >= %(fr)s AND start_stamp < %(to)s
             GROUP BY y,m) b
             ON a.y=b.y and a.m=b.m
             ORDER BY y,m;
