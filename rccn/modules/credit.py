@@ -114,7 +114,8 @@ class Credit:
                         "WHERE created >= %s AND created < %s ", (fr, to) )
             result.append(cur.fetchone())
             cur.execute("SELECT COALESCE(sum(cost),0) FROM cdr "
-                        "WHERE start_stamp >= %s and start_stamp < %s", (fr, to) )
+                        "WHERE cost is not null "
+                        "AND start_stamp >= %s and start_stamp < %s", (fr, to) )
             result.append(cur.fetchone())
             db_conn.commit()
         except psycopg2.DatabaseError as e:
