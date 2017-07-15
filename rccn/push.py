@@ -99,11 +99,8 @@ def get(msisdn, imsi, auth):
             return
         
         riak_imsi = bucket.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT).results
-        indexes = []
-        for entry in riak_imsi:
-            if not entry in indexes:
-                indexes.append(entry)
-        if len(indexes) > 1:
+
+        if riak_imsi.count(riak_imsi[0]) != len(riak_imsi):
             print "\033[91;1m More than ONE entry in this index! \033[0m"
             advise("!!More than ONE entry in this index: %s" % msisdn)
         if not riak_ext or not len(riak_imsi):
