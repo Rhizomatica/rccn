@@ -361,6 +361,8 @@ class SMSRESTService:
     @route('/', Http.POST)
     def receive(self, request, source, destination, charset, coding, text, btext, dr, dcs):
         
+        if btext == '':
+            btext = text
         t=binascii.hexlify(btext)
         
         api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s" charset:"%s"' %
