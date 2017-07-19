@@ -252,12 +252,19 @@ class Numbering:
         else:
             raise NumberingException('RK_DB Error no IP found for site %s' % site)
 
-    def get_callerid(self):
+    def get_callerid(self, caller, callee):
         try:
             cur = db_conn.cursor()
             # to still be decided the logic of dids
-            cur.execute('select callerid from dids,providers where providers.id = dids.provider_id and providers.active = 1 order by dids.id asc limit 1')
+            if callee[0] == '+':
+                dest = callee[1:2]
+            if re.search(r'^00', callee) != None:
+                dest = callee[2:3]
+            cur.execute('select callerid from dids,providers where callerid like %(prefix)s limit 1', {'prefix': '+'+dest+'%'} )
             callerid = cur.fetchone()
+            if callerid == None:
+                cur.execute('select callerid from dids,providers where providers.id = dids.provider_id and providers.active = 1 order by dids.id asc limit 1')
+                callerid = cur.fetchone()
             if callerid != None:
                 return callerid[0]
             else:
