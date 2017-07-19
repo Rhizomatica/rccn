@@ -76,7 +76,7 @@ class Context:
 
             # set correct caller id based on the active provider
             try:
-                caller_id = self.numbering.get_callerid()
+                caller_id = self.numbering.get_callerid(subscriber_number,self.destination_number)
             except NumberingException as e:
                 log.error(e)
 
