@@ -92,6 +92,7 @@ class Context:
                 log.info('Set caller id to %s' % caller_id)
                 self.session.setVariable('effective_caller_id_number', '%s' % caller_id)
                 self.session.setVariable('effective_caller_id_name', '%s' % caller_id)
+                self.session.execute('set', 'sip_h_P-Charge-Info=%s' % subscriber_number)
             else:
                 log.error('Error getting the caller id for the call')
                 self.session.setVariable('effective_caller_id_number', 'Unknown')
