@@ -102,37 +102,62 @@ class SMS:
             sms_log.info('SIP SMS? %s' % sip_endpoint)
 
             if sip_endpoint:
-                m=re.compile('sofia/([a-z]*)/sip').search(sip_endpoint)
+                m=re.compile('sofia/([a-z]*)/sip:(.*)').search(sip_endpoint)
+
                 if m:
                     sip_profile=m.group(1)
+                    contact=(m.group(2))
+                    s=contact.split(';')
+                    # Get fs_path param.
+                    r=re.compile('^fs_path=')
+                    s=filter(r.match,s)
+
+                    if len(s)>0: # Have fs_path
+                        bracket=re.compile('fs_path=%3C(.*)%3E').search(s[0])
+                        if bracket:
+                            params=urllib.unquote(bracket.group(1)).split(';')
+                            path=params[0].replace('sip:','')
+                            r=re.compile('received=*')
+                            rec=filter(r.match,params)
+                            received=rec[0].replace('received=sip:','')
+                        else:
+                            path=s[0]
+                            received = urllib.unquote(path).split('=')[1].split('@')[1]
+                    else:
+                        received = 'None'
+
                 if sip_profile == 'internalvpn':
                     simple_dest=self.destination+'@'+vpn_ip_address
+                    if path == '10.23.0.14':
+                        self.source = self.source+'@sip.rhizomatica.org'
+                        simple_dest=self.destination+'@10.23.0.14'+';received='+received
                 else:
-                    simple_dest=self.destination+'@'+wan_ip_address
+                    simple_dest=sip_profile+'/'+contact
                 try:
                     con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
                     event = ESL.ESLevent("CUSTOM", "SMS::SEND_MESSAGE")
+                    sms_log.info('SMS to SIP: Source is %s' % self.source)
+                    sms_log.info('SMS to SIP: Dest: %s' % simple_dest)
+                    sms_log.info('SMS to SIP: Received: %s' % received)
+                    sms_log.info('Text: %s' % self.text.decode(charset,'replace'))
+                    sms_log.info('Text: %s' % type(self.text))
+                    sms_log.info('Coding: %s' % self.coding)
                     event.addHeader("from", self.source)
                     event.addHeader("to", simple_dest)
                     event.addHeader("sip_profile", sip_profile);
                     event.addHeader("dest_proto", "sip")
                     event.addHeader("type","text/plain")
-                    sms_log.info('Text: %s' % self.text)
-                    sms_log.info('Text: %s' % type(self.text))
-                    sms_log.info('Coding: %s' % self.coding)
                     if self.coding == '0':
-                        msg=self.text.encode('utf8','replace')
+                        msg=self.text.decode('utf8','replace')
                     else:
-                        msg=self.text.encode('utf-8')
-                        #msg=urllib.urlencode({'text': msg })
-                        #print binascii.hexlify(msg)
-                    sms_log.info('Text: %s' % type(msg))
+                        msg=self.text.decode(charset,'replace')
+                    sms_log.info('Type: %s' % type(msg))
                     sms_log.info('Text: %s' % msg)
-                    event.addBody(msg)
+                    event.addBody(msg.encode(charset,'replace'))
                     con.sendEvent(event)
                     return
                 except Exception as e:
-                    api_log.info('Caught an Error in sms sip routine: %s' % e)
+                    api_log.info('Caught Error in sms sip routine: %s' % e)
 
         try:
             # auth checks
