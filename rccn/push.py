@@ -91,10 +91,11 @@ def get(msisdn, imsi, auth):
         riak_obj = bucket.get(imsi, timeout=RIAK_TIMEOUT)
         if riak_obj.exists:
             riak_ext=riak_obj.data['msisdn']
+            riak_auth=riak_obj.data['authorized']
         else:
             print "\033[91;1m!! Didn't get hlr key for imsi %s\033[0m" % imsi
             riak_ext = False
-        if riak_ext and auth == 1 and (riak_ext != msisdn):
+        if riak_ext and auth == 1 and riak_auth == 1 and (riak_ext != msisdn):
             imsi_clash(imsi, msisdn, riak_ext)
             return
         
