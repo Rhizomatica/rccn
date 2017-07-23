@@ -77,7 +77,7 @@ class SMS:
         self.source = source
         self.text = text
         self.internal_destination = destination
-        if "+" in destination:
+        if destination.find('+') > 1:
             destination = destination.split('+')[0]
         self.destination = destination
 
