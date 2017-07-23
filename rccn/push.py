@@ -36,9 +36,11 @@ Favor de intervenir y arreglar esta situacion manualmente.
     s.sendmail('postmaster@rhizomatica.org', advice_email, mail.as_string())
     s.quit()
 
-def check(auth, recent, hours=2):
+def check(auth, recent, hours=2, single=''):
     """ Get sub from the local PG db and see their status in riak """
     cur = db_conn.cursor()
+    if single:
+        cur.execute("SELECT msisdn,name FROM Subscribers WHERE msisdn=%s", [single])
     if recent == 0:
         cur.execute("SELECT msisdn,name FROM Subscribers WHERE authorized=%s", str(auth))
     if recent == 1:
@@ -166,6 +168,8 @@ def osmo_ext2imsi(ext):
 
 if __name__ == '__main__':
     parser = OptionParser()
+    parser.add_option("-s", "--single", dest="single",
+        help="Push a single number")
     parser.add_option("-c", "--cron", dest="cron", action="store_true",
         help="Running from cron, add a delay to not all hit riak at same time")
     parser.add_option("-r", "--recent", dest="recent",
@@ -179,15 +183,14 @@ if __name__ == '__main__':
         auth=0
     else:
         auth=1
+    if options.cron:
+        wait=random.randint(0,15)
+        print "Waiting %s seconds..." % wait
+        time.sleep(wait)    
+    if options.single:
+        check(auth,-1,0,options.single)
+        exit()
     if options.recent:
-        if options.cron:
-            wait=random.randint(0,15)
-            print "Waiting %s seconds..." % wait
-            time.sleep(wait)
         check(auth,options.recent,1)
     else:
-        if options.cron:
-            wait=random.randint(0,60)
-            print "Waiting %s seconds..." % wait
-            time.sleep(wait)
         check(auth,0)
