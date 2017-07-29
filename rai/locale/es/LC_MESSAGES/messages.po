@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: RAI 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-06-17 10:35+0200\n"
+"POT-Creation-Date: 2017-07-29 15:29+0200\n"
 "PO-Revision-Date: 2014-04-09 21:58+0200\n"
 "Last-Translator: Keith <keith@rhizomatica.org>\n"
 "Language: es\n"
@@ -199,45 +199,45 @@ msgstr "Ubicación"
 msgid "Actions"
 msgstr "Acciones"
 
-#: subscribers.php:164 cdr.php:51 sms.php:45 rates.php:37
+#: subscribers.php:164 cdr.php:62 sms.php:45 rates.php:37
 #: resellers_credit_history.php:41 resellers_transactions.php:39
 #: credit_history.php:41 resellers.php:64
 msgid "Loading data from server"
 msgstr "Cargardo datos desde el servidor"
 
-#: cdr.php:33
+#: cdr.php:44
 msgid "Calls Details Records"
 msgstr "Detalle del registro de llamadas"
 
-#: cdr.php:39 cdr.php:57
+#: cdr.php:50 cdr.php:68
 msgid "Call Date"
 msgstr "Fecha de llamada"
 
-#: cdr.php:40 cdr.php:58
+#: cdr.php:51 cdr.php:69
 msgid "Caller Number"
 msgstr "Número de Origen"
 
-#: cdr.php:41 cdr.php:59
+#: cdr.php:52 cdr.php:70
 msgid "Called Number"
 msgstr "Número de Destino"
 
-#: cdr.php:42 cdr.php:60 sms.php:40 sms.php:54
+#: cdr.php:53 cdr.php:71 sms.php:40 sms.php:54
 msgid "Context"
 msgstr "Contexto"
 
-#: cdr.php:43 cdr.php:61
+#: cdr.php:54 cdr.php:72
 msgid "Duration"
 msgstr "Duración"
 
-#: cdr.php:44 cdr.php:62
+#: cdr.php:55 cdr.php:73
 msgid "Hangup Cause"
 msgstr "Fin de la llamada"
 
-#: cdr.php:45 cdr.php:63 sms.php:39 sms.php:53 rates.php:30 rates.php:42
+#: cdr.php:56 cdr.php:74 sms.php:39 sms.php:53 rates.php:30 rates.php:42
 msgid "Destination"
 msgstr "Destino"
 
-#: cdr.php:46 cdr.php:64 rates.php:32 rates.php:44
+#: cdr.php:57 cdr.php:75 rates.php:32 rates.php:44
 msgid "Cost"
 msgstr "Costo"
 
@@ -613,7 +613,7 @@ msgstr "SMS"
 msgid "CDRs"
 msgstr "CDR"
 
-#: include/header.php:21 include/header.php:44
+#: include/header.php:21 include/header.php:46
 msgid "RAI - Rhizomatica Administration Interface"
 msgstr "RAI - Interfaz de Administración"
 
@@ -830,6 +830,11 @@ msgstr "pesos añadidos exitosamente al revendedor"
 #: js/js_locale.php:2
 msgid "Please Wait, processing data"
 msgstr "Espere por favor, procesando datos"
+
+#: js/js_locale.php:3
+
+msgid "Only Calls with Cost"
+msgstr "Solo Llamadas con Costo"
 
 #: site.php:40
 msgid "Site name"

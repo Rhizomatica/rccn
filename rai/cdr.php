@@ -7,7 +7,7 @@ require_once('include/menu.php');
 
     <script type="text/javascript" charset="utf-8">
             $(document).ready(function() {
-                    $('#example').dataTable( {
+                    var dT = $('#example').dataTable( {
                             <?
                             $lang_file = 'js/'.$_SESSION['lang'].'.txt';
                             if (file_exists($lang_file)) {
@@ -19,6 +19,17 @@ require_once('include/menu.php');
                             "bServerSide": true,
                             "aaSorting": [[ 0, "desc" ]],
                             "sAjaxSource": "cdr_processing.php",
+                            "fnServerParams": function ( aoData ) {
+				co = $("#cost_only_check").attr('checked');
+		                aoData.push( { "name": "cost_only", "value": co } );
+                            },
+                            "fnInitComplete": function (oSettings, json) {
+                                html='<span id="cost_only" style="margin-right:20px"><label>'+ tr.call_cost_txt + '</label><input style="vertical-align:middle;padding:1px" type="checkbox" name="cost_only" id="cost_only_check">'
+                                $("#example_filter").prepend(html);
+                                $("#cost_only_check").change(function () {
+                                        dT.fnFilter('');
+                                })
+                            },
                             "aoColumnDefs": [
 			                    { "bSearchable": false, "aTargets": [0] },
 			                    { "bSearchable": false, "aTargets": [1] },

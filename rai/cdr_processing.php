@@ -130,8 +130,16 @@
             $sWhere .= "CAST(".$aColumns[$i]." AS TEXT) ILIKE '%".pg_escape_string($_GET['sSearch_'.$i])."%' ";
         }
     }
-     
-     
+
+    if ( isset($_GET['cost_only']) && $_GET['cost_only'] == 'checked')
+    {
+        if ($sWhere == "") {
+            $sWhere = "WHERE cost IS NOT NULL";
+        } else {
+            $sWhere .= " AND cost IS NOT NULL";
+        }
+    }
+
     $sQuery = "
         SELECT ".str_replace(" , ", " ", implode(", ", $aColumns))."
         FROM   $sTable
