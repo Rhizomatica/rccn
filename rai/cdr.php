@@ -47,14 +47,14 @@ require_once('include/menu.php');
 	<thead>
 		<tr>
 			<th width="2%">ID</th>
-			<th align='left' width="13%"><?= _("Call Date") ?></th>
-			<th align='left' width='20%'><?= _("Caller Number") ?></th>
-			<th align='left' width='13%'><?= _("Called Number") ?></th>
-			<th align='left' width="10%"><?= _("Context") ?></th>
+			<th align='left' width="16%"><?= _("Call Date") ?></th>
+			<th align='left' width='12%'><?= _("Caller Number") ?></th>
+			<th align='left' width='12%'><?= _("Called Number") ?></th>
+			<th align='left' width="8%"><?= _("Context") ?></th>
 			<th width="5%"><?= _("Duration") ?></th>
-			<th align='left'><?= _("Hangup Cause") ?></th>
-			<th align='left'><?= _("Destination") ?></th>
-			<th align='left'><?= _("Cost") ?></th>
+			<th align='left' width="18%"><?= _("Hangup Cause") ?></th>
+			<th align='left' width="22%"><?= _("Destination") ?></th>
+			<th align='left' width="5%"><?= _("Cost") ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -65,14 +65,14 @@ require_once('include/menu.php');
 	<tfoot>
 		<tr>
                         <th width="2%">ID</th>
-                        <th align='left' width="13%"><?= _("Call Date") ?></th>
-                        <th align='left' width='20%'><?= _("Caller Number") ?></th>
-                        <th align='left' width='13%'><?= _("Called Number") ?></th>
-                        <th align='left' width="10%"><?= _("Context") ?></th>
+                        <th align='left' width="16%"><?= _("Call Date") ?></th>
+                        <th align='left' width='12%'><?= _("Caller Number") ?></th>
+                        <th align='left' width='12%'><?= _("Called Number") ?></th>
+                        <th align='left' width="8%"><?= _("Context") ?></th>
                         <th width="5%"><?= _("Duration") ?></th>
-                        <th align='left'><?= _("Hangup Cause") ?></th>
-                        <th align='left'><?= _("Destination") ?></th>
-                        <th align='left'><?= _("Cost") ?></th>
+                        <th align='left' width="18%"><?= _("Hangup Cause") ?></th>
+                        <th align='left' width="22%"><?= _("Destination") ?></th>
+                        <th align='left' width="5%"><?= _("Cost") ?></th>
 		</tr>
 	</tfoot>
 </table>
