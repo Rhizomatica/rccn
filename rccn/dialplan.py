@@ -97,6 +97,17 @@ class Dialplan:
         Dialplan processing to route call to the right context
         """
         # TODO split this monster function.
+        try:
+            if (len(self.destination_number) == 10 and re.search(r'^(00|\+)', self.destination_number) is None):
+                if self.numbering.is_number_mxcel(self.destination_number):
+                    self.destination_number = '00521' + self.destination_number
+                else:
+                    self.destination_number = '0052' + self.destination_number
+                self.session.setVariable("destination_number", self.destination_number)
+                self.context.destination_number = self.destination_number
+                log.info('Translated dialled 10 digit number to %s' % self.destination_number)
+        except NumberingException as e:
+            log.error(e)
 
         # the processing is async we need a flag
         processed = 0

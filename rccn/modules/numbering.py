@@ -294,6 +294,24 @@ class Numbering:
         except psycopg2.DatabaseError, e:
             raise NumberingException('Database error getting the Gateway: %s' % e)
 
+    def is_number_mxcel(self,number):
+        try:
+            if len(number) != 10:
+                log.debug("Number %s length not 10" % number)
+                return False
+            number = '521'+number
+            cur = db_conn.cursor()
+            cur.execute("""SELECT d::text as d FROM prefix_mexico
+                WHERE length(d::text) > 6 ORDER BY length(d::text) DESC
+                """)
+            prefixes = cur.fetchall()
+            for prefix in prefixes:
+                if number.startswith(prefix[0]):
+                    return True
+            return False
+        except psycopg2.DatabaseError, e:
+            db_conn.rollback()
+            raise NumberingException('Database error getting the Number Type: %s' % e)
 
 if __name__ == '__main__':
 	num = Numbering()
