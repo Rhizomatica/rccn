@@ -117,6 +117,10 @@ class Credit:
                         "WHERE cost is not null "
                         "AND start_stamp >= %s and start_stamp < %s", (fr, to) )
             result.append(cur.fetchone())
+            cur.execute("SELECT count(id) FROM cdr "
+                        "WHERE cost is not null "
+                        "AND start_stamp >= %s and start_stamp < %s", (fr, to) )
+            result.append(cur.fetchone())
             db_conn.commit()
         except psycopg2.DatabaseError as e:
             raise CreditException('PG_HLR getting monthly credit details: %s' % e)
