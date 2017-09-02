@@ -1,6 +1,7 @@
 ############################################################################
 # 
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
+# Copyright (C) 2017 Keith Whyte <keith@rhizomatica.org>
 #
 # Credit module
 # This file is part of RCCN
@@ -133,17 +134,23 @@ class Credit:
             to = str(int(year)+1)+'-01-01'
             cur = db_conn.cursor()
             sql="""
-            SELECT COALESCE(a.y,b.y)::int as y,COALESCE(a.m,b.m)::int as m,COALESCE(recarga,0) as recarga,COALESCE(gasto,0) as gasto FROM (
+            SELECT
+            COALESCE(a.y,b.y)::int as y, COALESCE(a.m,b.m)::int as m,
+            COALESCE(recarga,0) as recarga, COALESCE(gasto,0) as gasto,
+            b.call_count as call_count
+            FROM (
             SELECT date_part('YEAR', created)::varchar AS y,
             date_part('MONTH', created)::varchar AS m,
-            COALESCE(SUM(amount),0)::int AS recarga
+            COALESCE(SUM(amount),0)::int AS recarga,
+            NULL as call_count
             FROM credit_history
             WHERE created >= %(fr)s AND created < %(to)s
             GROUP BY y,m) a
             FULL OUTER JOIN (
             SELECT date_part('YEAR', start_stamp)::varchar AS y,
             date_part('MONTH', start_stamp)::varchar AS m,
-            COALESCE(sum(cost),0)::int AS gasto
+            COALESCE(sum(cost),0)::int AS gasto,
+            count(id) as call_count
             FROM cdr
             WHERE cost is not null
             AND start_stamp >= %(fr)s AND start_stamp < %(to)s
