@@ -7,6 +7,12 @@ import gsm0338
 import code
 from optparse import OptionParser
 
+db_revision = 0
+
+def cs(l, exit = 0):
+    code.interact(local = dict(globals(), **l) )
+    if exit == 1:
+      exit()
 
 def unpackSeptets(septets, numberOfSeptets=None, prevOctet=None, shift=7):
     """ Unpacks the specified septets into octets 
@@ -94,10 +100,15 @@ def parse_udh(s):
     return udh
 
 def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', dest = '', negate = False, limit = 0, order = False):
+    global db_revision
     try:
         sq_hlr = sqlite3.connect(sq_hlr_path)
         sq_hlr_cursor = sq_hlr.cursor()
         sq_hlr.text_factory = str
+        sql = "SELECT value FROM Meta WHERE key='revision'"
+        sq_hlr_cursor.execute(sql)
+        _revision = sq_hlr_cursor.fetchone()
+        db_revision = _revision[0]
         sql = 'SELECT * from SMS WHERE id > 0 '
         if not (sent and unsent):
             if unsent == True:
@@ -139,13 +150,55 @@ def build_msgs(smsq):
     ret = []
     csms = {}
     for sms in smsq:
+        charset='utf-8'
         utext=''
-        #code.interact(local=locals())
-        coding = sms[8]
-        udhdr = sms[9]
-        userdata = sms[16]
-        header = sms[17]
-        text = sms[18]
+        """
+        
+        0        id INTEGER PRIMARY KEY AUTOINCREMENT
+        1        created TIMESTAMP NOT NULL
+        2        sent TIMESTAMP
+        3        deliver_attempts INTEGER NOT NULL DEFAULT 0
+        4        valid_until TIMESTAMP
+        5        reply_path_req INTEGER NOT NULL
+        6        status_rep_req INTEGER NOT NULL
+        (7       is_report INTEGER NOT NULL)
+        (8       msg_ref INTEGER NOT NULL)
+        7 9      protocol_id INTEGER NOT NULL
+        8 10     data_coding_scheme INTEGER NOT NULL
+        9 11     ud_hdr_ind INTEGER NOT NULL
+        10 12    src_addr TEXT NOT NULL
+        11 13    src_ton INTEGER NOT NULL
+        12 14    src_npi INTEGER NOT NULL
+        13 15    dest_addr TEXT NOT NULL
+        14 16    dest_ton INTEGER NOT NULL
+        15 17    dest_npi INTEGER NOT NULL
+        16 18    user_data BLOB
+        17 19    header BLOB
+        18 20    text TEXT
+        """
+        if db_revision == '5':
+          is_report = sms[7]
+          coding = sms[10]
+          udhdr = sms[11]
+          src = sms[12]
+          dest = sms[15]
+          userdata = sms[18]
+          header = sms[19]
+          text = sms[20]
+        elif db_revision == '4':
+          is_report = 0
+          coding = sms[8]   
+          udhdr = sms[9]
+          src = sms[10]
+          dest = sms[13]
+          coding = sms[8]
+          userdata = sms[16]
+          header = sms[17]
+          text = sms[18]
+        else:
+          print "Unknown DB Revision"
+          exit()
+
         log.debug("Message ID: \033[93m" + str(sms[0]) + '\033[0m')
         log.debug("Valid Until: " + str(sms[4]))
         log.debug("Coding is \033[32m%s \033[0m" % str(coding))
@@ -189,7 +242,6 @@ def build_msgs(smsq):
                     except:
                         # Can't decode this segment on its own,
                         # probably because truncated utf16 data.
-                        #code.interact(local=locals())
                         msgpart = msg
                         charset = 'utf-16be'
                         not_decoded = 1
@@ -231,36 +283,44 @@ def build_msgs(smsq):
                     #if csms[udh['csms_ref']]['not_decoded'][i] == 1:
                     #    utext=utext+text.decode(charset)
                     mid = mid.rstrip(', ')
-                    #code.interact(local=locals())
                     csms[udh['csms_ref']] = None
                     #utext = unicode(utext.encode('utf-8'))
                 else:
                     continue
             except Exception as ex:
                 print ex
-                #code.interact(local=locals())
         else:
             mid = str(sms[0])
             if coding == 0:
                 # unpackSeptets returns bytearray
                 text7 = unpackSeptets(dtext).rstrip(chr(0))
                 log.debug ("User Data Octets unpacked: " + binascii.hexlify(text7))
+                # gsm_codec_s = gsm0338.Codec()
                 gsm_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
-                gsm_codec = gsm0338.Codec()
                 utext = gsm_codec.decode(str(text7))[0]
                 charset = 'gsm03.38'
-            if coding == 8 or coding == 4:
+            elif (coding == 8 or coding == 4) and is_report < 1:
                 # I don't have any indicator of what the actual charset is.
+                log.debug ("Lost")
                 try:
-                    utext = unicode(dtext,'utf-8')
-                    charset = 'UTF-8'
-                    #utext = re.sub(r'[^\x01-\xFF]', '', utext)
-                except UnicodeDecodeError:
-                    utext = unicode(dtext,'utf-16be')
+                    if re.match(r'[\x00-\x0f]', dtext):
+                        utext = unicode(dtext,'utf-16be')
+                        charset = 'UTF-16BE'
+                    else:    
+                        utext = unicode(dtext,'utf-8')
+                        charset = 'UTF-8'
+                    
+                except UnicodeDecodeError as e:
+                    try:
+                      utext = unicode(dtext,'utf-16be')
+                    except Exception as e:
+                      print e
                     charset = 'UTF-16BE'
                 log.debug ("Coding value is 4/8, Charset Determined %s", charset)
-
-
+            else:
+                utext = unicode(dtext,charset,'replace')
+                charset = 'utf-8'
+                
         log.debug("User Data dbd_decoded: " + binascii.hexlify(utext.encode(charset,'replace')))
 
         if header:
@@ -271,10 +331,15 @@ def build_msgs(smsq):
         r = {}
         r['sms'] = sms
         r['mid'] = mid
+        r['src'] = src
+        r['dest'] = dest
+        r['coding'] = coding
         r['charset'] = charset
         r['text'] = utext
         ret.append(r)
-        
+        if 'options' in globals() and options.debug_stop:
+          cs(locals())
+          
     return ret
 
 def display_queue(smsq):
@@ -284,9 +349,9 @@ def display_queue(smsq):
         mid = item['mid']
         utext = item['text']        
         charset = item['charset']
-        src = sms[10]
-        dest = sms[13]
-        coding = sms[8]
+        src = item['src']
+        dest = item['dest']
+        coding = item['coding']
         n = n + 1
         text1 = ''
         parts = str(mid.count(',')+1)
@@ -299,7 +364,7 @@ def display_queue(smsq):
                 print "Sent: " + str(sms[2])
             else:
                 print "Delivery Attempts: " + str(sms[3])
-            print "Charset:" + charset
+            print "Coding, Charset: " + str(coding) + ',' + charset
             print "Parts: " + parts
         try:
             if options.unicode:
@@ -311,7 +376,6 @@ def display_queue(smsq):
         except:
             e = sys.exc_info()[0]
             print 'Caught Exception Encoding: %s %s on Line %s' % (e, sys.exc_info()[1], sys.exc_info()[2].tb_lineno)
-            code.interact(local=locals())
             
         if options.brief:
             if options.colour:
@@ -380,6 +444,8 @@ if __name__ == '__main__':
         help="Reverse Sort Order")   
     parser.add_option("-d", "--debug", dest="debug", action="store_true",
         help="Turn on debug output")
+    parser.add_option("-D", "--debug-stop", dest="debug_stop", action="store_true",
+        help="Stop and Shell with msg")        
     (options, args) = parser.parse_args()
 
     if options.sq_hlr_path:
@@ -400,9 +466,9 @@ if __name__ == '__main__':
         exit()
     if options.msgid:
         smsq = read_queue(options.msgid)
-        q=build_msgs(smsq)        
-        display_queue(q)
+        msgs=build_msgs(smsq)        
+        display_queue(msgs)
     else:
         smsq = read_queue(0, options.unsent, options.sent, options.where, options.src, options.dest, options.negate, options.limit, options.order)
-        q=build_msgs(smsq)
-        display_queue(q)
+        msgq=build_msgs(smsq)
+        display_queue(msgq)
