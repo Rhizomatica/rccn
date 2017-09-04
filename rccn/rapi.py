@@ -364,18 +364,18 @@ class SMSRESTService:
         if btext == '':
             btext = text
         t=binascii.hexlify(btext)
-        
+
         api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s" charset:"%s"' %
             (request.getHost().host, self.path, source, destination, charset))
         api_log.debug('Data: source:"%s" destination:"%s" charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' %
-            (source, destination, charset, coding, text, t, dr, dcs))
+            (source, destination, charset, coding, text.decode(charset,'replace'), t, dr, dcs))
 
         # Kannel sends us GSM0338 but sets charset param to UTF-8
         if coding == '0':
             try:
                 gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
                 text=gsm_shift_codec.decode(btext)[0]
-                api_log.info('SMS Decoded as GSM 03.38')
+                api_log.info('SMS Decoded from GSM 03.38')
                 api_log.debug('Decoded text:"%s"' % text)
             except: # Catch Everything, try to not actually LOSE messages!  
                 e=sys.exc_info()[0]
