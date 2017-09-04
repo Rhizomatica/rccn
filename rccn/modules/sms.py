@@ -3,6 +3,7 @@
 ############################################################################
 # 
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
+# Copyright (C) 2017 Keith Whyte <keith@rhizomatica.org>
 #
 # SMS module
 # This file is part of RCCN
@@ -311,8 +312,9 @@ class SMS:
                 try:
                     try:
                         # Test if we can encode this as GSM03.38
-                        #gsm_codec = gsm0338.Codec(single_shift_decode_map=BASIC_CHARACTER_SET_EXTENSION)
-                        test = text.encode('gsm03.38')
+                        gsm_codec = gsm0338.Codec()
+                        test=gsm_codec.decode(text)[0]
+                        #test = text.encode('gsm03.38')
                         sms_log.debug('GSM03.38! %s -> %s' % (text, test))
                         self.coding = 0
                     except:
