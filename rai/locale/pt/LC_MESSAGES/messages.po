@@ -1,0 +1,876 @@
+# RAI BRAZILIAN PORTUGUESE TRANSLATION.
+# Copyright (C) 2014-2017 Rhizomatica
+# This file is distributed under the same license as the Rhizomatica package.
+# Tele <tele@rhizomatica.org>, 2013.
+# Bruno, Juba e outros - tradução para o Português Brasileiro
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: RAI 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-29 15:29+0200\n"
+"PO-Revision-Date: 2017-10-03 21:58+0200\n"
+"Last-Translator: GSM Comunitário <rafael@riseup.net>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: credit_status.php:29 account.php:46
+msgid "Credit Status"
+msgstr "Estado do Crédito"
+
+#: credit_status.php:32
+msgid "Year:"
+msgstr "Ano:"
+
+#: credit_status.php:40
+msgid "Month:"
+msgstr "Mês:"
+
+#: credit_status.php:55 stats/total_calls.php:72 stats/total_minutes.php:65
+#: stats/credits.php:62 stats/cost.php:62
+msgid "Month"
+msgstr "Mês"
+
+#: credit_status.php:56 subscribers.php:135
+msgid "Credit Sold"
+msgstr "Saldo Vendido"
+
+#: credit_status.php:57 subscribers.php:136
+msgid "Credit Used"
+msgstr "Saldo Usado"
+
+#: login.php:39
+msgid "Username:"
+msgstr "Usuário:"
+
+#: login.php:43
+msgid "Password:"
+msgstr "Senha:"
+
+#: login.php:56
+msgid "Login"
+msgstr "Entrar"
+
+#
+#: login.php:70
+msgid "Username is empty"
+msgstr "Campo usuário está em branco"
+
+#
+#: login.php:73
+msgid "Password is empty"
+msgstr "Campo senha está em branco"
+
+#: login.php:76
+msgid "Login Incorrect"
+msgstr "Login incorreto"
+
+#: resellers_provisioning.php:25
+msgid "Provision a new Reseller"
+msgstr "Cadastrar novo(a) revendedor(a)"
+
+#: resellers_provisioning.php:28 resellers_provisioning.php:29
+#: resellers_provisioning.php:84 resellers_credit.php:27
+#: resellers_credit.php:28 resellers_credit.php:32 resellers_credit.php:61
+#: resellers_credit.php:64
+msgid "Reseller number"
+msgstr "Número do(a) revendedor(a)"
+
+#: resellers_provisioning.php:33
+msgid "PIN"
+msgstr "PIN"
+
+#: resellers_provisioning.php:34
+msgid "Reseller code"
+msgstr "Código do(a) revendedor(a)"
+
+#: resellers_provisioning.php:38
+msgid "Initial Balance"
+msgstr "Saldo inicial"
+
+#: resellers_provisioning.php:39 credit.php:49 resellers_credit.php:38
+msgid "Amount to add"
+msgstr "Valor da recarga"
+
+#: resellers_provisioning.php:43 credit.php:53 provisioning.php:92
+#: provisioning.php:125 resellers_credit.php:42
+msgid "Add"
+msgstr "Adicionar"
+
+#: resellers_provisioning.php:58
+msgid "Reseller number is empty"
+msgstr "Número do(a) revendedor(a) está em branco"
+
+#: resellers_provisioning.php:61
+msgid "Reseller PIN is invalid"
+msgstr "PIN do(a) revendedor(a) inválido"
+
+#: resellers_provisioning.php:64
+msgid "Initial balance is empty"
+msgstr "Saldo inicial é zero"
+
+#: resellers_provisioning.php:84 provisioning.php:213 provisioning.php:215
+msgid "Successfully provisioned with an initial balance of"
+msgstr "Cadastrado com saldo inicial de"
+
+#: resellers_provisioning.php:85 resellers_provisioning.php:89
+# send_sms.php:84
+#: send_sms.php:95 send_sms.php:99 send_sms.php:107 send_sms.php:111
+#: resellers_configuration.php:23 resellers_configuration.php:103
+#: resellers_configuration.php:107 credit.php:94 credit.php:98
+#: provisioning.php:217 provisioning.php:222 resellers_credit.php:83
+#: resellers_credit.php:87
+msgid "Go Back"
+msgstr "Voltar"
+
+#: resellers_provisioning.php:88
+msgid "ERROR PROVISIONING RESELLER!"
+msgstr "ERRO AO CADASTRAR REVENDEDOR(A)!"
+
+#: subscribers.php:24
+msgid "All"
+msgstr "Todos"
+
+#: subscribers.php:132
+msgid "Unpaid subscription"
+msgstr "Assinatura não paga"
+
+#: subscribers.php:133
+msgid "Unauthorized"
+msgstr "Não autorizado"
+
+#: subscribers.php:134
+msgid "Paid subscription"
+msgstr "Assinatura paga"
+
+#: subscribers.php:137
+msgid "Online"
+msgstr "Conectado"
+
+#: subscribers.php:137
+msgid "Roaming"
+msgstr "Roaming"
+
+#: subscribers.php:138
+msgid "Offline"
+msgstr "Desconectado"
+
+#: subscribers.php:146
+msgid "Subscribers Phones"
+msgstr "Telefones dos Usuários"
+
+#: subscribers.php:151 subscribers.php:169
+msgid "Activation date"
+msgstr "Data de ativacão"
+
+#: subscribers.php:152 subscribers.php:170
+msgid "Subscription date"
+msgstr "Data de abertura do cadastro"
+
+#: subscribers.php:153 subscribers.php:171
+msgid "Subscription Status"
+msgstr "Estado da assinatura"
+
+#: subscribers.php:154 subscribers.php:172 subscriber_edit.php:81
+msgid "Authorized"
+msgstr "Autorizado"
+
+#: subscribers.php:155 subscribers.php:173 send_sms.php:33
+msgid "Number"
+msgstr "Número de Telefone"
+
+#: subscribers.php:156 subscribers.php:174 provisioning.php:66
+#: provisioning.php:100 subscriber_edit.php:43
+msgid "Name"
+msgstr "Nome"
+
+#: subscribers.php:157 subscribers.php:175 resellers.php:57 resellers.php:72
+msgid "Balance"
+msgstr "Saldo"
+
+#
+#: subscribers.php:158 subscribers.php:176 provisioning.php:79
+#: provisioning.php:112 subscriber_edit.php:57
+msgid "Location"
+msgstr "Localização"
+
+#: subscribers.php:159 subscribers.php:177 resellers.php:59 resellers.php:74
+msgid "Actions"
+msgstr "Ações"
+
+#: subscribers.php:164 cdr.php:62 sms.php:45 rates.php:37
+#: resellers_credit_history.php:41 resellers_transactions.php:39
+#: credit_history.php:41 resellers.php:64
+msgid "Loading data from server"
+msgstr "Carregando dados do servidor"
+
+#: cdr.php:44
+msgid "Calls Details Records"
+msgstr "Detalhe dos registros de chamadas"
+
+#: cdr.php:50 cdr.php:68
+msgid "Call Date"
+msgstr "Data da chamada"
+
+#: cdr.php:51 cdr.php:69
+msgid "Caller Number"
+msgstr "Número de Origem"
+
+#: cdr.php:52 cdr.php:70
+msgid "Called Number"
+msgstr "Número de Destino"
+
+#: cdr.php:53 cdr.php:71 sms.php:40 sms.php:54
+msgid "Context"
+msgstr "Contexto"
+
+#: cdr.php:54 cdr.php:72
+msgid "Duration"
+msgstr "Duração"
+
+#: cdr.php:55 cdr.php:73
+msgid "Hangup Cause"
+msgstr "Causa de fim da chamada"
+
+#: cdr.php:56 cdr.php:74 sms.php:39 sms.php:53 rates.php:30 rates.php:42
+msgid "Destination"
+msgstr "Destino"
+
+#: cdr.php:57 cdr.php:75 rates.php:32 rates.php:44
+msgid "Cost"
+msgstr "Custo"
+
+#: reseller_delete.php:16
+msgid "ERROR GETTING RESELLER INFO!"
+msgstr "ERROR AO CARREGAR A INFORMAÇÃO DO REVENDEDOR(A)!"
+
+#: reseller_delete.php:17 reseller_delete.php:49 reseller_delete.php:53
+#: subscriber_delete.php:17 subscriber_delete.php:48
+#subscriber_delete.php:52
+#: subscriber_edit.php:133 subscriber_edit.php:137
+msgid "Close"
+msgstr "Fechar"
+
+#: reseller_delete.php:25
+msgid "Delete Reseller"
+msgstr "Eliminar conta do revendedor(a)"
+
+#: reseller_delete.php:29 subscriber_delete.php:29
+msgid "Confirm deletion of"
+msgstr "Confirmar a eliminação de"
+
+#: reseller_delete.php:31 subscriber_delete.php:31
+msgid "Delete"
+msgstr "Eliminar"
+
+#: reseller_delete.php:48
+msgid "Reseller successfully deleted!"
+msgstr "Conta do(a) Revendedor(a) eliminada com sucesso!"
+
+#: reseller_delete.php:52
+msgid "ERROR DELETING RESELLER!"
+msgstr "ERROR AO APAGAR A CONTA DO/A REVENDEDOR/A!"
+
+#: sms.php:31
+msgid "SMS History"
+msgstr "Histórico dos SMS"
+
+#: sms.php:36 sms.php:50
+msgid "ID"
+msgstr "ID"
+
+#: sms.php:37 sms.php:51 resellers_credit_history.php:31
+#: resellers_credit_history.php:46 resellers_transactions.php:31
+#: resellers_transactions.php:44 credit_history.php:31 credit_history.php:46
+msgid "Date"
+msgstr "Data"
+
+#: sms.php:38 sms.php:52
+msgid "Source"
+msgstr "Origem"
+
+#: rates.php:25 include/menu.php:79
+msgid "Rates"
+msgstr "Tarifas"
+
+#: rates.php:31 rates.php:43
+msgid "Area Code"
+msgstr "Código de Área"
+
+#: subscribers_processing.php:178
+msgid "Roaming User"
+msgstr "Usuário em Roaming"
+
+#: subscribers_processing.php:262
+msgid "Roaming from"
+msgstr "Em roaming desde"
+
+#: subscribers_processing.php:265
+msgid "Tagged as roaming on"
+msgstr "Parece estar em roaming em"
+
+#: subscribers_processing.php:267
+msgid "Roaming on"
+msgstr "Em roaming em"
+
+#: subscribers_processing.php:275
+msgid "Not authorized on HLR!"
+msgstr "Não autorizado/a em HLR!"
+
+#: subscribers_processing.php:276
+msgid "Authorized on HLR!"
+msgstr "Autorizado/a en HLR!"
+
+#: subscribers_processing.php:286
+msgid "NOT_PAID"
+msgstr "NAO_PAGA"
+
+#: subscribers_processing.php:286
+msgid "PAID"
+msgstr "PAGA"
+
+#: send_sms.php:25 send_sms.php:50 include/menu.php:71
+msgid "Send SMS"
+msgstr "Enviar SMS"
+
+#: send_sms.php:28
+msgid "Message"
+msgstr "Mensagem"
+
+#: send_sms.php:29
+msgid "Text of the SMS message"
+msgstr "Texto da mensagem SMS"
+
+#: send_sms.php:34
+msgid "Recipient of the SMS message"
+msgstr "Destinatário da mensagem SMS"
+
+#: send_sms.php:38
+msgid "All registered"
+msgstr "Usuários registrados"
+
+#: send_sms.php:41
+msgid "All not registered (5 digits)"
+msgstr "Usuários não registrados (5 digitos)"
+
+#: send_sms.php:44
+msgid "All subscription not paid"
+msgstr "Usuários que não pagaram"
+
+#: send_sms.php:47
+msgid "All not authorized"
+msgstr "Usuár‭ios não autorizados"
+
+#: send_sms.php:66
+msgid "SMS text is empty"
+msgstr "O texto do SMS está em branco"
+
+#: send_sms.php:69
+msgid "SMS number is empty"
+msgstr "O número de SMS está em branco"
+
+#: send_sms.php:83 send_sms.php:110
+msgid "ERROR SENDING SMS!"
+msgstr "ERRO AO ENVIAR O SMS!"
+
+#: send_sms.php:94
+msgid "BROADCAST MESSAGE IS BEING SENT!"
+msgstr "ENVIANDO MENSAGEM DE DIFUSÃO EM MASSA"
+
+#: send_sms.php:98
+msgid "ERROR SENDING MASS SMS!"
+msgstr "ERROR AO ENVIAR MENSAGEM DE DIFUSÃO EM MASSA!"
+
+#: send_sms.php:106
+msgid "MESSAGE SENT!"
+msgstr "MENSAGEM ENVIADA!"
+
+#: resellers_configuration.php:22
+msgid "ERROR GETTING INFO!"
+msgstr "Erro ao carregar a informacão!"
+
+#: resellers_configuration.php:40
+msgid "Configure reseller notification messages"
+msgstr "Configurar as mensagens de notificacão do revendedor"
+
+#: resellers_configuration.php:43
+msgid "Invalid data"
+msgstr "Dados inválidos"
+
+#: resellers_configuration.php:44
+msgid "Invalid data sent to the shortcode"
+msgstr "Dados inválidos enviados ao código curto"
+
+#: resellers_configuration.php:48
+msgid "Reseller not enough credit1"
+msgstr "Revendedor/a não tem saldo suficiente"
+
+#: resellers_configuration.php:49 resellers_configuration.php:59
+msgid "Message sent to the subscriber"
+msgstr "Mensagem enviada à/o usuario/a"
+
+#: resellers_configuration.php:53
+msgid "Reseller not enough credit2 "
+msgstr "Revendedor/a não tem saldo suficiente2"
+
+#: resellers_configuration.php:54
+msgid "Message sent to the reseller"
+msgstr "Mensagem enviada à/o revendedor/a"
+
+#: resellers_configuration.php:58 resellers_configuration.php:63
+msgid "Credit added successfully to subscriber account"
+msgstr "Saldo adicionado con sucesso à conta do usuário"
+
+#: resellers_configuration.php:64
+msgid "Message sent to the Reseller"
+msgstr "Mensagem enviada à/o revendedor/a"
+
+#: resellers_configuration.php:68
+msgid "General error"
+msgstr "Erro geral"
+
+#: resellers_configuration.php:69
+msgid "General error notice message"
+msgstr "Mensagem de aviso de erro geral"
+
+#: resellers_configuration.php:73 subscriber_edit.php:88
+msgid "Save"
+msgstr "Salvar"
+
+#: resellers_configuration.php:102
+msgid "MESSAGES SAVED!"
+msgstr "Mensagens guardadas!"
+
+#: resellers_configuration.php:106
+msgid "ERROR SAVING MESSAGES!"
+msgstr "Erro ao salvar as mensagens!"
+
+#: credit.php:35 include/menu.php:51 include/menu.php:62
+#: resellers_credit.php:24
+msgid "Add Credit"
+msgstr "Fazer recarga"
+
+#: credit.php:38 credit.php:39 credit.php:43 credit.php:72 credit.php:75
+#: provisioning.php:72 provisioning.php:215 credit_history.php:33
+#: credit_history.php:48 subscriber_edit.php:49 subscriber_edit.php:50
+#: subscriber_edit.php:132
+msgid "Subscriber number"
+msgstr "Telefone do usuário"
+
+#: credit.php:44
+msgid "Repeat Subscriber Number"
+msgstr "Repetir número do usuário"
+
+#: credit.php:48 resellers_credit.php:37
+msgid "Amount"
+msgstr "Valor"
+
+#: credit.php:69
+msgid "Subscriber number do not match"
+msgstr "O número de usuário não coincide"
+
+#: credit.php:72 credit.php:75 resellers_credit.php:61
+# resellers_credit.php:64
+msgid "is empty"
+msgstr "está em branco"
+
+#: credit.php:78 resellers_credit.php:67
+msgid "Invalid amount"
+msgstr "Valor inválido"
+
+#: credit.php:93 resellers_credit.php:82
+msgid "Credit of"
+msgstr "Saldo de"
+
+#: credit.php:93
+msgid "pesos successfully added to subscriber"
+msgstr "reais adicionados com sucesso à/o usuaria/o"
+
+#: credit.php:97 resellers_credit.php:86
+msgid "ERROR UPDATING BALANCE!"
+msgstr "ERRO AO ATUALIZAR SALDO!"
+
+#: resellers_credit_history.php:26
+msgid "Resellers Credit History"
+msgstr "Histórico de crédito dos revendedores"
+
+#: resellers_credit_history.php:32 resellers_credit_history.php:47
+#: credit_history.php:32 credit_history.php:47
+msgid "Invoice Number"
+msgstr "Número do Recibo"
+
+#: resellers_credit_history.php:33 resellers_credit_history.php:48
+#: resellers_transactions.php:32 resellers_transactions.php:45
+#: resellers.php:55 resellers.php:70
+msgid "Reseller Number"
+msgstr "Número do/a revendedor/a"
+
+#: resellers_credit_history.php:34 resellers_credit_history.php:49
+#: credit_history.php:34 credit_history.php:49
+msgid "Previous Balance"
+msgstr "Saldo Anterior"
+
+#: resellers_credit_history.php:35 resellers_credit_history.php:50
+#: resellers_transactions.php:34 resellers_transactions.php:47
+#: credit_history.php:35 credit_history.php:50
+msgid "Amount Added"
+msgstr "Valor adicionado"
+
+#: resellers_credit_history.php:36 resellers_credit_history.php:51
+#: credit_history.php:36 credit_history.php:51
+msgid "Balance after Recharge"
+msgstr "Saldo depois da recarga"
+
+#: include/menu.php:6
+msgid "Logout"
+msgstr "Encerrar a sessão"
+
+#: include/menu.php:11
+msgid "Platform"
+msgstr "Plataforma"
+
+#: include/menu.php:13
+msgid "Site"
+msgstr "Site"
+
+#: include/menu.php:14
+msgid "VOIP Account"
+msgstr "Conta de VOIP"
+
+#: include/menu.php:15
+msgid "System Stats"
+msgstr "Estatísticas do Sistema"
+
+#: include/menu.php:16
+msgid "Network Stats"
+msgstr "Estatísticas da Rede"
+
+#: include/menu.php:17
+msgid "Network Map"
+msgstr "Mapa da Rede"
+
+#
+#: include/menu.php:18
+msgid "Online Support"
+msgstr "Suporte Online"
+
+#: include/menu.php:23
+msgid "Statistics"
+msgstr "Estatísticas"
+
+#: include/menu.php:25
+msgid "Costs"
+msgstr "Custos"
+
+#: include/menu.php:26 stats/total_calls.php:79
+msgid "Calls"
+msgstr "Chamadas"
+
+#: include/menu.php:40
+msgid "Subscribers"
+msgstr "Assinantes"
+
+#: include/menu.php:42 include/menu.php:50
+msgid "Provisioning"
+msgstr "Cadastrar"
+
+#: include/menu.php:47 resellers.php:49
+msgid "Resellers"
+msgstr "Revendedores"
+
+#: include/menu.php:49
+msgid "List Resellers"
+msgstr "Lista de revendedores"
+
+#: include/menu.php:52
+msgid "Resellers invoices"
+msgstr "Recibos de revendedores"
+
+#: include/menu.php:53
+msgid "Transactions"
+msgstr "Transações"
+
+#: include/menu.php:54
+msgid "Configuration"
+msgstr "Configuração"
+
+#: include/menu.php:60
+msgid "Credits"
+msgstr "Recargas"
+
+#: include/menu.php:63
+msgid "History"
+msgstr "Histórico"
+
+#: include/menu.php:64
+msgid "Status"
+msgstr "Status"
+
+#: include/menu.php:69
+msgid "SMSs"
+msgstr "SMSs"
+
+#: include/menu.php:76
+msgid "CDRs"
+msgstr "CDRs"
+
+#: include/header.php:21 include/header.php:46
+msgid "RAI - Rhizomatica Administration Interface"
+msgstr "RAI - Interface Administrativa"
+
+#: account.php:33
+msgid "Error loading VOIP Account Balance.. please try again later"
+msgstr "Erro ao buscar o saldo VOIP.. por favor tente novamente mais tarde"
+
+#: account.php:36
+msgid "Loading VOIP Account Balance.. please wait"
+msgstr "Buscando saldo da conta VOIP.. por favor espere"
+
+#: account.php:41
+msgid "VOIP Account Balance:"
+msgstr "Saldo da conta VOIP"
+
+#: account.php:60
+msgid "Credit Allocated"
+msgstr "Saldo alocado"
+
+#: account.php:62
+msgid "Authorised"
+msgstr "Assinatura autorizada"
+
+#: account.php:63
+msgid "Not Authorised"
+msgstr "Não autorizada"
+
+#: account.php:64
+msgid "Not Paid, Authorised"
+msgstr "Não paga, Autorizada"
+
+#: account.php:66
+msgid "Total Sold to Authorised Users"
+msgstr "Total Saldo Vendido a Autorizados"
+
+#: resellers_transactions.php:26
+msgid "Resellers Transactions"
+msgstr "Transações dos revendedores"
+
+#: resellers_transactions.php:33 resellers_transactions.php:46
+msgid "Subscriber Number"
+msgstr "Número do/a usuário/a"
+
+#: provisioning.php:29
+msgid "Provision a new subscriber"
+msgstr "Cadastrar novo usuário"
+
+#: provisioning.php:67 provisioning.php:101 subscriber_edit.php:44
+msgid "Subscriber Name"
+msgstr "Nome do usuário"
+
+#: provisioning.php:71
+msgid "Subscriber number or IMSI"
+msgstr "Telefone do/a usuario/a ou IMSI"
+
+#
+#: provisioning.php:80 provisioning.php:113 subscriber_edit.php:58
+msgid "Subscriber location"
+msgstr "Localização do/a usuario/a"
+
+#: provisioning.php:106
+msgid "The phone must be connected or have recently attempted to connect"
+msgstr "O telefone tem que estar conectado ou ter tentado conectar recentemente"
+
+#: provisioning.php:155 provisioning.php:183 subscriber_edit.php:105
+msgid "Name is empty"
+msgstr "Nome está em branco"
+
+#: provisioning.php:166
+msgid "Subscriber already exists:"
+msgstr "Usuário já existe:"
+
+#
+#: provisioning.php:168
+msgid "Subscriber not found"
+msgstr "Usuário não encontrado"
+
+#: provisioning.php:171
+msgid "Invalid IMEI"
+msgstr "IMEI inválido"
+
+#
+#: provisioning.php:186
+msgid "Subscriber number is empty"
+msgstr "Telefone do/a usuário/a em branco"
+
+#
+#: provisioning.php:188
+msgid "Invalid number"
+msgstr "Número inválido"
+
+#: provisioning.php:213
+msgid "Subscriber already exists! New subscriber number"
+msgstr "O/a usuario/a já existe! Número de novo/a usuário/a"
+
+#: provisioning.php:220
+msgid "ERROR PROVISIONING SUBSCRIBER!"
+msgstr "ERRO AO CADASTRAR O/A USUÁRIO/A"
+
+#: stats/total_calls.php:70 stats/total_minutes.php:63 stats/credits.php:60
+#: stats/cost.php:60
+msgid "Last 7 Days"
+msgstr "Últimos 7 Dias"
+
+#: stats/total_calls.php:70
+msgid "Daily Total Calls"
+msgstr "Chamadas totais diárias"
+
+#: stats/total_calls.php:70 stats/total_minutes.php:63 stats/credits.php:60
+#: stats/cost.php:60
+msgid "Day"
+msgstr "Dia"
+
+#: stats/total_calls.php:71 stats/total_minutes.php:64 stats/credits.php:61
+#: stats/cost.php:61
+msgid "Last 4 Weeks"
+msgstr "Últimas 4 Semanas"
+
+#: stats/total_calls.php:71
+msgid "Total Calls per Week"
+msgstr "Total de chamadas semanais"
+
+#: stats/total_calls.php:71 stats/total_minutes.php:64 stats/credits.php:61
+#: stats/cost.php:61
+msgid "Week year"
+msgstr "Semana do ano"
+
+#: stats/total_calls.php:72
+msgid "Total Monthly Calls"
+msgstr "Total de chamadas mensais"
+
+#: stats/total_minutes.php:63
+msgid "Daily Total Minutes"
+msgstr "Total de minutos diários"
+
+#: stats/total_minutes.php:64
+msgid "Total Minutes per Week"
+msgstr "Total de minutos por semana"
+
+#: stats/total_minutes.php:65
+msgid "Total Monthly Minutes"
+msgstr "Total de minutos mensais"
+
+#: stats/credits.php:60
+msgid "Total pesos amount in credits per day"
+msgstr "Valor total de recarga por dia"
+
+#: stats/credits.php:61
+msgid "Total pesos amount in credits per week"
+msgstr "Valor total de recarga por semana"
+
+#: stats/credits.php:62
+msgid "Total pesos amount in credits per month"
+msgstr "Valor total de recarga por mês"
+
+#: stats/cost.php:60
+msgid "Daily Total Calls Cost"
+msgstr "Custo total de uso diário"
+
+#: stats/cost.php:61
+msgid "Weekly Total Cost Usage"
+msgstr "Custo total de uso semanal"
+
+#: stats/cost.php:62
+msgid "Monthly Total Cost Usage"
+msgstr "Custo total de uso mensal"
+
+#: subscriber_delete.php:16 subscriber_edit.php:23
+msgid "ERROR GETTING SUBSCRIBER INFO!"
+msgstr "ERRO AO OBTER INFORMACÃO DO/A USUÁRIO/A!"
+
+#: subscriber_delete.php:25
+msgid "Delete Subscriber"
+msgstr "Eliminar conta de usuário/a"
+
+#: subscriber_delete.php:47
+msgid "Subscriber successfully deleted!"
+msgstr "Conta eliminada com sucesso!"
+
+#: subscriber_delete.php:51
+msgid "ERROR DELETING SUBSCRIBER!"
+msgstr "ERRO AO ELIMINAR CONTA DO/A USUÁRIO/A!"
+
+#: credit_history.php:26
+msgid "Credit History"
+msgstr "Histórico de recargas"
+
+#: call_stats.php:34
+msgid "Total calls:"
+msgstr "Total de chamadas:"
+
+#: resellers.php:54 resellers.php:69
+msgid "Creation Date"
+msgstr "Data de criação"
+
+#: resellers.php:58 resellers.php:73
+msgid "Total Sales"
+msgstr "Vendas totais"
+
+#: resellers_credit.php:33
+msgid "Repeat Reseller Number"
+msgstr "Repetir o número doa revendedora"
+
+#: resellers_credit.php:58
+msgid "Reseller number do not match"
+msgstr "Número doa revendedora náo coincide"
+
+#: resellers_credit.php:82
+msgid "pesos successfully added to reseller"
+msgstr "Valor adicionado com sucesso à/o revendedor/a"
+
+#: js/js_locale.php:2
+msgid "Please Wait, processing data"
+msgstr "Espere por favor, processando dados"
+
+#: js/js_locale.php:3
+
+msgid "Only Calls with Cost"
+msgstr "Somente chamadas com custo"
+
+#: site.php:40
+msgid "Site name"
+msgstr "Nome do site"
+
+#: site.php:42
+msgid "Network name"
+msgstr "Nome da rede"
+
+#: site.php:44
+msgid "Prefix"
+msgstr "Prefixo"
+
+#: subscriber_edit.php:39
+msgid "Edit Subscriber"
+msgstr "Editar Usuário/a"
+
+#: subscriber_edit.php:75
+msgid "Subscription Paid"
+msgstr "Assinatura do/a usuário/a paga"
+
+#: subscriber_edit.php:76 subscriber_edit.php:82
+msgid "Check for yes uncheck for no"
+msgstr "Selecionar para afirmativo, deselecionar para negativo"
+
+#: subscriber_edit.php:108
+msgid "Subscriber number is invalid"
+msgstr "O número do/a usuário/a é inválido"
+
+#: subscriber_edit.php:132
+msgid "successfully modified"
+msgstr "modificado com sucesso"
+
+#: subscriber_edit.php:136
+msgid "ERROR SAVING SUBSCRIBER!"
+msgstr "ERRO AO SALVAR USUÁRIO/A!"
+

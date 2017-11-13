@@ -47,8 +47,9 @@ require_once('include/header.php');
 				<br/>
 				<input type="hidden" name="language" id="language" value="" />
 				<select id="language-select">
-        				<option value="es" <?=($language=='es') ? 'selected="selected"' : ''?>data-imagesrc="img/mx_flag.png">Español</option>
-				        <option value="en" <?=($language=='en') ? 'selected="selected"' : ''?>data-imagesrc="img/en_flag.png">English</option>
+					<option value="es" <?=($language=='es') ? 'selected="selected"' : ''?>data-imagesrc="img/mx_flag.png">Español</option>
+					<option value="pt_BR" <?=($language=='pt_BR') ? 'selected="selected"' : ''?>data-imagesrc="img/br_flag.png">Português</option>
+					<option value="en" <?=($language=='en') ? 'selected="selected"' : ''?>data-imagesrc="img/en_flag.png">English</option>
 				</select>
 			    </div>
 			    <div><br/>
