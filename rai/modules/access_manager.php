@@ -56,7 +56,7 @@ class AccessManager
 	public function initializeSession() {
 		session_start();
 		$_SESSION['username'] = $this->username;
-		$_SESSION['lang'] = (strlen($this->lang) > 2 ) ? $this->lang.'.UTF-8' : $this->lang."_".strtoupper($this->lang);
+		$_SESSION['lang'] = (strlen($this->lang) > 2 ) ? $this->lang.'.utf8' : $this->lang."_".strtoupper($this->lang);
 		$_SESSION['is_logged'] = 1;
 	}
 
