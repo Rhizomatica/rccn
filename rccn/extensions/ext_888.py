@@ -1,3 +1,5 @@
+#!/usr/bin/env python 
+# -*- coding: utf-8 -*-
 ############################################################################
 #
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
@@ -38,7 +40,7 @@ def handler(session, *args):
 
     session.answer()
     session.execute('playback', '006_mensaje_saldo_actual.gsm')
-    text = 'Su saldo actual es de %s pesos' % current_subscriber_balance
+    text = 'Seu saldo atual é de %s reais' % current_subscriber_balance
     log.info('Send SMS to %s: %s' % (calling_number, text))
     sms.send(config['smsc'], calling_number, text)
     session.hangup()
