@@ -142,7 +142,7 @@ def rx_alert_notification(pdu):
             print "That is from %s last seen %s" % (bts['home_bts'],bts['current_bts'])
 
 def smpp_bind():
-    client = smpplib.client.Client("127.0.0.1", 2775)
+    client = smpplib.client.Client("127.0.0.1", 2775, 90)
     client.set_message_received_handler(rx_alert_notification)
     client.connect()
     client.bind_transceiver(system_id="NOTIFY", password="Password")
