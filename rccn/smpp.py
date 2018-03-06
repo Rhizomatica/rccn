@@ -78,6 +78,7 @@ def rx_alert_notification(pdu):
                     sub._update_location_pghlr(subscriber)
                 except Exception as e:
                     print str(e)
+                sub.update_location_local_hlr(extension)
                 log.info('Tell home about it..')
                 if subscriber.data['current_bts']:
                     current_bts = subscriber.data['current_bts']
@@ -91,7 +92,7 @@ def rx_alert_notification(pdu):
                         if 'success' in res:
                             log.info('Roaming Subscriber %s returned to %s' % (extension,current_bts))
                         else:
-                            log.error('Error Returning Roaming Subscriber %s at %s' % (extension,current_bts))
+                            log.error('Error (%s) Returning Roaming Subscriber %s at %s' % (config.json.loads(res)['error'], extension, current_bts))
                     except IOError:
                         log.error('Error connect to site %s to return subscriber %s' % (current_bts,extension) )
 
@@ -110,6 +111,11 @@ def rx_alert_notification(pdu):
                 # So either the hlr is out of date, or this is new here.
                 imsi=_get_imsi(pdu.source_addr)
                 sub.update_location(imsi,extension,True)
+
+                # a riak exception in the previous
+                # function would prevent the local PG update.
+                # this is usually overkill, to be sure, to be sure...
+                sub.update_location_local_hlr(extension, myip)
                 # Expire this on where I think it was last.
                 try:
                     values = '{"msisdn": "%s"}' % extension
@@ -121,12 +127,12 @@ def rx_alert_notification(pdu):
                     if 'success' in res:
                         log.info('Roaming Subscriber %s expired on %s' % (extension,current_bts))
                     else:
-                        log.error('Error Expiring Roaming Subscriber %s at %s' % (extension,current_bts))
+                        log.error('Error (%s) Expiring Roaming Subscriber %s at %s' % (config.json.loads(res)['error'], extension,current_bts))
                 except IOError:
-                    log.error('Error connect to site %s to expire subscriber %s' % (current_bts,extension) )
+                    log.error('Error connecting to site %s to expire subscriber %s' % (current_bts,extension) )
 
         else:
-            # Mode deliver-src-imsi
+            # Mode deliver-src-imsi (not used)
             extension=sub.get_local_extension(pdu.source_addr)
             if extension[:6] == myprefix:
                 print "That's mine"
