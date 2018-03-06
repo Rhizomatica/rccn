@@ -529,6 +529,20 @@ class Subscriber:
         except psycopg2.DatabaseError as e:
             raise SubscriberException('Database error: %s' % e)
 
+    def update_location_local_hlr(self, extension, current_bts = False):
+        try:
+            cur = db_conn.cursor()
+            if current_bts is False:
+                cur.execute('UPDATE hlr SET current_bts=home_bts,'
+                ' updated=%(updated)s WHERE msisdn=%(msisdn)s',
+                {'msisdn': extension, 'updated': "now()"})
+            else:
+                cur.execute('UPDATE hlr SET current_bts=%(current_bts)s,'
+                ' updated=%(updated)s WHERE msisdn=%(msisdn)s',
+                {'msisdn': extension, 'current_bts': current_bts, 'updated': "now()"})
+            db_conn.commit()
+        except psycopg2.DatabaseError as e:
+            raise SubscriberException('Database error: %s' % e)
 
     def delete(self, msisdn):
         subscriber_number = msisdn[-5:]
