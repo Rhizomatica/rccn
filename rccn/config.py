@@ -149,7 +149,7 @@ try:
                     cur.execute(open(revision_dir + filename[0], 'r').read())
                 else:
                     log.warning("Could not find Database Migration File")
-        except psycopg2.DatabaseError, OSError. as e:
+        except (psycopg2.DatabaseError, OSError) as e:
             log.warning("Failed to Upgrade Database Revision! (%s)" % e)
     cur.execute('SELECT * from site')
     site_conf = cur.fetchone()
