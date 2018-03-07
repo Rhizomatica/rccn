@@ -10,6 +10,7 @@ pgsql_db = 'rhizomatica'
 pgsql_user = 'rhizomatica'
 pgsql_pwd = 'yourpwd'
 pgsql_host = 'localhost'
+db_revision = '12'
 
 # SITE
 site_name = "Test"
