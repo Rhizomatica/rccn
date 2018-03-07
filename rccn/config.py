@@ -128,16 +128,31 @@ for f in files:
     ext_name = file_name.split('_')[1]
     extensions_list.append(ext_name)
 
-
 # initialize DB handler
 db_conn = None
 config = {}
 try:
     db_conn = psycopg2.connect(database=pgsql_db, user=pgsql_user, password=pgsql_pwd, host=pgsql_host)
     cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT value from meta WHERE key='db_revision'")
+    PG_revision=cur.fetchone()
+    if PG_revision[0] != db_revision:
+        try:
+            log.info("Upgrading DB Revision to Version %s" % db_revision)
+            revision_dir=rhizomatica_dir + '/db/migration/'
+            current=int(PG_revision[0])
+            revisions=os.listdir(revision_dir)
+            while current < int(db_revision):
+                current = current + 1
+                filename = [fn for fn in revisions if int(fn[:3]) == current]
+                if len(filename) and os.path.isfile(revision_dir + filename[0]):
+                    cur.execute(open(revision_dir + filename[0], 'r').read())
+                else:
+                    log.warning("Could not find Database Migration File")
+        except psycopg2.DatabaseError, OSError. as e:
+            log.warning("Failed to Upgrade Database Revision! (%s)" % e)
     cur.execute('SELECT * from site')
     site_conf = cur.fetchone()
-
     config['site_name'] = site_conf['site_name']
     config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
     config['local_ip'] = site_conf['ip_address']
@@ -150,6 +165,7 @@ try:
     config['sms_destination_unauthorized'] = smsc[2]
 except psycopg2.DatabaseError as e:
     log.error('Database connection error %s' % e)
+    sys.exit(-1)
 
 # Connect to riak
 #riak_client = riak.RiakClient(protocol='http', host='127.0.0.1', http_port=8098)
