@@ -1,6 +1,6 @@
 <?php
 
-function print_menu($select) {
+function print_menu($select = None) {
 	echo "<nav>";
 	echo "<ul>";
 	echo "<li><a href='logout.php'><img src='img/logout.png' width='10' height='10' /> "._("Logout")."</a></li>";
