@@ -126,12 +126,19 @@ class Billing:
             #print session.getVariable('bleg_billsec')
 
             configuration = Configuration()
-            if configuration.check_charge_local_calls():
-                _charge = configuration.get_charge_local_calls()
-                if duration > int(_charge[1]):
-                    call_cost = _charge[0]
+            try:
+                _charge_local = configuration.check_charge_local_calls()
+                if _charge_local == 1:
+                    _charge = configuration.get_charge_local_calls()
+                    if duration > int(_charge[1]):
+                        call_cost = _charge[0]
+                    else:
+                        call_cost = 0
                 else:
-                    call_cost = 0
+                    return
+            except:
+                bill_log.error('Error reading local calls charge config.')
+                return
 
             # set destination_name and cost for the CDR
             session.setVariable('destination_name', 'Local')
