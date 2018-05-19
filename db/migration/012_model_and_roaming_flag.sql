@@ -16,6 +16,7 @@ create table subscribers (
 );
 INSERT INTO subscribers(id,msisdn,name,authorized,balance,subscription_status,subscription_date,location,created) SELECT id,msisdn,name,authorized,balance,subscription_status,subscription_date,location,created FROM sub;
 DROP TABLE sub;
+SELECT pg_catalog.setval(pg_get_serial_sequence('subscribers','id'), (SELECT MAX(id) FROM subscribers)+1);
 UPDATE meta SET value='12' WHERE key='db_revision';
 
 COMMIT;
