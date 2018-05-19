@@ -418,7 +418,7 @@ class Subscriber:
             api_log.debug('Exception in expire_lu! %s' % e)
             pass
 
-    def add(self, msisdn, name, balance, location=''):
+    def add(self, msisdn, name, balance, location='', equipment=''):
         if len(msisdn) == 15:
             # lookup extension by imsi
             extension = self.get_local_extension(msisdn)
@@ -436,7 +436,7 @@ class Subscriber:
                 # get a new extension
                 msisdn = self._get_new_msisdn(msisdn, name)
                 subscriber_number = config['internal_prefix'] + msisdn
-                self._provision_in_database(subscriber_number, name, balance, location)
+                self._provision_in_database(subscriber_number, name, balance, location, equipment)
             except SubscriberException as e:
                 # revert back the change on SQ_HLR
                 self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
@@ -444,7 +444,7 @@ class Subscriber:
         else:
             try:
                 self._authorize_subscriber_in_local_hlr(msisdn, subscriber_number, name)
-                self._provision_in_database(subscriber_number, name, balance, location)
+                self._provision_in_database(subscriber_number, name, balance, location, equipment)
             except SubscriberException as e:
                 # revert back the change on SQ_HLR
                 self._authorize_subscriber_in_local_hlr(subscriber_number, msisdn, name)
@@ -651,8 +651,11 @@ class Subscriber:
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error changing subscriber subscription status: %s' % e)
 
-
-    def edit(self, msisdn, name, balance, location):
+    def edit(self, msisdn, name, balance, location, equipment, roaming):
+        params = locals()
+        updating = [k for k, v in params.items() if v != ""]
+        updating.remove('self')
+        updating.remove('msisdn')
         # edit subscriber data in the Osmo
         try:
             appstring = 'OpenBSC'
@@ -662,32 +665,25 @@ class Subscriber:
             vty.command(cmd)
             cmd = 'subscriber extension %s name %s' % (msisdn, name)
             vty.command(cmd)
-        except e:
+        except Exception as e:
             raise SubscriberException('VTY error updating subscriber data: %s' % e.args[0])
         
         # PG_HLR update subscriber data
         try:
+            _set = {}
+            for i in updating:
+                _set[i] = params[i]
             cur = db_conn.cursor()
-            if balance != "":
-		if location != "":
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s,location=%(location)s WHERE msisdn=%(msisdn2)s',
-        	        {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn, 'location': location})
-		else:
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,balance=%(balance)s WHERE msisdn=%(msisdn2)s',
-        	        {'msisdn': msisdn, 'name': name, 'balance': Decimal(str(balance)), 'msisdn2': msisdn})
-
-            else:
-		if location != "":
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s,location=%(location)s WHERE msisdn=%(msisdn2)s',
-        	        {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn, 'location': location})
-		else:
-	                cur.execute('UPDATE subscribers SET msisdn=%(msisdn)s,name=%(name)s WHERE msisdn=%(msisdn2)s',
-        	        {'msisdn': msisdn, 'name': name, 'msisdn2': msisdn})
+            sql_template = "UPDATE subscribers SET ({}) = %s WHERE msisdn = '{}'"
+            sql = sql_template.format(', '.join(_set.keys()), msisdn)
+            params = (tuple(_set.values()),)
+            cur.execute(sql, params)
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
                 raise SubscriberException('PG_HLR No subscriber found')
         except psycopg2.DatabaseError, e:
+            cur.execute("rollback")
             raise SubscriberException('PG_HLR error updating subscriber data: %s' % e)
 
     def _get_imsi(self, msisdn):
@@ -721,11 +717,15 @@ class Subscriber:
         except Exception as e:
             raise SubscriberException('SQ_HLR error provisioning the subscriber %s' % e)
 
-    def _provision_in_database(self, msisdn, name, balance, location=''):
+    def _provision_in_database(self, msisdn, name, balance, location='', equipment=''):
         try:
             cur = db_conn.cursor()
-            cur.execute('INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status,location) VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s)',
-            {'msisdn': msisdn, 'name': unidecode(name), 'balance': Decimal(str(balance)), 'location': location})
+            cur.execute(
+                'INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status, '
+                'location, equipment) '
+                'VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s,%(equipment)s)',
+                { 'msisdn': msisdn, 'name': unidecode(name), 'balance': Decimal(str(balance)),
+                  'location': location, 'equipment': equipment })
             cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
             {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
             db_conn.commit()
