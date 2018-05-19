@@ -8,7 +8,7 @@ print_menu('subscribers');
  
 ?>	
 
-<br/><br/><br/>
+<br/><br/>
 
 <?php
 
@@ -19,6 +19,8 @@ function print_form($post_data,$errors,$active_tab='0') {
 	$firstname_imei = ($_POST['firstname_imei'] != '') ? $_POST['firstname_imei'] : '';
 	$callerid = ($_POST['callerid'] != '') ? $_POST['callerid'] : '';
 	$amount = ($_POST['amount'] != '') ? $_POST['amount'] : '0';
+	$equipment = ($_POST['equipment'] != '') ? $_POST['equipment'] : '';
+	$equipment_imei = ($_POST['equipment_imei'] != '') ? $_POST['equipment_imei'] : '';
 	$location = ($_POST['location'] != '') ? $_POST['location'] : '';
 	
 
@@ -72,6 +74,12 @@ function print_form($post_data,$errors,$active_tab='0') {
 	<span class="small"><?= _("Subscriber number") ?></span>
 	</label>
 	<input type="text" name="callerid" id="callerid" value="<?=$ext?>"/>
+	<label><?=_("Equipment")?>
+	<span class="small"><?=_("a short description of the phone and model - iPhone5/Galaxy 7/etc")?>
+	</span>
+	</label>
+	<input type="text" name="equipment" id="equipment" value="<?=$equipment?>" />
+
 
 <?php
 				if (count($locations) > 1) {
@@ -106,19 +114,23 @@ function print_form($post_data,$errors,$active_tab='0') {
 		<span class="small"><?= _("The phone must be connected or have recently attempted to connect") ?></span>
 		</label>
 		<input type="text" name="imei" id="imei_text" />
+		<label><?=_("Equipment")?>
+		<span class="small"><?=_("a short description of the phone and model - iPhone5/Galaxy 7/etc")?></span>
+		</label>
+		<input type="text" name="equipment_imei" id="equipment_imei" value="<?=$equipment_imei?>"/>
 <?php
-				if (count($locations) > 1) {
+			if (count($locations) > 1) {
 ?>
-				<label><?= _("Location") ?>
-				<span class="small"><?= _("Subscriber location") ?></span>
-				</label>
+			<label><?= _("Location") ?>
+			<span class="small"><?= _("Subscriber location") ?></span>
+			</label>
 <?php
-					echo "<select name='location_imei' id='location_imei'>";
-					foreach ($locations as $rloc) {
-						echo "<option value='".$rloc->name."'>".$rloc->name."</option>";
-					}
-					echo "</select>";
+			echo "<select name='location_imei' id='location_imei'>";
+			foreach ($locations as $rloc) {
+				echo "<option value='".$rloc->name."'>".$rloc->name."</option>";
 				}
+			echo "</select>";
+			}
 					
 ?>
 		<br />
@@ -155,6 +167,7 @@ function print_form($post_data,$errors,$active_tab='0') {
 			$error_txt .= _("Name is empty")."<br/>";
 		}
 		$location = $_POST['location_imei'];
+		$equipment = $_POST['equipment_imei'];
 		if (isset($_POST['imei']) && strlen($_POST['imei'])==15) {
 
 			$imei = rtrim($_POST['imei'],'X');
@@ -178,6 +191,7 @@ function print_form($post_data,$errors,$active_tab='0') {
 		$firstname = $_POST['firstname'];
 		$callerid = $_POST['callerid'];
 		$location = $_POST['location'];
+		$equipment = $_POST['equipment'];
 
 		if ($firstname == "") {
 			$error_txt .= _("Name is empty")."<br/>";
@@ -205,8 +219,9 @@ function print_form($post_data,$errors,$active_tab='0') {
 			echo "<center>";
 			$amount = 0;
 			$sub = new Subscriber();
+
 			try {
-				$sub->set("",$callerid,$firstname,1,$amount,"", "", $location);
+				$sub->set("", $callerid, $firstname, 1, $amount,"", "", $location, $equipment);
 				$ret = $sub->create();
 				echo "<img src='img/true.png' width='200' height='170' /><br/><br/>";
 				if ($ret != "") {

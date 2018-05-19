@@ -15,8 +15,11 @@ class Subscriber
 	public $authorized = "";
 	public $balance = "";
 	public $activation_date = "";
+	public $location = "";
+	public $roaming = 0;
+	public $equipment = "";
 
-	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="") {
+	public function set($id="", $msisdn="", $name="", $authorized="", $balance="", $activation_date="",$subscription_status="", $location="", $equipment="", $roaming="") {
 		$this->id = $id;
 		$this->msisdn = $msisdn;
 		$this->name = $name;
@@ -25,6 +28,8 @@ class Subscriber
 		$this->activation_date = $activation_date;
 		$this->subscription_status = $subscription_status;
 		$this->location = $location;
+		$this->roaming = $roaming;
+		$this->equipment = $equipment;
 	}
 
 	public function get($msisdn) {
@@ -49,6 +54,9 @@ class Subscriber
 			$this->subscription_status = $data[5];
 			$this->activation_date = $data[6];
 			$this->location = $data[7];
+			$this->roaming = $data[8];
+			$this->equipment = $data[9];
+
 		}
 	}
 
@@ -99,7 +107,10 @@ class Subscriber
 		
 
 	public function create() {
-		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "location" => $this->location);
+		$subscriber = array(
+				"msisdn" => $this->msisdn, "name" => $this->name,
+				"balance" => $this->balance, "location" => $this->location,
+				"equipment" => $this->equipment);
 		try {
 			$response = \Httpful\Request::post($this->path)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
@@ -108,27 +119,27 @@ class Subscriber
 		$data = $response->body;
 		if ($data->status == 'failed') {
 			throw new SubscriberException($data->error);
+		} elseif ($data->status == 'success') {
+			# the extension already existed, we got a new one ?
+			return ($data->error != '') ? $data->error : '';
 		} else {
-			if ($data->status == 'success' && $data->error != '') {
-				# the extension already existed, we got a new one
-				return $data->error;
-			} else {
-				return "";
-			}
+			throw new SubscriberException($data);
 		}
-		
 	}
 
 	public function edit() {
-		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "authorized" => $this->authorized, "subscription_status" => $this->subscription_status, "location" => $this->location);
+		$subscriber = array("msisdn" => $this->msisdn, "name" => $this->name, "balance" => $this->balance, "authorized" => $this->authorized, "subscription_status" => $this->subscription_status, "location" => $this->location, "equipment" => $this->equipment, "roaming" => $this->roaming);
 		try {
 			$response = \Httpful\Request::put($this->path."/".$this->msisdn)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
 			throw new SubscriberException($e->getMessage());
 		}
 		$data = $response->body;
+		if ($data->status == 'success') return True;
 		if ($data->status == 'failed') {
 			throw new SubscriberException($data->error);
+		} else {
+			throw new SubscriberException($data);
 		}
 	}
 

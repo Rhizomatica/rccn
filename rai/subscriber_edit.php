@@ -18,6 +18,7 @@ function print_form($post_data,$errors) {
 		$name = ($_POST['firstname'] != '') ? $_POST['firstname'] : $sub->name;
 		$callerid = ($_POST['callerid'] != '') ? $_POST['callerid'] : $sub->msisdn;
 		$location = ($_POST['location'] != '') ? $_POST['location'] : $sub->location;
+		$equipment = ($_POST['equipment'] != '') ? $_POST['equipment'] : $sub->equipment;
 	} catch (PDOException $e) {
 		echo "<img src='img/false.png' width='200' height='170' /><br/><br/>";
 		echo "<span style='font-size: 20px; color: red;'>"._("ERROR GETTING SUBSCRIBER INFO!").$e->getMessage()." </span><br/><br/><br/><br/>";
@@ -39,6 +40,7 @@ function print_form($post_data,$errors) {
 				<h1><?= _("Edit Subscriber") ?></h1><br/>
 
 				<input type="hidden" name="sip_id" value="<?=$msisdn?>" />
+				
 				<span style='color: red; font-size: 12px;'><?= $errors ?></span><br/>
                                 <label><?= _("Name") ?>
                                 <span class="small"><?= _("Subscriber Name") ?></span>
@@ -49,8 +51,13 @@ function print_form($post_data,$errors) {
 				<label><?= _("Subscriber number") ?>
 				<span class="small"><?= _("Subscriber number") ?></span>
 				</label>
-				<input type="text" name="callerid" id="callerid" value="<?=$callerid?>" readonly/>
-				
+				<input type="text" style="color:grey" name="callerid" id="callerid" value="<?=$callerid?>" readonly/>
+				<label><?=_("Equipment")?>
+				<span class="small"><?=_("a short description of the phone and model")?>
+				</span>
+				</label>
+				<input type="text" name="equipment" id="equipment" value="<?=$equipment?>" />		
+
 <?php
                                 if (count($locations) > 1) {
 ?>
@@ -71,18 +78,23 @@ function print_form($post_data,$errors) {
 ?>
 
 
-
 				<label><?= _("Subscription Paid") ?>
 				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
 				</label><br/><br/>
 				<? $checked = ($sub->subscription_status == 0) ? '' : 'checked=checked'; ?>
 				<input type="checkbox" name="subscription_status" id="subscription_status" value="1" <?=$checked?>/><br/>
-				
+
 				<label><?= _("Authorized") ?>
 				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
 				</label>
 				<? $checked = ($sub->authorized == 0) ? '' : 'checked=checked'; ?>
 				<input type="checkbox" name="authorized" id="authorized" value="1" <?=$checked?>/><br/>
+
+				<label><?= _("Roaming") ?>
+				<span class="small"><?= _("Check for yes uncheck for no") ?></span>
+				</label>
+				<? $checked = ($sub->roaming == 0) ? '' : 'checked=checked'; ?>
+				<input type="checkbox" name="roaming" id="roaming" value="1" <?=$checked?>/><br/>
 
 
 				<button type="submit" name="edit_subscriber"><?= _("Save") ?></button>
@@ -100,6 +112,8 @@ function print_form($post_data,$errors) {
 					$callerid = $_POST['callerid'];
 					$authorized = $_POST['authorized'];
 					$location = $_POST['location'];
+					$equipment = $_POST['equipment'];
+					$roaming = (isset($_POST['roaming'])) ? $_POST['roaming'] : '0'; 
 
 					if ($firstname == "") {
 						$error_txt .= _("Name is empty")."<br/>";
@@ -117,9 +131,11 @@ function print_form($post_data,$errors) {
 					try {
 						#$sub->get($_POST['msisdn']);
 						if ($_POST['authorized'] == 1) {
-							$sub->set("",$callerid,$firstname,1,"","","",$location);
+							$sub->set("",$callerid,$firstname,1,"","","",
+								$location,$equipment,$roaming);
 						} else {
-							$sub->set("",$callerid,$firstname,0,"","","",$location);
+							$sub->set("",$callerid,$firstname,0,"","","",
+								$location,$equipment,$roaming);
 						}
 						if ($_POST['subscription_status'] == 1) {
 							$sub->subscription_status = 1;
