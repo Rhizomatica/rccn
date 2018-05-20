@@ -90,11 +90,11 @@ class SubscriberRESTService:
  
     # add new subscriber
     @route('/', Http.POST)
-    def post(self, request, msisdn, name, balance, location):
-        api_log.info('%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s"' % (request.getHost().host, self.path, msisdn, name, balance, location))
+    def post(self, request, msisdn, name, balance, location, equipment):
+        api_log.info('%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s equipment:"%s"' % (request.getHost().host, self.path, msisdn, name, balance, location, equipment))
         try:
             sub = Subscriber()
-            num = sub.add(msisdn, name, balance, location)
+            num = sub.add(msisdn, name, balance, location, equipment)
             if num != msisdn:
                 data = {'status': 'success', 'error': num}
             else:
@@ -137,9 +137,13 @@ class SubscriberRESTService:
 
     # edit subscriber
     @route('/<msisdn>', Http.PUT)
-    def put(self, request, msisdn='', name='', balance='', authorized='', subscription_status='', location=''):
-        api_log.info('%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" subscription_status:"%s" location:"%s"' % (request.getHost().host, self.path, 
-        msisdn, name, balance, authorized, subscription_status, location))
+    def put(self, request, msisdn='', name='', balance='', authorized='', 
+        subscription_status='', location='', equipment='', roaming=''):
+        api_log.info(
+            '%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" ' 
+            'subscription_status:"%s" location:"%s" equipment:"%s" roaming:"%s"' 
+            % (request.getHost().host, self.path, msisdn, name, balance,
+                authorized, subscription_status, location, equipment, roaming))
         try:
             sub = Subscriber()
             if  authorized != '':
@@ -147,11 +151,10 @@ class SubscriberRESTService:
             if subscription_status != '':
                 sub.subscription(msisdn, subscription_status)
             if msisdn != '' and name != '' or balance != '':
-                sub.edit(msisdn, name, balance, location)
+                sub.edit(msisdn, name, balance, location, equipment, roaming)
             data = {'status': 'success', 'error': ''}
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
-
         api_log.info(data)
         return data
 
