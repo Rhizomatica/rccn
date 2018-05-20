@@ -126,12 +126,12 @@ class SMS:
                             received = urllib.unquote(path).split('=')[1].split('@')[1]
                     else:
                         received = 'None'
-
+                sms_log.info('FS Path: %s' % path)
                 if sip_profile == 'internalvpn':
-                    simple_dest=self.destination+'@'+vpn_ip_address
-                    if path == '10.23.0.14':
+                    simple_dest=self.destination+'@'+sip_central_ip_address+';received='+received
+                    if path == sip_central_ip_address:
                         self.source = self.source+'@sip.rhizomatica.org'
-                        simple_dest=self.destination+'@10.23.0.14'+';received='+received
+                        simple_dest=self.destination+'@'+sip_central_ip_address+';received='+received
                 else:
                     simple_dest=sip_profile+'/'+contact
                 try:
