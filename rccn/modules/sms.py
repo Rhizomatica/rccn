@@ -34,6 +34,9 @@ from threading import Thread
 import ESL
 import binascii
 import gsm0338
+import smpplib
+import smpplib.gsm
+
 
 class SMSException(Exception):
     pass
@@ -126,12 +129,12 @@ class SMS:
                             received = urllib.unquote(path).split('=')[1].split('@')[1]
                     else:
                         received = 'None'
-                sms_log.info('FS Path: %s' % path)
+
                 if sip_profile == 'internalvpn':
-                    simple_dest=self.destination+'@'+sip_central_ip_address+';received='+received
-                    if path == sip_central_ip_address:
+                    simple_dest=self.destination+'@'+vpn_ip_address
+                    if path == '10.23.0.14':
                         self.source = self.source+'@sip.rhizomatica.org'
-                        simple_dest=self.destination+'@'+sip_central_ip_address+';received='+received
+                        simple_dest=self.destination+'@10.23.0.14'+';received='+received
                 else:
                     simple_dest=sip_profile+'/'+contact
                 try:
@@ -283,8 +286,9 @@ class SMS:
     def send(self, source, destination, text, charset='utf-8', server=config['local_ip']):
         sms_log.info('SMS Send: Text: <%s> Charset: %s' % (text, charset) )
         try:
-            # In the case of single/broadcast from RAI, there's no charset passed
-            sms_log.info('Type of text: %s', (type(text)) )  
+            # In the case of single/broadcast from RAI, there's no charset passed and
+            # the str is unicode
+            sms_log.info('Type of text: %s', (type(text)) )
             if (charset == 'UTF-8' or charset == 'utf-8' or charset == 'gsm03.38') and type(text) != unicode:
                 sms_log.info('1 case')
                 str_text=unicode(text,charset).encode('utf-8')
@@ -306,9 +310,9 @@ class SMS:
                 sms_log.info('4 case')
                 str_text=text.encode('utf-8','replace')
                 
-            sms_log.info('Type: %s', (type(str_text)) )
+            sms_log.info('Type str_text: %s', (type(str_text)) )
 
-            if type(text) == unicode:
+            if type(text) != unicode:
                 try:
                     try:
                         # Test if we can encode this as GSM03.38
@@ -319,6 +323,8 @@ class SMS:
                         self.coding = 0
                     except:
                         sms_log.debug('Using GSM03.38 default alphabet not possible. %s' % sys.exc_info()[1] )
+                        import code
+                        #code.interact(local = dict(globals(), **locals()) )
                     # Maybe we can see if we use the Spanish Char Set?
                     gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
                     test = gsm_shift_codec.encode(text)
@@ -341,17 +347,15 @@ class SMS:
 
         if server == config['local_ip']:
             try:
-                sms_log.info('Send SMS: %s %s %s %s' % (source, destination, text, enc_text))
-                kannel_post="http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
-                    % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
-                sms_log.info('Kannel URL: %s' % (kannel_post))     
-                res = urllib.urlopen(kannel_post).read()
-                sms_log.info('Kannel Result: %s' % (res))
+                if use_kannel == 'no' and source == '10000':
+                    source = network_name
+                sms_log.info('Send SMS to Local: %s %s %s %s' % (source, destination, text, enc_text))
+                self.local_smpp_submit_sm(source, destination, text)
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)
-            except IOError:
-                raise SMSException('Error connecting to Kannel to send SMS')
+            except SMSException as e:
+                raise SMSException("Error with local sumbit_sm")
         else:
             try:
                 sms_log.info('Send SMS to %s: %s %s %s' % (server, source, destination, str_text))
@@ -372,6 +376,62 @@ class SMS:
                     self.save(source, destination, self.context)
             except IOError:
                 raise SMSException('Error sending SMS to site %s' % server)
+    
+    def determine_coding(self, unicode_str):
+        try:
+            try:
+                # Test if we can encode this as GSM03.38
+                gsm_codec = gsm0338.Codec()
+                tst=gsm_codec.encode(unicode_str)[0]
+                sms_log.debug('GSM03.38! %s -> %s' % (unicode_str, tst))
+                return smpplib.consts.SMPP_ENCODING_DEFAULT
+            except:
+                sms_log.debug('Enocoding to GSM03.38 default alphabet not possible. %s' % sys.exc_info()[1] )
+            # Maybe we can see if we use the Spanish Char Set?
+            gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
+            tst = gsm_shift_codec.encode(unicode_str)[0]
+            sms_log.debug('GSM03.38 Spanish! %s -> %s' % (unicode_str, gsm_shift_codec.decode(tst)[0]))
+            return smpplib.consts.SMPP_ENCODING_DEFAULT
+        except:
+            sms_log.debug('Using GSM03.38 Spanish Shift not possible. %s' % sys.exc_info()[1] )
+            return smpplib.consts.SMPP_ENCODING_ISO10646
+
+    def local_smpp_submit_sm(self, source, destination, text):
+        if use_kannel == 'yes':
+            try:
+                enc_text = urllib.urlencode({'text': text})
+                kannel_post="http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
+                    % (self.server, self.port, self.username, self.password, self.charset, self.coding, destination, source, enc_text)
+                sms_log.info('Kannel URL: %s' % (kannel_post))
+                res = urllib.urlopen(kannel_post).read()
+                sms_log.info('Kannel Result: %s' % (res))
+                return
+            except IOError:
+                raise SMSException('Error connecting to Kannel to send SMS')
+        try:
+            parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(text)
+            smpp_client = smpplib.client.Client("127.0.0.1", 2775, 90)
+            smpp_client.connect()
+            smpp_client.bind_transceiver(system_id="OSMPP", password="Password")
+            for part in parts:
+                pdu = smpp_client.send_message(
+                    source_addr_ton = smpplib.consts.SMPP_TON_ALNUM,
+                    source_addr_npi= smpplib.consts.SMPP_NPI_UNK,
+                    source_addr = str(source),
+                    dest_addr_ton = smpplib.consts.SMPP_TON_SBSCR,
+                    dest_addr_npi = smpplib.consts.SMPP_NPI_ISDN,
+                    destination_addr = str(destination),
+                    data_coding = encoding_flag,
+                    esm_class = msg_type_flag,
+                    short_message = part,
+                    registered_delivery = False,
+                )
+            smpp_client.unbind()
+            smpp_client.disconnect()
+            del pdu
+            del smpp_client
+        except IOError:
+            raise SMSException('Unable to Submit Message via SMPP')
 
     def roaming(self, subject):
         
