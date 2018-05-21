@@ -73,6 +73,12 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error checking DID: %s' % e)
 
+    def fivetoeleven(self, source_number, destination_number):
+        """ Convert a five digit extension to 11 digits based on the caller. """
+        if len(destination_number) !=5:
+            return destination_number
+        return source_number[:6] + destination_number
+
     def is_number_local(self, destination_number):
         # check if extension if yes add internal_prefix
         if len(destination_number) == 5:
