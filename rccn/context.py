@@ -39,6 +39,9 @@ class Context:
         self.numbering = modules[1]
         self.billing = modules[2]
         self.configuration = modules[3]
+        self.local_codec = 'AMR'
+        self.internal_codec = 'G729'
+        self.outbound_codec = 'G729'
 
     def outbound(self):
         """ Outbound context. Calls to be sent out using the VoIP provider """
@@ -56,6 +59,7 @@ class Context:
             # TODO: announcement of general error
 
         log.debug('Current subscriber balance: %.2f' % current_subscriber_balance)
+
         if current_subscriber_balance > Decimal('0.00'):
             # subscriber has enough balance to make a call
             log.debug('Get call rate')
@@ -64,15 +68,17 @@ class Context:
             rate = self.billing.get_rate(self.destination_number)
             total_call_duration = self.billing.get_call_duration(current_subscriber_balance, rate[3])
 
-            log.info('Total duration for the call before balance end is set to %d sec' % total_call_duration)
-
+            log.info('Total duration for the call before balance end is set to %d sec' 
+                % total_call_duration)
             mid_announcement = total_call_duration - 30
 
-            self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % total_call_duration)
+            self.session.execute('set',
+              'execute_on_answer_1=sched_hangup +%s normal_clearing both' % total_call_duration)
             if total_call_duration > 60:
-                self.session.execute('set', 'execute_on_answer_2=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' % mid_announcement)
-            
-            self.session.execute('set', 'execute_on_answer_3=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' % (total_call_duration - 3))
+                self.session.execute('set',
+                  'execute_on_answer_2=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' % mid_announcement)
+            self.session.execute('set',
+              'execute_on_answer_3=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' % (total_call_duration - 3))
 
             # set correct caller id based on the active provider
             try:
@@ -86,7 +92,6 @@ class Context:
             except ConfigurationException as e:
                 log.error(e)
             '''
-            outbound_codec = 'G729'
 
             if caller_id != None:
                 log.info('Set caller id to %s' % caller_id)
@@ -109,16 +114,22 @@ class Context:
                 self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
                 self.session.hangup()
                 
-            self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
-            self.session.execute('bridge', "{absolute_codec_string='"+outbound_codec+"',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
-            _fail_cause=self.session.getVariable('originate_disposition')
+            self.session.execute('set',
+                "continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
+            self.session.execute('bridge', "{absolute_codec_string='" + self.outbound_codec +
+                "',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
+            _fail_cause = self.session.getVariable('originate_disposition')
             log.info('Gateway Finished with Call: %s' % _fail_cause)
-            if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN" or _fail_cause == "CALL_REJECTED":
+            if (
+                    _fail_cause == "INVALID_GATEWAY" or 
+                    _fail_cause == "GATEWAY_DOWN" or 
+                    _fail_cause == "CALL_REJECTED"
+                ):
                 self.session.execute('playback', '010_no_puede_ser_enlazada.gsm')
             if _fail_cause == "USER_BUSY":
                 self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
         else:
-            log.debug('Subscriber doesn\'t have enough balance to make a call')
+            log.debug('Current Subscriber Balance is 0 or less.')
             # play announcement not enough credit and hangup call
             self.session.answer()
             self.session.execute('playback', '002_saldo_insuficiente.gsm')
@@ -179,7 +190,7 @@ class Context:
         # Hangup after bridge is true in the dialplan.
         #self.session.execute('set','hangup_after_bridge=false')
         self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
+        self.session.execute('bridge', "{absolute_codec_string='AMR'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
         _fail_cause=self.session.getVariable('originate_disposition')
         log.info('LCR Finished with Call: %s' % _fail_cause)
         if _fail_cause == "DESTINATION_OUT_OF_ORDER" or _fail_cause == "NO_ANSWER":
@@ -234,7 +245,7 @@ class Context:
                     self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
                     self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
                     self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@'+mncc_ip_address+':5050')
+                    self.session.execute('bridge', "{absolute_codec_string='"+local_codec+"'}sofia/internal/sip:"+subscriber_number+'@'+mncc_ip_address+':5050')
                     _fail_cause=self.session.getVariable('originate_disposition')
                     log.info('LCR Finished with Call: %s' % _fail_cause)
                     if _fail_cause == "DESTINATION_OUT_OF_ORDER":
@@ -305,7 +316,7 @@ class Context:
                         self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
                         self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
                         self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+dest_num+'@'+mncc_ip_address+':5050')
+                        self.session.execute('bridge', "{absolute_codec_string='"+local_codec+"'}sofia/internal/sip:"+dest_num+'@'+mncc_ip_address+':5050')
                         _fail_cause=self.session.getVariable('originate_disposition')
                         log.info('LCR Finished with Call: %s' % _fail_cause)
                         if _fail_cause == "DESTINATION_OUT_OF_ORDER":
@@ -350,7 +361,7 @@ class Context:
                     # if current_bts is the same as local site, send the call to the local LCR
                     if site_ip == config['local_ip']:
                         log.info('Currentbts same as local site send call to LCR')
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
+                        self.session.execute('bridge', "{absolute_codec_string='"+local_codec+"'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
                     else:
                         self.session.execute('bridge', "{absolute_codec_string='GSM,G729'}sofia/internalvpn/sip:"+self.destination_number+'@'+site_ip+':5040')
                 except NumberingException as e:
