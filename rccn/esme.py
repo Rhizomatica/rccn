@@ -41,6 +41,20 @@ def cs(l, exit = 0):
     if exit == 1:
       exit()
 
+def route_to_hfconnector(src,dest,msg,seq):
+    _hermes_path = '/var/spool/outgoing_messages/'
+    try:
+        _sms_file = _hermes_path + "Outgoing_SMS_" + str(seq) + '.txt'
+        with open(_sms_file, "w") as file:
+            file.write("{0}\n".format(str(src)))
+            file.write("{0}\n".format(str(dest)))
+            file.write("{0}\n".format(str(msg)))
+        log.debug('Wrote SMS to %s' % _sms_file)
+        return 0
+    except Exception as e:
+        log.debug(e)
+        return -1
+
 def rx_deliver_sm(pdu):
     if not isinstance(pdu, smpplib.command.DeliverSM):
         mid = pdu.sequence
@@ -57,10 +71,17 @@ def rx_deliver_sm(pdu):
     log.info("RX SMS: %s" % log_msg)
     log.debug("RX SMS with TON: %s" % pdu.dest_addr_ton)
     if int(pdu.dest_addr_ton) == smpplib.consts.SMPP_TON_INTL:
+        if config.sms_route_intl_hermes == 'yes':
+            rc = route_to_hfconnector(pdu.source_addr,pdu.destination_addr,
+                                pdu.short_message,pdu.sequence)
+            if rc == 0:
+                return smpplib.consts.SMPP_ESME_ROK
         # We cannot deliver any SMS to SMPP_TON_INTL
-        #return smpplib.consts.SMPP_ESME_RSYSERR
         log.info("Unable to handle SMS for %s: SMPP_TON_INTL" % (pdu.destination_addr) )
         return smpplib.consts.SMPP_ESME_RINVDSTADR
+        #return smpplib.consts.SMPP_ESME_RSYSERR
+        #return smpplib.consts.SMPP_ESME_RINVSRCADR
+
     try:
         valid_src = sub.get(pdu.source_addr)
         if not sub.is_authorized(pdu.source_addr,0):
