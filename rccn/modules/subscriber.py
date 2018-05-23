@@ -390,6 +390,19 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
 
+
+    def get_all_by_name(self, string):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('SELECT * FROM subscribers WHERE name ilike %(string)s', {'string': '%'+string+'%'})
+            if cur.rowcount > 0:
+                subs = cur.fetchall()
+                return subs
+            else:
+                return []
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
+
     def set_lac(self, imsi, lac):
         ''' I fixed this, but don't use it. Dont write to the sqlite3. '''
         try:
