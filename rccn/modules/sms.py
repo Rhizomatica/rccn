@@ -44,10 +44,15 @@ class SMSException(Exception):
 class SMS:
 
     def __init__(self):
+
         self.server = kannel_server
         self.port = kannel_port
         self.username = kannel_username
         self.password = kannel_password
+        self.smssvc_url = smssvc_url
+        self.smssvc_user = smssvc_user
+        self.smssvc_secret = smssvc_secret
+        self.smssvc_from = smssvc_from
         self.charset = 'UTF-8'
         self.coding = 2
         self.context = 'SMS_LOCAL'
@@ -74,6 +79,27 @@ class SMS:
                 sms_log.info('Dropping SMS on floor because text matched %s' % regexp)
                 return True
         return False
+
+    def route_intl_service(self, source, destination, text, sequence):
+        sms_log.info('SMS for delivery by provider: %s %s %s %s' % (source, destination, text, sequence))
+        
+        _from = { '52' : '529512058046', }.get(destination[:2], self.smssvc_from)
+        # These values are for nexmo
+        values = {  'api_key': self.smssvc_user,
+                    'api_secret': self.smssvc_secret,
+                    'from': _from, 
+                    'to': destination, 
+                    'text': text, 
+                }
+        data = urllib.urlencode(values)
+        t = Thread (target = self._t_urlopen2, args = (self.smssvc_url, data) )
+        t.start()
+        sms_log.info('Started Remote SMS Delivery Thread')
+        if self.save_sms:
+            sms_log.info('Save SMS in the history')
+            self.save(source, destination, self.context)
+        return 0
+
 
     def receive(self, source, destination, text, charset, coding):
         self.charset = charset
@@ -202,6 +228,13 @@ class SMS:
             except SubscriberException as e:
                 destination_authorized = False
 
+            if destination == self.smssvc_from:
+                source_authorized = True
+                destination_authorized = True
+                destination = '68000122465'
+                intl = True
+                
+
             sms_log.info('Source_authorized: %s Destination_authorized: %s' % (str(source_authorized), str(destination_authorized)))
 
 
@@ -224,12 +257,12 @@ class SMS:
                         # number is local send SMS back to SMSc
                         self.context = 'SMS_LOCAL'
                         # Decision was not to send coding on here.....
-                        self.send(source, destination, text, charset)
+                        self.send(source, destination, text, charset, 'utf-8', config['local_ip'], intl)
                     else:
                         if not self.numbering.is_number_local(source) and destination_authorized:
                             sms_log.info('SMS_INTERNAL Forward SMS back to BSC')
                             self.context = 'SMS_INTERNAL'
-                            self.send(source, destination, text, charset)
+                            self.send(source, destination, text, charset, config['local_ip'], intl)
                         else:
                             if destination_authorized and not self.numbering.is_number_local(source):
                                 sms_log.info('SMS_INBOUND Forward SMS back to BSC')
@@ -283,8 +316,8 @@ class SMS:
         except NumberingException as e:
             raise SMSException('Receive SMS Error: %s' % e)
     
-    def send(self, source, destination, text, charset='utf-8', server=config['local_ip']):
-        sms_log.info('SMS Send: Text: <%s> Charset: %s' % (text, charset) )
+    def send(self, source, destination, text, charset='utf-8', server=config['local_ip'], intl=False):
+        sms_log.info('SMS Send: Text: <%s> Charset: %s INTL:%s' % (text, charset, intl) )
         try:
             # In the case of single/broadcast from RAI, there's no charset passed and
             # the str is unicode
@@ -350,7 +383,7 @@ class SMS:
                 if use_kannel == 'no' and source == '10000':
                     source = network_name
                 sms_log.info('Send SMS to Local: %s %s %s %s' % (source, destination, text, enc_text))
-                self.local_smpp_submit_sm(source, destination, text)
+                self.local_smpp_submit_sm(source, destination, text, intl)
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)
@@ -396,7 +429,7 @@ class SMS:
             sms_log.debug('Using GSM03.38 Spanish Shift not possible. %s' % sys.exc_info()[1] )
             return smpplib.consts.SMPP_ENCODING_ISO10646
 
-    def local_smpp_submit_sm(self, source, destination, text):
+    def local_smpp_submit_sm(self, source, destination, text, intl):
         if use_kannel == 'yes':
             try:
                 enc_text = urllib.urlencode({'text': text})
@@ -409,14 +442,20 @@ class SMS:
             except IOError:
                 raise SMSException('Error connecting to Kannel to send SMS')
         try:
+            if intl == True:
+                ston = smpplib.consts.SMPP_TON_INTL
+                snpi = smpplib.consts.SMPP_NPI_ISDN
+            else:
+                snpi = smpplib.consts.SMPP_NPI_UNK
+                ston = smpplib.consts.SMPP_TON_ALNUM
             parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(text)
             smpp_client = smpplib.client.Client("127.0.0.1", 2775, 90)
             smpp_client.connect()
             smpp_client.bind_transceiver(system_id="OSMPP", password="Password")
             for part in parts:
                 pdu = smpp_client.send_message(
-                    source_addr_ton = smpplib.consts.SMPP_TON_ALNUM,
-                    source_addr_npi= smpplib.consts.SMPP_NPI_UNK,
+                    source_addr_ton = ston,
+                    source_addr_npi= snpi,
                     source_addr = str(source),
                     dest_addr_ton = smpplib.consts.SMPP_TON_SBSCR,
                     dest_addr_npi = smpplib.consts.SMPP_NPI_ISDN,
@@ -536,6 +575,22 @@ class SMS:
         sms_log.info('Send broadcast SMS to all subscribers. text: %s' % text)
         t = Thread(target=self.broadcast_to_all_subscribers, args=(text, btype, ))
         t.start()
+
+    def _t_urlopen2(self, url, data):
+        try:
+            res = urllib.urlopen(url, data)
+            ret = res.read()
+            res.close()
+            try:
+                j = json.loads(ret)
+                sms_log.info('Status of Submitted SMS to %s: %s' % 
+                    (j['messages'][0]['to'], j['messages'][0]['status']))
+                sms_log.info('NEXMO Account Balance: %s' % 
+                    (j['messages'][0]['remaining-balance']))
+            except:
+                pass
+        except IOError as ex:
+            sms_log.error(ex)
 
     def _t_urlopen(self, url, data):
         try:

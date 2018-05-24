@@ -137,11 +137,17 @@ def rx_deliver_sm(pdu):
         return smpplib.consts.SMPP_ESME_ROK
 
     if int(pdu.dest_addr_ton) == smpplib.consts.SMPP_TON_INTL:
+        # FIXME Deal properly with multipart messages.
+        rc = -1
         if config.sms_route_intl_hermes == 'yes':
             rc = route_to_hfconnector(pdu.source_addr,pdu.destination_addr,
                                 pdu.short_message,pdu.sequence)
-            if rc == 0:
+        if config.sms_route_intl_service == 'yes':
+            rc = sms.route_intl_service(pdu.source_addr,pdu.destination_addr,
+                                pdu.short_message,pdu.sequence)
+        if rc == 0:
                 return smpplib.consts.SMPP_ESME_ROK
+
         # We cannot deliver any SMS to SMPP_TON_INTL
         log.info("Unable to handle SMS for %s: SMPP_TON_INTL" % (pdu.destination_addr) )
         return smpplib.consts.SMPP_ESME_RINVDSTADR
@@ -315,6 +321,8 @@ if __name__ == "__main__":
     SubscriberException = config.subscriber.SubscriberException
     num=config.Numbering()
     NumberingException = config.numbering.NumberingException
+    sms=config.SMS()
+    SMSException = config.sms.SMSException
     #open a VTY console, don't bring up and down all the time.
     #vty = obscvty.VTYInteract('OpenBSC', '127.0.0.1', 4242)
     log.info('Starting up ESME')
