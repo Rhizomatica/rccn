@@ -406,7 +406,8 @@ class SMSRESTService:
                     text=btext
         try:
             sms = SMS()
-            sms.receive(source, destination, text, charset, coding)
+            # I have stolen the dcs param to pass the messageId from Data Centre
+            sms.receive(source, destination, text, charset, coding, dcs)
             data = {'status': 'success', 'error': ''}
         except SMSException as e:
             data = {'status': 'failed', 'error': str(e)}

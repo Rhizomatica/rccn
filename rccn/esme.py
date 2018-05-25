@@ -42,20 +42,6 @@ def cs(l, exit = 0):
     if exit == 1:
       exit()
 
-def route_to_hfconnector(src,dest,msg,seq):
-    _hermes_path = '/var/spool/outgoing_messages/'
-    try:
-        _sms_file = _hermes_path + "Outgoing_SMS_" + str(seq) + '.txt'
-        with open(_sms_file, "w") as file:
-            file.write("{0}\n".format(str(src)))
-            file.write("{0}\n".format(str(dest)))
-            file.write("{0}\n".format(str(msg)))
-        log.debug('Wrote SMS to %s' % _sms_file)
-        return 0
-    except Exception as e:
-        log.debug(e)
-        return -1
-
 def check_for_shortcode(pdu):
     if pdu.destination_addr == '111':
         _svc = 'HELP'
@@ -140,8 +126,8 @@ def rx_deliver_sm(pdu):
         # FIXME Deal properly with multipart messages.
         rc = -1
         if config.sms_route_intl_hermes == 'yes':
-            rc = route_to_hfconnector(pdu.source_addr,pdu.destination_addr,
-                                pdu.short_message,pdu.sequence)
+            rc = sms.route_to_hfconnector(pdu.source_addr,pdu.destination_addr,
+                                pdu.short_message,pdu.sequence, 'outgoing')
         if config.sms_route_intl_service == 'yes':
             rc = sms.route_intl_service(pdu.source_addr,pdu.destination_addr,
                                 pdu.short_message,pdu.sequence)

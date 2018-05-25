@@ -100,8 +100,24 @@ class SMS:
             self.save(source, destination, self.context)
         return 0
 
+    def route_to_hfconnector(self, src, dest, msg, seq, direction):
+        _hermes_path = '/var/spool/' + direction + '_messages/'
+        try:
+            if not os.path.exists(_hermes_path):
+                os.makedirs(_hermes_path)
+            _sms_file = _hermes_path + "msg-" + str(seq) + '.txt'
+            with open(_sms_file, "w") as file:
+                file.write("{0}\n".format(str(src)))
+                file.write("{0}\n".format(str(dest)))
+                file.write("{0}\n".format(str(msg)))
+            log.debug('Wrote SMS to %s' % _sms_file)
+            return 0
+        except Exception as e:
+            log.debug(e)
+            return -1        
 
-    def receive(self, source, destination, text, charset, coding):
+
+    def receive(self, source, destination, text, charset, coding, seq):
         self.charset = charset
         self.coding = coding
         self.source = source
@@ -231,8 +247,13 @@ class SMS:
             if destination == self.smssvc_from:
                 source_authorized = True
                 destination_authorized = True
-                destination = '68000122465'
-                intl = True
+                # TODO. Make some kind of a map here.
+                if incoming_intl_to_queue == 'yes':
+                    self.route_to_hfconnector(source, destination, text, seq, 'incoming')
+                    return
+                else:    
+                    destination = '68000122465'
+                    intl = True
                 
 
             sms_log.info('Source_authorized: %s Destination_authorized: %s' % (str(source_authorized), str(destination_authorized)))
