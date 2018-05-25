@@ -190,7 +190,7 @@ class Context:
         # Hangup after bridge is true in the dialplan.
         #self.session.execute('set','hangup_after_bridge=false')
         self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-        self.session.execute('bridge', "{absolute_codec_string='AMR'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
+        self.session.execute('bridge', "{absolute_codec_string='"+self.local_codec+"'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
         _fail_cause=self.session.getVariable('originate_disposition')
         log.info('LCR Finished with Call: %s' % _fail_cause)
         if _fail_cause == "DESTINATION_OUT_OF_ORDER" or _fail_cause == "NO_ANSWER":
@@ -199,6 +199,8 @@ class Context:
             self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
         if _fail_cause == "UNALLOCATED_NUMBER":
             self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')            
+
+        self.session.hangup(_fail_cause)
 
         # in case of no answer send call to voicemail
         #log.info('No answer, send call to voicemail')
