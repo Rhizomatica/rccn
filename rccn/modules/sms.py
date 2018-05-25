@@ -252,7 +252,8 @@ class SMS:
                     self.route_to_hfconnector(source, destination, text, seq, 'incoming')
                     return
                 else:    
-                    destination = '68000122465'
+                    #destination = '68000122465'
+                    destination = '77777146471'
                     intl = True
                 
 
