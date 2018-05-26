@@ -48,6 +48,7 @@ def check_for_shortcode(pdu):
         _help_str = (
         "Text to 111 for HELP\n"
         "Text to 222 to Update your Name.\n"
+        "Text to 333 to alert all users.\n"
         "Text to 555 to Search.\n")
         if len(_help_str) < 160:
             local_submit(_svc,str(pdu.source_addr),_help_str)
@@ -82,6 +83,13 @@ def check_for_shortcode(pdu):
             local_submit(_svc,str(pdu.source_addr),str(e))
             return -1
         local_submit(_svc,str(pdu.source_addr),'Name updated to '+_name)
+        return True
+    if pdu.destination_addr == '333':
+        try:
+            sms.send_broadcast(pdu.short_message, 'all')
+        except SubscriberException as e:
+            sms.local_submit(_svc,str(pdu.source_addr),str(e))
+            return -1
         return True
     return -1
 
