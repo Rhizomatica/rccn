@@ -32,6 +32,12 @@ import config
 import obscvty, urllib2, time
 import smpplib.client
 import smpplib.consts
+import code
+
+def cs(l, exit = 0):
+    code.interact(local = dict(globals(), **l) )
+    if exit == 1:
+      exit()
 
 def _get_imsi(ext):
     try:
@@ -47,7 +53,7 @@ def _get_imsi(ext):
         return False
 
 def rx_alert_notification(pdu):
-    
+
     #print pdu.source_addr_ton, pdu.source_addr_npi, pdu.source_addr, pdu.ms_availability_status
     # Sanity check that we got imsi/extension
     if pdu.source_addr_ton == '3' and pdu.source_addr_npi == '1':
@@ -55,6 +61,20 @@ def rx_alert_notification(pdu):
     elif pdu.source_addr_ton == '4' and pdu.source_addr_npi == '6':
         mode='IMSI'
     else:
+        return
+
+    #cs(locals())
+
+    if pdu.ms_availability_status == '3':
+        log.info('Received Initial IMSI Attach Notification for %s: %s' % (mode, pdu.source_addr))
+        welcome =  (
+        "You are connected to the open HERMES SAR Network\n"
+        "Text to 111 for HELP\n"
+        "Text to 222 to Update your Name.\n"
+        "Text to 333 to alert all users.\n"
+        "Text to 555 to Search.\n")
+        sms = config.SMS()
+        sms.local_smpp_submit_sm(config.network_name, pdu.source_addr, welcome, False)
         return
 
     if pdu.ms_availability_status == '2':
@@ -97,7 +117,7 @@ def rx_alert_notification(pdu):
                         log.error('Error connect to site %s to return subscriber %s' % (current_bts,extension) )
 
     if pdu.ms_availability_status == '0':
-        log.debug('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
+        log.info('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
         if mode=='EXT':
             extension=pdu.source_addr
             if len(extension) == 5:
