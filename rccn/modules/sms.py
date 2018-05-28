@@ -244,21 +244,24 @@ class SMS:
             except SubscriberException as e:
                 destination_authorized = False
 
-            if destination == self.smssvc_from:
+            try:
+                local_rcpt = self.numbering.get_did_subscriber(destination)
+                # We have a mapping for this number. 
+                # It might be incoming from provider via rapi, or
+                # coming from the hermes spool if we are remote.
+                sms_log.info('Found mapping for %s to %s' % (destination, local_rcpt))
                 source_authorized = True
                 destination_authorized = True
-                # TODO. Make some kind of a map here.
-                if incoming_intl_to_queue == 'yes':
+                if hermes == 'central':
                     self.route_to_hfconnector(source, destination, text, seq, 'incoming')
                     return
-                else:    
-                    #destination = '68000122465'
-                    destination = '77777146471'
+                elif hermes == 'remote':
+                    destination = local_rcpt
                     intl = True
-                
+            except NumberingException as e:
+                sms_log.info('No Mapping for this number')
 
             sms_log.info('Source_authorized: %s Destination_authorized: %s' % (str(source_authorized), str(destination_authorized)))
-
 
             if not source_authorized and not self.numbering.is_number_internal(source):
                 sms_log.info('Sender unauthorized send notification message (EXT)')

@@ -133,10 +133,10 @@ def rx_deliver_sm(pdu):
     if int(pdu.dest_addr_ton) == smpplib.consts.SMPP_TON_INTL:
         # FIXME Deal properly with multipart messages.
         rc = -1
-        if config.sms_route_intl_hermes == 'yes':
+        if config.route_intl_to_hermes == 'yes':
             rc = sms.route_to_hfconnector(pdu.source_addr,pdu.destination_addr,
                                 pdu.short_message,pdu.sequence, 'outgoing')
-        if config.sms_route_intl_service == 'yes':
+        if config.route_intl_to_service == 'yes':
             rc = sms.route_intl_service(pdu.source_addr,pdu.destination_addr,
                                 pdu.short_message,pdu.sequence)
         if rc == 0:
