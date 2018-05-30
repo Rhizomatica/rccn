@@ -1,6 +1,7 @@
 ############################################################################
 #
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
+# Copyright (C) 2018 Keith <keith@rhizomatica.org>
 #
 # Dialplan call routing
 # This file is part of RCCN
@@ -35,8 +36,7 @@ class Dialplan:
         """ init """
         self.session = session
 
-        self.destination_number = self.session.getVariable(
-            'destination_number')
+        self.destination_number = self.session.getVariable('destination_number')
         self.calling_number = self.session.getVariable('caller_id_number')
         self.calling_host = self.session.getVariable("sip_network_ip")
 
@@ -92,12 +92,33 @@ class Dialplan:
             # TODO: register announcement of general error
             self.play_announcement(self.NOT_CREDIT_ENOUGH)
 
+    def audio_to_hermes(self, direction='outgoing'):
+        self.session.answer()
+        self.session.execute('playback', 'leave_message.gsm')
+        self.session.execute('playback', 'beep.gsm')
+        _uuid = re.sub('-', '', self.session.getVariable('call_uuid'))
+        _caller = self.calling_number
+        _callee = re.sub('^[+|0]*', '', self.destination_number)
+        _filename = _uuid + '-' + _caller + '-' + _callee + '.gsm'
+        recording = "/var/spool/"+direction+"_messages/call-" + _filename
+        log.debug('Recording to %s' % recording)
+        #self.session.execute('record', recording+'.wav 15 10 5')
+        self.session.recordFile(recording, 15, 30, 3)
+        self.session.execute('playback', 'beep.gsm')
+        self.session.sleep(1)
+        self.session.hangup()
+
+
     def lookup(self):
         """
         Dialplan processing to route call to the right context
         """
         # TODO split this monster function.
         # the processing is async we need a flag
+
+        #x = dir(self.session)
+        #log.debug(x)
+
         processed = 0
 
         # emergency call check
@@ -120,6 +141,7 @@ class Dialplan:
                 dial_str = 'sofia/internal/sip:'+emergency_contact+'@'+mncc_ip_address+':5050'
             
             self.session.setVariable('context','EMERGENCY')
+            # FIXME: Implement dynamic codec here:
             self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
             
         if processed == 0:
@@ -129,12 +151,24 @@ class Dialplan:
                 if (self._n.is_number_did(self.destination_number)):
                     log.info('Called number is a DID')
                     log.info("Caller from: %s" % self.calling_host)
-                    if self.calling_host == mncc_ip_address:
+                    if self.calling_host == '1'+mncc_ip_address:
                         log.info("Call to DID has local origin!")
                         self.play_announcement(self.WRONG_NUMBER)
                         return
                     log.debug('Execute context INBOUND call')
                     processed = 1
+                    
+                    if hermes == 'central':
+                        log.info('Incoming Call to HERMES')
+                        try:
+                            log.info('Check if DID is assigned to a subscriber for direct calling')
+                            subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
+                            self.destination_number = subscriber_number
+                            log.info('DID is assigned to %s' % subscriber_number)
+                        except NumberingException as e:
+                            log.error(e)
+                        self.audio_to_hermes('incoming')
+                        return
                     # send call to IVR execute context
                     self.session.setVariable('inbound_loop', '0')
                     self.context.inbound()
@@ -177,6 +211,7 @@ class Dialplan:
             # prefix with + or 00
 
             try:
+                # FIXME: Make this Mexico Specific code a configurable option.
                 if (len(self.destination_number) == 10 and re.search(r'^(00|\+)', self.destination_number) is None):
                     if self.numbering.is_number_mxcel(self.destination_number):
                         self.destination_number = '00521' + self.destination_number
@@ -194,6 +229,10 @@ class Dialplan:
             ) and processed == 0:
                 log.debug('Called number is an international call or national')
                 processed = 1
+                if hermes == 'remote':
+                    log.debug('Outgoing International Call to HERMES')
+                    self.audio_to_hermes('outgoing')
+                    return
                 log.debug(
                     'Called number is an external number '
                     'send call to OUTBOUND context')
@@ -282,3 +321,4 @@ class Dialplan:
                             self.play_announcement(self.WRONG_NUMBER)
             except NumberingException as e:
                 log.error(e)
+

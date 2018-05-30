@@ -49,6 +49,8 @@ class Numbering:
         try:
             con = ESLconnection("127.0.0.1", "8021", "ClueCon")
             e = con.api("sofia_contact "+str(number))
+            if e is None:
+                return False
             _sofia_contact=e.getBody()
             if _sofia_contact == 'error/user_not_registered':
                 e = con.api( "sofia_contact */" + str(number) + "@" + str(wan_ip_address) )
@@ -285,6 +287,7 @@ class Numbering:
             dest = cur.fetchone()
             if dest != None:
                 return dest[0]
+            return False
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error getting subscriber number associated to the DID: %s' % e)
 

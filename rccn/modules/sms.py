@@ -249,15 +249,16 @@ class SMS:
                 # We have a mapping for this number. 
                 # It might be incoming from provider via rapi, or
                 # coming from the hermes spool if we are remote.
-                sms_log.info('Found mapping for %s to %s' % (destination, local_rcpt))
-                source_authorized = True
-                destination_authorized = True
-                if hermes == 'central':
-                    self.route_to_hfconnector(source, destination, text, seq, 'incoming')
-                    return
-                elif hermes == 'remote':
-                    destination = local_rcpt
-                    intl = True
+                if local_rcpt:
+                        sms_log.info('Found mapping for %s to %s' % (destination, local_rcpt))
+                        source_authorized = True
+                        destination_authorized = True
+                        if hermes == 'central':
+                            self.route_to_hfconnector(source, destination, text, seq, 'incoming')
+                            return
+                        elif hermes == 'remote':
+                            destination = local_rcpt
+                            intl = True
             except NumberingException as e:
                 sms_log.info('No Mapping for this number')
 
@@ -494,7 +495,7 @@ class SMS:
             smpp_client.disconnect()
             del pdu
             del smpp_client
-        except IOError:
+        except IOError, Exception:
             raise SMSException('Unable to Submit Message via SMPP')
 
     def roaming(self, subject):

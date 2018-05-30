@@ -213,11 +213,11 @@ class Context:
         """ Inbound context. Calls coming from the VoIP provider """
         self.session.setVariable('context', 'INBOUND')
         # check if DID is assigned to a subscriber
-        #try:
-        #    log.info('Check if DID is assigned to a subscriber for direct calling')
-        #    subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
-        #except NumberingException as e:
-        #    log.error(e)
+        try:
+            log.info('Check if DID is assigned to a subscriber for direct calling')
+            subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
+        except NumberingException as e:
+            log.error(e)
         try:
             log.debug('Check if Number is a Valid Local Number')
             if (self.numbering.is_number_local(self.destination_number)):

@@ -27,6 +27,7 @@ rhizo-hf-connector folder watch
 import os, re
 import inotify.adapters
 import config
+import ESL
 
 if __name__ == "__main__":
     sms = config.SMS()
@@ -61,28 +62,50 @@ if __name__ == "__main__":
                     if not os.path.isfile(_full_path):
                         log.info("File: %s was deleted!" % (_full_path))
                         continue
-                    m = re.match('msg-(.*).txt', filename)
+                    m = re.match('(msg|call)-(.*).(txt|gsm)', filename)
                     if not m:
                         log.info("File: %s not of interest to us." % (_full_path))
                         continue
                     #import code
                     #code.interact(local=locals())
-                    _seq = m.groups()[0]
-                    with open(_full_path, "r") as file:
-                        _source = file.readline().strip()
-                        _dest = file.readline().strip()
-                        _msg = ''
-                        _line = file.readline()
-                        while _line:
-                            _msg = _msg + _line.strip()
+                    
+                    if m.groups()[0] == 'msg':
+                        _seq = m.groups()[1]
+                        with open(_full_path, "r") as file:
+                            _source = file.readline().strip()
+                            _dest = file.readline().strip()
+                            _msg = ''
                             _line = file.readline()
-                    log.info("Message (%s) from: %s to %s with %s" % (_seq, _source, _dest, _msg) )
-                    if config.hermes == 'remote':
-                        # Deliver this SMS to the local SMSC (via rapi)
-                        sms.receive(_source, _dest, _msg, 'utf-8', 0, _seq)
-                    if config.hermes == 'central':
-                        # Deliver this SMS to the upstream provider.
-                        sms.route_intl_service(_source, _dest, _msg, _seq)
+                            while _line:
+                                _msg = _msg + _line.strip()
+                                _line = file.readline()
+                        log.info("Message (%s) from: %s to %s with %s" % (_seq, _source, _dest, _msg) )
+                        if config.hermes == 'remote':
+                            # Deliver this SMS to the local SMSC (via rapi)
+                            sms.receive(_source, _dest, _msg, 'utf-8', 0, _seq)
+                        if config.hermes == 'central':
+                            # Deliver this SMS to the upstream provider.
+                            sms.route_intl_service(_source, _dest, _msg, _seq)
+                    if m.groups()[0] == 'call':
+                        _caller = m.groups()[1].split('-')[1]
+                        _callee = m.groups()[1].split('-')[2]
+                        log.info('New audio call found from %s to %s' % (_caller, _callee))
+                        try:
+                            con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
+                            _file_string = "file_string://have_new_message.gsm!" + _full_path
+                            _sofia_str = (
+                                "{origination_caller_id_number="+_caller+"}"
+                                "sofia/internal/"+str(_callee)+"@"+config.mncc_ip_address+":5050"
+                                " &playback("+_file_string+")"
+                                )
+                            e = con.api("originate", _sofia_str)
+                            if e:
+                                res = e.getBody()
+                                log.info("Freeswitch Response: %s" % res)
+                        except Exception as ex:
+                            print str(ex)
+
+                        # Call ?
 
                 log.debug("WD=(%d) MASK=(%d) COOKIE=(%d) LEN=(%d) MASK->NAMES=%s "
                              "WATCH-PATH=[%s] FILENAME=[%s]",
