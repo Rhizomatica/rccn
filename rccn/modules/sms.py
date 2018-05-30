@@ -477,7 +477,11 @@ class SMS:
             parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(text)
             smpp_client = smpplib.client.Client("127.0.0.1", 2775, 90)
             smpp_client.connect()
-            smpp_client.bind_transceiver(system_id="OSMPP", password="Password")
+            try:
+                text = text.decode('utf-8').encode('ascii', 'replace')
+                smpp_client.bind_transceiver(system_id="OSMPP", password="Password")
+            except:
+                log.error("Exception in smpp_client prob. due to encoding probs.")
             for part in parts:
                 pdu = smpp_client.send_message(
                     source_addr_ton = ston,
