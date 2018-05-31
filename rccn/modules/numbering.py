@@ -280,6 +280,18 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error getting CallerID: %s' % e)
 
+    def get_subscriber_did(self, calling_number):
+        try:
+            cur = db_conn.cursor()
+            cur.execute('select callerid from dids where subscriber_number=%(number)s', {'number': calling_number})
+            dest = cur.fetchone()
+            if dest != None:
+                return dest[0]
+            return False
+        except psycopg2.DatabaseError as e:
+            raise NumberingException('Database error getting DID associated to the subscriber number: %s' % e)
+
+
     def get_did_subscriber(self, destination_number):
         try:
             cur = db_conn.cursor()
