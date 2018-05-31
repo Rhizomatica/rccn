@@ -87,33 +87,37 @@ if __name__ == "__main__":
                             # Deliver this SMS to the upstream provider.
                             sms.route_intl_service(_source, _dest, _msg, _seq)
                     if m.groups()[0] == 'call':
+                        _seq = m.groups()[1].split('-')[0]
                         _caller = m.groups()[1].split('-')[1]
                         _callee = m.groups()[1].split('-')[2]
-                        log.info('New audio call found from %s to %s' % (_caller, _callee))
+                        log.info('New audio message found from %s to %s' % (_caller, _callee))
                         # FIXME: I think what is needed here is to send the B leg into a dialplan
                         # where we can control what happens and then interact with the callee.
                         try:
                             con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
-                            _file_string = "file_string://wait5.gsm!have_new_message.gsm!" + _full_path
-                            if config.hermes == 'remote':
-                                # Our Message needs to go upstream to VOIP
-                                sip_route = 'internal'
-                                sip_dest = "@"+config.mncc_ip_address+":5050"
                             if config.hermes == 'central':
-                                # Our Message is being sent to the local GSM Net.
-                                # FIXME, Make this lookup properly in the database.
+                                # Our Message needs to go upstream to VOIP
                                 _callee = '+'+_callee
                                 sip_route = "gateway/rhizomatica"
                                 sip_dest = ""
+                            if config.hermes == 'remote':
+                                # Our Message is being sent to the local GSM Net.
+                                # FIXME, Make this lookup properly in the database.
+                                sip_route = 'internal'
+                                sip_dest = "@"+config.mncc_ip_address+":5050"
+                                #sip_dest = "@192.168.11.121:5061"
                             _sofia_str = (
-                                "{origination_caller_id_number="+_caller+"}"
+                                "{orig_uuid="+_seq+"}"
                                 "sofia/"+sip_route+"/"+str(_callee)+sip_dest+" "
-                                "&playback("+_file_string+")"
+                                ""+_caller+" XML hermes +"+_caller +" +"+_caller+""
                                 )
+                            log.info('FS originate: %s' % _sofia_str)
                             e = con.api("originate", _sofia_str)
                             if e:
                                 res = e.getBody()
                                 log.info("Freeswitch Response: %s" % res)
+                                if res[:3] != "+OK":
+                                    log.info("Call did not go through, what to do?")
                         except Exception as ex:
                             print str(ex)
 

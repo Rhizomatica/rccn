@@ -52,6 +52,49 @@ class Dialplan:
 
         self.context = Context(session, modules)
 
+    def hermes_bleg(self):
+        if hermes == 'central':
+            direction = 'outgoing'
+            _hermes_path = b'/var/spool/' + direction + '_messages/'
+        if hermes == 'remote':
+            direction = 'incoming'
+            _hermes_path = b'/var/spool/' + direction + '_messages/'
+
+        # This is the B-leg of our outgoing notification call.
+        # The way the variables get passed it ends up that the caller is
+        self.session.sleep(500)
+        self.session.execute('playback','have_new_message.gsm')
+        uuid = self.session.getVariable('orig_uuid')
+        _audio_file="call-"+uuid+"-"+self.destination_number+"-"+self.calling_number+".gsm"
+        log.info('HERMES-%s: From:%s To:%s Seq:%s' % 
+            (hermes, self.calling_number, self.destination_number, uuid))
+        log.info('Playing Back: %s' % _audio_file)
+        self.session.execute('playback',_hermes_path+_audio_file)
+        # Wait for DTMF to confirm and then delete the audio file.
+        loop_count = 0
+        while self.session.ready() == True and loop_count < 3:
+                loop_count += 1
+                log.info('Playback Hermes menu (%s)', loop_count)
+                log.info('Collect DTMF')
+                choice = self.session.playAndGetDigits(1, 1, 3, 3000, '', "hermes_loop.gsm", '', "\\d+")
+                log.info('User Choice: %s' % choice)
+                if choice == '1':
+                    self.session.execute('playback',_hermes_path+_audio_file)
+                if choice == '2':
+                    self.session.execute('playback','hermes_bye.gsm')
+                    self.session.sleep(750)
+                    self.session.hangup()
+                if choice == '3':
+                    # audio_to_hermes will hangup.
+                    if hermes == 'central':
+                        self.audio_to_hermes('incoming')
+                    if hermes == 'remote':
+                        self.audio_to_hermes('outgoing')
+                if self.session.ready() != True:
+                    self.session.hangup()
+                    return
+        return
+
     def play_announcement(self, ann):
         """
         Play an announcement and hangup call.
@@ -94,7 +137,7 @@ class Dialplan:
 
     def audio_to_hermes(self, direction='outgoing'):
         self.session.answer()
-        self.session.execute('playback', 'leave_message.gsm')
+        self.session.execute('playback', 'please_record.gsm')
         self.session.execute('playback', 'beep.gsm')
         _uuid = re.sub('-', '', self.session.getVariable('call_uuid'))
         _caller = self.calling_number
@@ -105,6 +148,7 @@ class Dialplan:
         #self.session.execute('record', recording+'.wav 15 10 5')
         self.session.recordFile(recording, 15, 30, 3)
         self.session.execute('playback', 'beep.gsm')
+        self.session.execute('playback', 'hermes_bye.gsm')
         self.session.sleep(1)
         self.session.hangup()
 
