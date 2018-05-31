@@ -76,7 +76,7 @@ class Dialplan:
         log.info('HERMES-%s: From:%s To:%s Seq:%s' % 
             (hermes, self.calling_number, self.destination_number, uuid))
         log.info('Playing Back: %s' % _rawfile)
-        self.session.execute('set_audio_level', 'write +4')
+        self.session.execute('set_audio_level', 'write +2')
         self.session.execute('playback',_rawfile)
         self.session.execute('set_audio_level', 'write 0')
         # Wait for DTMF to confirm and then delete the audio file.
@@ -89,7 +89,7 @@ class Dialplan:
                 choice = self.session.playAndGetDigits(1, 1, 3, 3000, '', "hermes_loop.gsm", '', "\\d+")
                 log.info('User Choice: %s' % choice)
                 if choice == '1':
-                    self.session.execute('set_audio_level', 'write +4')
+                    self.session.execute('set_audio_level', 'write +2')
                     self.session.execute('playback',_rawfile)
                     self.session.execute('set_audio_level', 'write 0')
                 if choice == '2':
