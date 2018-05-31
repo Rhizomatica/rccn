@@ -101,7 +101,7 @@ if __name__ == "__main__":
                         if _did:
                             _caller_id = _did
                         else:
-                            _caller_id = _caller
+                            _caller_id = '+'+_caller
                         try:
                             con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
                             if config.hermes == 'central':
