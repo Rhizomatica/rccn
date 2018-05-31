@@ -64,7 +64,7 @@ if __name__ == "__main__":
                     if not os.path.isfile(_full_path):
                         log.info("File: %s was deleted!" % (_full_path))
                         continue
-                    m = re.match('(msg|call)-(.*).(txt|gsm)', filename)
+                    m = re.match('(msg|call)-(.*).(txt|c2)', filename)
                     if not m:
                         log.info("File: %s not of interest to us." % (_full_path))
                         continue

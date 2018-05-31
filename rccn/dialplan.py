@@ -65,11 +65,15 @@ class Dialplan:
         self.session.sleep(500)
         self.session.execute('playback','have_new_message.gsm')
         uuid = self.session.getVariable('orig_uuid')
-        _audio_file="call-"+uuid+"-"+self.destination_number+"-"+self.calling_number+".gsm"
+        _c2file="call-"+uuid+"-"+self.destination_number+"-"+self.calling_number+".c2"
+        _rawfile = "/tmp/call-" + uuid + '.raw'
+        log.info('Decoding %s to %s' % (_c2file, _rawfile))
+        enc_command = '/usr/local/bin/c2dec 1200 '+ _hermes_path+_c2file + ' ' + _rawfile
+        os.system(enc_command)
         log.info('HERMES-%s: From:%s To:%s Seq:%s' % 
             (hermes, self.calling_number, self.destination_number, uuid))
-        log.info('Playing Back: %s' % _audio_file)
-        self.session.execute('playback',_hermes_path+_audio_file)
+        log.info('Playing Back: %s' % _rawfile)
+        self.session.execute('playback',_rawfile)
         # Wait for DTMF to confirm and then delete the audio file.
         loop_count = 0
         while self.session.ready() == True and loop_count < 3:
@@ -79,11 +83,14 @@ class Dialplan:
                 choice = self.session.playAndGetDigits(1, 1, 3, 3000, '', "hermes_loop.gsm", '', "\\d+")
                 log.info('User Choice: %s' % choice)
                 if choice == '1':
-                    self.session.execute('playback',_hermes_path+_audio_file)
+                    self.session.execute('playback',_rawfile)
                 if choice == '2':
+                    self.session.sleep(500)
                     self.session.execute('playback','hermes_bye.gsm')
-                    self.session.sleep(750)
+                    self.session.sleep(500)
                     self.session.hangup()
+                    os.remove(_rawfile)
+                    #os.remove(_c2file)
                 if choice == '3':
                     # audio_to_hermes will hangup.
                     if hermes == 'central':
