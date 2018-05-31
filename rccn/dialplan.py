@@ -159,7 +159,8 @@ class Dialplan:
         self.session.execute('playback', 'please_record.gsm')
         self.session.execute('playback', 'beep.gsm')
         _uuid = re.sub('-', '', self.session.getVariable('call_uuid'))
-        _caller = self.calling_number
+        # Calling Number will have a plus on it when incoming from DID.
+        _caller = re.sub('^[+]*', '', self.calling_number)
         _callee = re.sub('^[+|0]*', '', self.destination_number)
         _filename = "call-"+_uuid + '-' + _caller + '-' + _callee
         # Have Freeswitch record someplace else to not confuse rz-hf-connector
