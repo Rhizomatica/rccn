@@ -31,6 +31,7 @@ import ESL
 
 if __name__ == "__main__":
     sms = config.SMS()
+    num = config.Numbering()
     log=config.log
     hermes_rec_path = "/var/spool/recorded_messages/"
     if config.hermes == 'central':
@@ -88,6 +89,7 @@ if __name__ == "__main__":
                         if config.hermes == 'central':
                             # Deliver this SMS to the upstream provider.
                             sms.route_intl_service(_source, _dest, _msg, _seq)
+
                     if m.groups()[0] == 'call':
                         _seq = m.groups()[1].split('-')[0]
                         _caller = m.groups()[1].split('-')[1]
@@ -95,6 +97,11 @@ if __name__ == "__main__":
                         log.info('New audio message found from %s to %s' % (_caller, _callee))
                         # FIXME: I think what is needed here is to send the B leg into a dialplan
                         # where we can control what happens and then interact with the callee.
+                        _did = num.get_subscriber_did(_caller)
+                        if _did:
+                            _caller_id = _did
+                        else:
+                            _caller_id = _caller
                         try:
                             con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
                             if config.hermes == 'central':
@@ -109,9 +116,9 @@ if __name__ == "__main__":
                                 sip_dest = "@"+config.mncc_ip_address+":5050"
                                 #sip_dest = "@192.168.11.121:5061"
                             _sofia_str = (
-                                "{orig_uuid="+_seq+"}"
+                                "{absolute_codec_string='G729',ignore_early_media=true,orig_uuid="+_seq+"}"
                                 "sofia/"+sip_route+"/"+str(_callee)+sip_dest+" "
-                                ""+_caller+" XML hermes +"+_caller +" +"+_caller+""
+                                ""+_caller+" XML hermes HERMES-Network "+_caller_id+""
                                 )
                             log.info('FS originate: %s' % _sofia_str)
                             e = con.api("originate", _sofia_str)
