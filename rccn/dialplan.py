@@ -61,11 +61,14 @@ class Dialplan:
             _hermes_path = b'/var/spool/' + direction + '_messages/'
 
         # This is the B-leg of our outgoing notification call.
-        # The way the variables get passed it ends up that the caller is
+        # The way the variables get passed it ends up that the caller is 
+        # the destination as such..
         self.session.sleep(500)
         self.session.execute('playback','have_new_message.gsm')
         uuid = self.session.getVariable('orig_uuid')
-        _c2file="call-"+uuid+"-"+self.destination_number+"-"+self.calling_number+".c2"
+        _calling_strip_plus = re.sub('^[+]*', '', self.calling_number)
+        _callee_strip_plus = re.sub('^[+]*', '', self.destination_number)
+        _c2file="call-"+uuid+"-"+_callee_strip_plus+"-"+_calling_strip_plus+".c2"
         _rawfile = "/tmp/call-" + uuid + '.raw'
         log.info('Decoding %s to %s' % (_c2file, _rawfile))
         enc_command = '/usr/local/bin/c2dec 1200 '+ _hermes_path+_c2file + ' ' + _rawfile
@@ -73,26 +76,34 @@ class Dialplan:
         log.info('HERMES-%s: From:%s To:%s Seq:%s' % 
             (hermes, self.calling_number, self.destination_number, uuid))
         log.info('Playing Back: %s' % _rawfile)
+        self.session.execute('set_audio_level', 'write +4')
         self.session.execute('playback',_rawfile)
+        self.session.execute('set_audio_level', 'write 0')
         # Wait for DTMF to confirm and then delete the audio file.
         loop_count = 0
         while self.session.ready() == True and loop_count < 3:
                 loop_count += 1
                 log.info('Playback Hermes menu (%s)', loop_count)
                 log.info('Collect DTMF')
+                self.session.execute('start_dtmf')
                 choice = self.session.playAndGetDigits(1, 1, 3, 3000, '', "hermes_loop.gsm", '', "\\d+")
                 log.info('User Choice: %s' % choice)
                 if choice == '1':
+                    self.session.execute('set_audio_level', 'write +4')
                     self.session.execute('playback',_rawfile)
+                    self.session.execute('set_audio_level', 'write 0')
                 if choice == '2':
                     self.session.sleep(500)
                     self.session.execute('playback','hermes_bye.gsm')
                     self.session.sleep(500)
                     self.session.hangup()
+                    os.remove(_hermes_path+_c2file)
                     os.remove(_rawfile)
-                    #os.remove(_c2file)
                 if choice == '3':
                     # audio_to_hermes will hangup.
+                    # User is replying.. assume message was heard:
+                    os.remove(_hermes_path+_c2file)
+                    os.remove(_rawfile)
                     if hermes == 'central':
                         self.audio_to_hermes('incoming')
                     if hermes == 'remote':
