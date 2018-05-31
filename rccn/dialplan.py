@@ -136,21 +136,32 @@ class Dialplan:
             self.play_announcement(self.NOT_CREDIT_ENOUGH)
 
     def audio_to_hermes(self, direction='outgoing'):
+        hermes_rec_path = "/var/spool/recorded_messages/"
         self.session.answer()
         self.session.execute('playback', 'please_record.gsm')
         self.session.execute('playback', 'beep.gsm')
         _uuid = re.sub('-', '', self.session.getVariable('call_uuid'))
         _caller = self.calling_number
         _callee = re.sub('^[+|0]*', '', self.destination_number)
-        _filename = _uuid + '-' + _caller + '-' + _callee + '.gsm'
-        recording = "/var/spool/"+direction+"_messages/call-" + _filename
+        _filename = "call-"+_uuid + '-' + _caller + '-' + _callee
+        # Have Freeswitch record someplace else to not confuse rz-hf-connector
+        recording = hermes_rec_path + _filename + '.raw'
+        c2file = hermes_rec_path + _filename +'.c2'
+        tx_file = "/var/spool/"+direction+"_messages/" + _filename + '.c2'
         log.debug('Recording to %s' % recording)
         #self.session.execute('record', recording+'.wav 15 10 5')
         self.session.recordFile(recording, 15, 30, 3)
         self.session.execute('playback', 'beep.gsm')
         self.session.execute('playback', 'hermes_bye.gsm')
-        self.session.sleep(1)
+        self.session.sleep(300)
         self.session.hangup()
+        log.info('Encoding %s to %s' % (recording, c2file))
+        enc_command = '/usr/local/bin/c2enc 1200 '+ recording + ' ' + c2file
+        os.system(enc_command)
+        log.info('Moving %s to %s' % (c2file, tx_file))
+        os.rename(c2file, tx_file)
+        log.info('Deleting %s ' % (recording))
+        os.remove(recording)
 
 
     def lookup(self):

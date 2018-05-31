@@ -32,7 +32,7 @@ import ESL
 if __name__ == "__main__":
     sms = config.SMS()
     log=config.log
-
+    hermes_rec_path = "/var/spool/recorded_messages/"
     if config.hermes == 'central':
         direction = 'outgoing'
         _hermes_path = b'/var/spool/' + direction + '_messages/'
@@ -42,6 +42,8 @@ if __name__ == "__main__":
     try:
         if not os.path.exists(_hermes_path):
             os.makedirs(_hermes_path)
+        if not os.path.exists(hermes_rec_path):
+            os.makedirs(hermes_rec_path)
     except Exception as e:
         log.debug(e)
         exit(-1)
