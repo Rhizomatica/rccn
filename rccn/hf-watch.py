@@ -109,14 +109,16 @@ if __name__ == "__main__":
                                 _callee = '+'+_callee
                                 sip_route = "gateway/rhizomatica"
                                 sip_dest = ""
+                                codec = 'G729'
                             if config.hermes == 'remote':
                                 # Our Message is being sent to the local GSM Net.
                                 # FIXME, Make this lookup properly in the database.
                                 sip_route = 'internal'
                                 sip_dest = "@"+config.mncc_ip_address+":5050"
+                                codec = 'GSM'
                                 #sip_dest = "@192.168.11.121:5061"
                             _sofia_str = (
-                                "{absolute_codec_string='G729',ignore_early_media=true,orig_uuid="+_seq+"}"
+                                "{absolute_codec_string='"+codec+"',ignore_early_media=true,orig_uuid="+_seq+"}"
                                 "sofia/"+sip_route+"/"+str(_callee)+sip_dest+" "
                                 ""+_caller+" XML hermes HERMES-Network "+_caller_id+""
                                 )
