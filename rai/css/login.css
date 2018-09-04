@@ -47,10 +47,8 @@
         background: -webkit-linear-gradient(top, #333333 25%,#666666 100%);
 
 	color: white;
-    width: 25em;
+    width: 27em;
     border: 1px solid #000;
-    
-    border-top: 0;
 }
 
 #newRequestForm .login_button {

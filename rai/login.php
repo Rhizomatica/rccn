@@ -37,11 +37,11 @@ require_once('include/header.php');
 			    <div style='margin:auto; width:130px; color: red; font-size: 12px;'><?= nl2br($errors) ?></div><br/>
 			    <div>
 			        <label for="user_login"><?=_('Username:')?> &nbsp;</label>
-				<input type='text' name='username' size='20' />
+				<input type='text' name='username' size='15' />
 			    </div>
 			    <div>
 			        <label for="user_password"><?=_('Password:')?> &nbsp;</label>
-				<input type='password' name='password' size='20' />
+				<input type='password' name='password' size='15' />
 			    </div>
 			    <div>
 				<br/>
