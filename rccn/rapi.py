@@ -50,6 +50,8 @@ class SubscriberRESTService:
             sub = Subscriber()
             if msisdn == 'all_connected':
                 data = json.dumps(sub.get_all_connected(), cls=PGEncoder)
+            elif msisdn == 'all_sip':
+                data = json.dumps(sub.get_sip_connected())
             elif msisdn == 'unpaid_subscription':
                 data = json.dumps(sub.get_unpaid_subscription(), cls=PGEncoder)
             elif msisdn == 'paid_subscription':
