@@ -362,55 +362,57 @@ class SMSRESTService:
     path = '/sms'
 
     @route('/', Http.POST)
-    def receive(self, request, source, destination, charset, coding, text, btext, dr, dcs):
+    def receive(self, request, source, destination, charset, coding, text, btext='', dr='', dcs=''):
         
         if btext == '':
             btext = text
-        t=binascii.hexlify(btext)
+        thex = binascii.hexlify(btext)
 
         api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s" charset:"%s"' %
             (request.getHost().host, self.path, source, destination, charset))
         api_log.debug('Data: source:"%s" destination:"%s" charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' %
-            (source, destination, charset, coding, text.decode(charset,'replace'), t, dr, dcs))
-
-        # Kannel sends us GSM0338 but sets charset param to UTF-8
-        if coding == '0':
-            try:
-                gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
-                text=gsm_shift_codec.decode(btext)[0]
-                api_log.info('SMS Decoded from GSM 03.38')
-                api_log.debug('Decoded text:"%s"' % text)
-            except: # Catch Everything, try to not actually LOSE messages!  
-                e=sys.exc_info()[0]
-                api_log.debug('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
-                data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
-                text=btext
-        # Kannel can have problems if we send back UTF-16BE, so let's standardise here:
-        if coding == '2' and charset == 'UTF-16BE':
-            try:
-                text=btext.decode('utf-16be')
-                api_log.info('SMS decoded as UTF-16BE')
-                api_log.debug('Decoded text: "%s"' % text)
-            except: # Catch Everything, try to not actually LOSE messages!  
-                e=sys.exc_info()[0]
-                api_log.debug('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
-                # Some phones are sending multi part messages with different charsets.
-                # Kannel concatenates and sends as UTF-16BE coding 2
+            (source, destination, charset, coding, text.decode(charset,'replace'), thex, dr, dcs))
+        sms = SMS()
+        unicode_text = text.decode(charset,'replace')
+        if use_kannel == 'yes':
+            # Kannel posts to:
+            # post-url = "http://localhost:8085/sms?source=%p&destination=%P&charset=%C&coding=%c&text=%a&btext=%b&dr=%d&dcs=%O"
+            # Kannel sends us GSM0338 but sets charset param to UTF-8
+            if coding == '0':
                 try:
-                    api_log.info('Trying multi part trick')
-                    a=btext[:134]
-                    b=btext[134:]
-                    text=a.decode('utf-16be')+b.decode('utf8')
-                except:
-                    api_log.debug('Caught Exception: %s %s' % (e, sys.exc_info()[1]))
-                    text=btext
+                    unicode_text = sms.check_decode0338(btext)
+                    api_log.info('SMS Decoded from GSM 03.38')
+                    api_log.debug('Decoded text:"%s"' % unicode_text)
+                except Exception as ex:
+                    api_log.debug('Coding(%s), but: %s %s' % (coding, str(ex), sys.exc_info()[1]))
+                    data = {'status': 'failed', 'error': str(ex)+' '+str(sys.exc_info()[1])}
+                    # It's probably utf-8
+                    unicode_text=btext.decode('utf-8','replace')
+            elif coding == '2' and charset == 'UTF-16BE':
+                try:
+                    unicode_text=btext.decode('utf-16be')
+                    api_log.info('SMS decoded as UTF-16BE')
+                    api_log.debug('Decoded text: "%s"' % text)
+                except: # Catch Everything, try to not actually LOSE messages!
+                    e=sys.exc_info()[0]
+                    api_log.debug('Exception: %s %s' % (e, sys.exc_info()[1]))
+                    # Some phones are sending multi part messages with different charsets.
+                    # Kannel concatenates and sends as UTF-16BE coding 2
+                    try:
+                        api_log.info('Trying multi part trick')
+                        a=btext[:134]
+                        b=btext[134:]
+                        unicode_text=a.decode('utf-16be')+b.decode('utf8')
+                    except:
+                        api_log.debug('Exception: %s %s' % (e, sys.exc_info()[1]))
+                        unicode_text=btext.decode('utf-16be','replace')
+            else:
+                unicode_text=btext.decode('utf-8','replace')
         try:
-            sms = SMS()
-            sms.receive(source, destination, text, charset, coding)
+            sms.receive(source, destination, unicode_text, charset, coding)
             data = {'status': 'success', 'error': ''}
         except SMSException as e:
             data = {'status': 'failed', 'error': str(e)}
-        
         api_log.info(data)
         return data
 
