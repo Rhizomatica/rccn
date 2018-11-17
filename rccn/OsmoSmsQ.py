@@ -99,7 +99,7 @@ def parse_udh(s):
     udh['part_num'] = ord(s[5])
     return udh
 
-def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', dest = '', negate = False, limit = 0, order = False):
+def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', dest = '', both=None, negate = False, limit = 0, order = False):
     global db_revision
     try:
         sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -131,6 +131,8 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
             sql = sql + ' AND src_addr' + op + src
         if dest != '':
             sql = sql + ' AND dest_addr' + op + dest
+        if both:
+            sql = sql + ' AND (src_addr like "%' + both + '%" OR dest_addr like "%' + both + '%")'
         if order == False:
             sql = sql + ' ORDER BY created ASC '
         else:
@@ -336,6 +338,7 @@ def build_msgs(smsq):
         r['coding'] = coding
         r['charset'] = charset
         r['text'] = utext
+        r['created'] = sms[1]
         ret.append(r)
         if 'options' in globals() and options.debug_stop:
           cs(locals())
@@ -434,6 +437,8 @@ if __name__ == '__main__':
             help="Filter on from (src_addr)")
     parser.add_option("-t", "--to", dest="dest", default='',
             help="Filter on to (dest_addr)")                    
+    parser.add_option("-B", "--both", dest="both", default='',
+            help="Filter on both (with like match)")
     parser.add_option("-n", "--negate", dest="negate", action="store_true",
             help="Negate to/from search")        
     parser.add_option("-w", "--where", dest="where", default='',
@@ -469,6 +474,6 @@ if __name__ == '__main__':
         msgs=build_msgs(smsq)        
         display_queue(msgs)
     else:
-        smsq = read_queue(0, options.unsent, options.sent, options.where, options.src, options.dest, options.negate, options.limit, options.order)
+        smsq = read_queue(0, options.unsent, options.sent, options.where, options.src, options.dest, options.both, options.negate, options.limit, options.order)
         msgq=build_msgs(smsq)
         display_queue(msgq)
