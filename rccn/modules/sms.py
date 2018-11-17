@@ -177,7 +177,7 @@ class SMS:
             sub = Subscriber()
             # check if source or destination is roaming
             try:
-                if not self.numbering.is_number_known(source):
+                if not (source == '10000' or self.numbering.is_number_known(source)):
                     sms_log.info('Sender unauthorized send notification')
                     self.context = 'SMS_UNAUTH'
                     self.coding = 2
@@ -342,7 +342,7 @@ class SMS:
                 unicode_text = text.decode(charset)
             else:
                 unicode_text = text
-            
+
         if server == config['local_ip']:
             try:
                 sms_log.info('Send SMS to Local: %s %s %s' % (source, destination, text))
