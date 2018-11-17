@@ -73,6 +73,12 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error checking DID: %s' % e)
 
+    def fivetoeleven(self, source_number, destination_number):
+        """ Convert a five digit extension to 11 digits based on the caller. """
+        if len(destination_number) !=5:
+            return destination_number
+        return source_number[:6] + destination_number
+
     def is_number_local(self, destination_number):
         # check if extension if yes add internal_prefix
         if len(destination_number) == 5:
@@ -92,6 +98,16 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error checking if number is local:' % e )
 
+    def is_number_known(self, number):
+        try:
+            cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute('SELECT * FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
+            subscriber = cur.fetchone()
+            if subscriber != None:
+                return True
+            return False
+        except psycopg2.DatabaseError as e:
+            raise NumberingException('PG_HLR error checking if number is known:' % e)
 
     def is_number_internal(self, destination_number):
         siteprefix = destination_number[:6]
@@ -242,15 +258,28 @@ class Numbering:
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
 
-
     def get_site_ip(self, destination_number):
         siteprefix = destination_number[:6]
-        site = riak_client.bucket('sites')
-        site_data = site.get(siteprefix)
-        if site_data.data['ip_address'] != None:
-            return site_data.data['ip_address']
+        return self.get_site_ip_hlr(siteprefix)
+
+    def get_site_ip_hlr(self, siteprefix):
+        cur = db_conn.cursor()
+        cur.execute('SELECT DISTINCT home_bts FROM hlr WHERE msisdn like %(prefix)s', {'prefix': siteprefix+'%'})
+        result = cur.fetchall()
+        if len(result) != 1:
+            log.warn('!!FIX THIS!! Did not get ONE home_bts from hlr for %s', siteprefix)
+            log.debug('Trying Riak...')
+            try:
+                site = riak_client.bucket('sites')
+                site_data = site.get(siteprefix)
+                if site_data.data['ip_address'] != None:
+                    return site_data.data['ip_address']
+                else:
+                    raise NumberingException('RK_DB Error no IP found for site %s' % site)
+            except socket.error as err:
+                    raise NumberingException('RK_DB Connection Unavailable %s' % str(err))
         else:
-            raise NumberingException('RK_DB Error no IP found for site %s' % site)
+            return result[0][0]
 
     def get_callerid(self, caller, callee):
         try:
