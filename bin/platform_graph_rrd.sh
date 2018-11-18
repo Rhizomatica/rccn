@@ -94,6 +94,15 @@ LINE1:min#0000AA:"Minimum voltage" \
 LINE1:max#00AA00:"Maximum voltage" \
 GPRINT:curV:"Current\: %3.0lf %s"
 
+rrdtool graph $RHIZO_DIR/graphs/latency-$age.png --start -$age -aPNG -w 600 -l 80 -u 160 --vertical-label='ms' -t "Average Latency sampled c/5m" \
+DEF:min=$RHIZO_DIR/latency.rrd:latency:MIN \
+DEF:max=$RHIZO_DIR/latency.rrd:latency:MAX \
+VDEF:curL=max,LAST \
+LINE1:min#0000AA:"Minimum" \
+LINE1:max#00AA00:"Maximum" \
+GPRINT:curL:"Current Latency\: %3.0lf %s"
+
+
 rrdtool graph $RHIZO_DIR/graphs/memory-$age.png --start -$age -aPNG -w 600 -t "Memory Usage" \
 "DEF:dsC=$RHIZO_DIR/memory.rrd:cached:AVERAGE" \
 "DEF:dsB=$RHIZO_DIR/memory.rrd:buffer:AVERAGE" \

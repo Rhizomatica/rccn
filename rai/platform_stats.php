@@ -10,7 +10,7 @@ require_once('include/menu.php');
 			<br/><br/><br/>
 			<?php
 				$age = (isset($_GET['a'])) ? $_GET['a'] : '12h';
-				$graphs = array('loadaverage','cpu','memory','voltage','temperature','disk','eth0_traffic','eth0_errors');
+				$graphs = array('loadaverage','cpu','memory','latency','voltage','temperature','disk','eth0_traffic','eth0_errors');
 				foreach ($graphs as &$g) {
 					echo "<img src='graphs/$g-$age.png' /><br/><br/>";
 				}
