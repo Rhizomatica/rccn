@@ -79,13 +79,13 @@ class LiveStatistics:
 
     def get_fs_calls(self,fs_con):
 
-        e = fs_con.api("show calls")
+        e = fs_con.api("show channels as delim |")
         fs_calls=e.getBody()
         calls=[]
         lines=fs_calls.split('\n')
         for line in lines:
             if line != '' and line.find(' total.') == -1:
-                values=line.split(',')
+                values=line.split('|')
                 if values[0]=='uuid':
                     keys=values
                     continue
@@ -93,14 +93,22 @@ class LiveStatistics:
                 for i,val in enumerate(values):
                     call[keys[i]]=val
                 calls.append(call)
-        return calls
-        call_data_to_send=[]
+        to_send=[]
         for call in calls:
             c={}
-            c['name']=call['name']
-            c['b_name']=call['b_name']
-            call_data_to_send.append(c)
-        return call_data_to_send
+            c['sip']=call['name']
+            c['direction']=call['direction']
+            c['cid']=call['cid_num']
+            c['dest']=call['dest']
+            c['ip_addr']=call['ip_addr']
+            c['codec']=call['read_codec']
+            c['state']=call['callstate']
+            c['callee']=call['callee_num']
+            c['created']=call['created_epoch']
+            c['uuid']=call['uuid']
+            c['cuuid']=call['call_uuid']
+            to_send.append(c)
+        return to_send
 
     def get_sms_pending(self):
         try:
