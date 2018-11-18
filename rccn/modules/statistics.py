@@ -46,6 +46,7 @@ class LiveStatistics:
         data['ut']=self.get_uptime()
         data['la']=os.getloadavg()
         data['v']=self.get_linev()
+        data['lat']=self.get_latency()
         data['p']=self.get_puppet_lr()
         fs_con=ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
         data['c']=self.get_fs_calls(fs_con)
@@ -158,6 +159,13 @@ class LiveStatistics:
     def get_linev(self):
         try:
             with open('/tmp/voltage', 'r') as f:
+                return f.readline()
+        except IOError:
+            return ''
+
+    def get_latency(self):
+        try:
+            with open('/tmp/latency', 'r') as f:
                 return f.readline()
         except IOError:
             return ''
