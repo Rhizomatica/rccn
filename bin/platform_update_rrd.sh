@@ -9,11 +9,16 @@ cpustat=`cat /proc/stat|head -1| sed "s/^cpu\ \+\([0-9]*\)\ \([0-9]*\)\ \([0-9]*
 rrdtool update $RHIZO_DIR/cpu.rrd N:$cpustat
 
 temperature=`sensors 2>/dev/null | grep temp1: | head -1 | awk '{print $2}' | sed -e 's/°C//g' -e 's/\+//g'`
-rrdtool update $RHIZO_DIR/temperature.rrd N:$temperature
+if [ -n "$temperature" ]; then
+  rrdtool update $RHIZO_DIR/temperature.rrd N:$temperature
+fi
 
 linev=`/sbin/apcaccess status 2>/dev/null | grep LINEV | head -1 | awk '{print $3}'`
-/usr/bin/rrdtool update $RHIZO_DIR/voltage.rrd N:$linev
-echo $linev > /tmp/voltage
+if [ -n "$linev" ]; then
+  /usr/bin/rrdtool update $RHIZO_DIR/voltage.rrd N:$linev
+  echo $linev > /tmp/voltage
+fi
+
 
 C=$(egrep ^Cached /proc/meminfo|awk '{print $2}')
 B=$(egrep ^Buffers /proc/meminfo|awk '{print $2}')
