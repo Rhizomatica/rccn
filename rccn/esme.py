@@ -59,7 +59,7 @@ def local_submit_one(source, destination, unicode_text):
     parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(unicode_text)
     smpp_client = smpplib.client.Client("127.0.0.1", 2775, 90)
     smpp_client.connect()
-    smpp_client.bind_transceiver(system_id="OSMPP", password="Password")
+    smpp_client.bind_transceiver(system_id="ISMPP", password="Password")
     for part in parts:
         pdu = smpp_client.send_message(
             source_addr_ton=smpplib.consts.SMPP_TON_ALNUM,

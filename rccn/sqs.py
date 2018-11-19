@@ -61,7 +61,7 @@ def smpp_sumbit(src, dest, utext, bts, report=False):
         smpplib.client.logger.setLevel('INFO')
         smpp_client.set_message_sent_handler(lambda pdu: sms_log.info("Sent (%s)", pdu.message_id))
         smpp_client.connect()
-        smpp_client.bind_transceiver(system_id="OSMPP", password="Password")
+        smpp_client.bind_transceiver(system_id="ISMPP", password="Password")
         for part in parts:
             pdu = smpp_client.send_message(
                 source_addr_ton=smpplib.consts.SMPP_TON_ALNUM,
