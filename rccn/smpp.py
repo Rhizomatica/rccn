@@ -97,7 +97,7 @@ def rx_alert_notification(pdu):
                         log.error('Error connect to site %s to return subscriber %s' % (current_bts,extension) )
 
     if pdu.ms_availability_status == 0:
-        log.debug('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
+        log.info('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
         if mode=='EXT':
             extension=pdu.source_addr
             if len(extension) == 5:
@@ -107,14 +107,18 @@ def rx_alert_notification(pdu):
                 return
             try:
                 current_bts = num.get_current_bts(extension)
-            except NumberingException as ex:
+            except config.NumberingException as ex:
                 log.debug('!! No subscriber in hlr?? %s', str(ex))
                 return
             if current_bts != myip:
                 # Our HLR doesn't expect this MS to be here.
                 # So either the hlr is out of date, or this is new here.
                 imsi=_get_imsi(pdu.source_addr)
-                sub.update_location(imsi,extension,True)
+                try:
+                    sub.update_location(imsi,extension,True)
+                except config.SubscriberException as ex:
+                    log.debug('Subscriber error: %s', str(ex))
+                    return
 
                 # a riak exception in the previous
                 # function would prevent the local PG update.
