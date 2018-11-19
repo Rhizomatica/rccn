@@ -105,7 +105,11 @@ def rx_alert_notification(pdu):
                 # I'd like to react to them, but need the full hlr db with IMSIs 
                 # locally at least.
                 return
-            current_bts = num.get_current_bts(extension)
+            try:
+                current_bts = num.get_current_bts(extension)
+            except NumberingException as ex:
+                log.debug('!! No subscriber in hlr?? %s', str(ex))
+                return
             if current_bts != myip:
                 # Our HLR doesn't expect this MS to be here.
                 # So either the hlr is out of date, or this is new here.
