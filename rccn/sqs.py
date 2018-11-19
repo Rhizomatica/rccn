@@ -54,7 +54,7 @@ sms = cn.SMS()
 if options.debug:
     sms_log.setLevel('DEBUG')
 
-def smpp_sumbit(src, dest, utext, bts):
+def smpp_sumbit(src, dest, utext, bts, report=False):
     try:
         parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(utext)
         smpp_client = smpplib.client.Client(bts, 2775, 90)
@@ -73,7 +73,7 @@ def smpp_sumbit(src, dest, utext, bts):
                 data_coding=encoding_flag,
                 esm_class=msg_type_flag,
                 short_message=part,
-                registered_delivery=True,
+                registered_delivery=report,
             )
             smpp_client.read_once()
         smpp_client.unbind()
@@ -135,6 +135,7 @@ try:
         src = item['src']
         dest = item['dest']
         coding = item['coding']
+        reg_delivery = item['reg_delivery']
         created = datetime.strptime(item['created'], '%Y-%m-%d %X').replace(tzinfo=from_zone).astimezone(to_zone)
         days = (today-created).days
         n = n + 1
@@ -166,7 +167,7 @@ try:
                             resp = rccn_submit(src, dest, utext, c_bts)
                             mark_local(mid)
                         if not options.rccn:
-                            sm_resp = smpp_sumbit(src, dest, utext, bts)
+                            sm_resp = smpp_sumbit(src, dest, utext, bts, reg_delivery)
                             if sm_resp == 0:
                                 sent = sent + 1
                                 mark_local(mid)
@@ -186,7 +187,7 @@ try:
                 if options.rccn:
                     resp = rccn_submit(src, dest, utext, c_bts)
                 if not options.rccn:
-                    sm_resp = smpp_sumbit(src, dest, utext, c_bts)
+                    sm_resp = smpp_sumbit(src, dest, utext, c_bts, reg_delivery)
                     if sm_resp != 0:
                         continue
             except cn.SMSException as ex:

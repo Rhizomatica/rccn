@@ -179,6 +179,7 @@ def build_msgs(smsq):
         18 20    text TEXT
         """
         if db_revision == '5':
+          reg_delivery = sms[6]
           is_report = sms[7]
           coding = sms[10]
           udhdr = sms[11]
@@ -188,6 +189,7 @@ def build_msgs(smsq):
           header = sms[19]
           text = sms[20]
         elif db_revision == '4':
+          reg_delivery = 0
           is_report = 0
           coding = sms[8]   
           udhdr = sms[9]
@@ -202,6 +204,7 @@ def build_msgs(smsq):
           exit()
 
         log.debug("Message ID: \033[93m" + str(sms[0]) + '\033[0m')
+        log.debug("Is Report: " + str(is_report))
         log.debug("Valid Until: " + str(sms[4]))
         log.debug("Coding is \033[32m%s \033[0m" % str(coding))
         log.debug("UD HDR Indicator: " + str( sms[9] ))
@@ -339,6 +342,8 @@ def build_msgs(smsq):
         r['charset'] = charset
         r['text'] = utext
         r['created'] = sms[1]
+        r['is_report'] = is_report
+        r['reg_delivery'] = reg_delivery
         ret.append(r)
         if 'options' in globals() and options.debug_stop:
           cs(locals())
@@ -367,8 +372,13 @@ def display_queue(smsq):
                 print "Sent: " + str(sms[2])
             else:
                 print "Delivery Attempts: " + str(sms[3])
-            print "Coding, Charset: " + str(coding) + ',' + charset
-            print "Parts: " + parts
+            if item['is_report'] == 1:
+                print "-----> Is Report"
+            else:
+                print "Coding, Charset: " + str(coding) + ',' + charset
+                print "Parts: " + parts
+            if item['reg_delivery'] == 1:
+                print "Delivery Report Requested"
         try:
             if options.unicode:
                 text1 = utext.encode('unicode_escape')
