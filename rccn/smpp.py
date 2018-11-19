@@ -50,14 +50,14 @@ def rx_alert_notification(pdu):
     
     #print pdu.source_addr_ton, pdu.source_addr_npi, pdu.source_addr, pdu.ms_availability_status
     # Sanity check that we got imsi/extension
-    if pdu.source_addr_ton == '3' and pdu.source_addr_npi == '1':
+    if pdu.source_addr_ton == 3 and pdu.source_addr_npi == 1:
         mode='EXT'
-    elif pdu.source_addr_ton == '4' and pdu.source_addr_npi == '6':
+    elif pdu.source_addr_ton == 4 and pdu.source_addr_npi == 6:
         mode='IMSI'
     else:
         return
 
-    if pdu.ms_availability_status == '2':
+    if pdu.ms_availability_status == 2:
         log.info('Received Detach Notification for %s: %s' % (mode, pdu.source_addr))
         if mode=='EXT':
             extension=pdu.source_addr
@@ -96,7 +96,7 @@ def rx_alert_notification(pdu):
                     except IOError:
                         log.error('Error connect to site %s to return subscriber %s' % (current_bts,extension) )
 
-    if pdu.ms_availability_status == '0':
+    if pdu.ms_availability_status == 0:
         log.debug('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
         if mode=='EXT':
             extension=pdu.source_addr
