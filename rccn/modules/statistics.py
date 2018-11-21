@@ -55,15 +55,15 @@ class LiveStatistics:
         return data
 
     def get_puppet_lr(self):
-        puppet_lr='/var/lib/puppet/state/last_run_summary.yaml'
-        with open(puppet_lr) as stream:
-            y=yaml.load(stream)
-        p={}
         try:
+            puppet_lr='/var/lib/puppet/state/last_run_summary.yaml'
+            with open(puppet_lr) as stream:
+                y=yaml.load(stream)
+            p={}
             p['lr']=y['time']['last_run']
             p['f']=y['events']['failure']
         except:
-            pass
+            return {}
         return p
 
     def get_fs_status(self,fs_con):
