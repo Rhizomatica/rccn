@@ -43,6 +43,7 @@ class LiveStatistics:
         data['lt']=self.get_recent_call_count('10 mins')
         data['ld']=self.get_recent_call_count('1 hour')
         data['ls']=self.get_recent_call_count('24 hours')
+        data['ss']=self.get_recent_sms_count('30 mins')
         data['ut']=self.get_uptime()
         data['la']=os.getloadavg()
         data['v']=self.get_linev()
@@ -145,6 +146,19 @@ class LiveStatistics:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise StatisticException('SQ_HLR error: %s' % e.args[0])
+
+    def get_recent_sms_count(self,ago):
+        try:
+            cur = db_conn.cursor()
+            cur.execute("SELECT count(*) FROM sms WHERE send_stamp >= (now() - interval %(ago)s)",
+                        { 'ago': ago } )
+            if cur.rowcount > 0:
+                sub = cur.fetchone()
+                return sub[0]
+            else:
+                raise StatisticException('PG_HLR No rows found')
+        except psycopg2.DatabaseError, e:
+            raise StatisticException('PG_HLR error: %s' % e)
 
     def get_recent_call_count(self,ago):
         try:
