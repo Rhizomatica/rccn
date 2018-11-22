@@ -139,7 +139,7 @@ try:
         created = datetime.strptime(item['created'], '%Y-%m-%d %X').replace(tzinfo=from_zone).astimezone(to_zone)
         days = (today-created).days
         n = n + 1
-        if len(dest) < 11:
+        if len(dest) < 11 or not unicode(dest).isnumeric():
             sms_log.debug("[%s] Skipping Destination: %s from %s" % (mid, dest, src))
             continue
         mark = '92' if cn.config['internal_prefix'] == dest[:6] else '91'
