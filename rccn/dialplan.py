@@ -139,7 +139,7 @@ class Dialplan:
                     self.session.setVariable('inbound_loop', '0')
                     self.context.inbound()
                     return
-                if self.calling_host == sip_central_ip_address:
+                if self.calling_host == sip_central_ip_address or self.calling_host == "10.23.0.20":
                     log.info("Incoming call from SIP server")
                     processed = 1
                     self.context.inbound()
