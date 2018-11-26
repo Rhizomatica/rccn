@@ -86,7 +86,7 @@ def rx_deliver_sm(pdu):
         log.debug('PDU Seq. #%s is not a DeliverSM' % pdu.sequence)
         return
     _udhi = pdu.esm_class & smpplib.consts.SMPP_GSMFEAT_UDHI
-    log.info("--(%s)-- RX SMS with DataCoding (%s), TON(%s), UHDI(%s)" %
+    log.info("--> RX SMS ref(%s) DataCoding (%s), TON(%s), UHDI(%s)" %
         (pdu.user_message_reference, pdu.data_coding, pdu.dest_addr_ton, _udhi))
 
     gsm_shift_codec = gsm0338.Codec(single_shift_decode_map=gsm0338.SINGLE_SHIFT_CHARACTER_SET_SPANISH)
@@ -123,7 +123,7 @@ def rx_deliver_sm(pdu):
         log_msg = binascii.hexlify(pdu.short_message[_start:])
         print str(ex)
 
-    log.debug("RX SMS: %s" % log_msg)
+    log.debug("RX SMS: [ %s ]" % log_msg)
     if int(pdu.dest_addr_ton) == smpplib.consts.SMPP_TON_INTL:
         # We cannot deliver any SMS to SMPP_TON_INTL
         #return smpplib.consts.SMPP_ESME_RSYSERR
@@ -275,7 +275,7 @@ def local_pass_pdu(pdu):
     )
 
 def post_tx_message(pdu):
-    log.info('SMSC said msgid: %s, sequence: %s' % (pdu.message_id, pdu._sequence))
+    log.info('Local SMSC msgid(%s) sequence(%s)' % (pdu.message_id, pdu._sequence))
     return
     #cs(locals())
     dlr = smpplib.smpp.make_pdu('submit_sm',
