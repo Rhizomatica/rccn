@@ -227,19 +227,13 @@ def remote_pass_pdu(pdu, dest_ip):
         rpdu.sequence = pdu.sequence
         try:
             smpp_client.send_pdu(rpdu)
+            log.debug('Sumbit_SM is sent. waiting response...')
             smpp_client.read_once()
+            return smpplib.consts.SMPP_ESME_ROK
         except smpplib.exceptions.PDUError as ex:
             smpp_client.unbind()
             smpp_client.disconnect()
             raise Exception('Unable to Submit Message via Remote SMPP (%s)' % ex)
-        log.debug('Sumbit_SM is sent. waiting..')
-        p = smpp_client.read_pdu()
-        if p.is_error():
-            smpp_client.unbind()
-            smpp_client.disconnect()
-            log.debug("Remote SMSC status: %s" % p.status)
-            return p.status
-        log.debug("Remote SMSC Message ID: %s" % p.message_id)
         smpp_client.unbind()
         smpp_client.disconnect()
         del smpp_client
