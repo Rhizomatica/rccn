@@ -98,7 +98,7 @@ def rx_deliver_sm(pdu):
             _udh_length = ord(pdu.short_message[:1])
             _start = _udh_length+1
             udh = parse_udh(pdu.short_message[:_udh_length])
-            if not udh:
+            if udh is False:
                 log.debug('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
                 return smpplib.consts.SMPP_ESME_ROK
             if udh['part_num'] == 1:
