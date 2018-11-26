@@ -100,7 +100,7 @@ def rx_deliver_sm(pdu):
             udh = parse_udh(pdu.short_message[:_udh_length])
             if not udh:
                 log.debug('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
-                return consts.smpplib.SMPP_ESME_ROK
+                return smpplib.consts.SMPP_ESME_ROK
             if udh['part_num'] == 1:
                 smpp_messages[udh['csms_ref']]=[]
             log.debug('Part %s of %s' % (udh['part_num'], udh['parts']))
