@@ -94,17 +94,29 @@ def rx_deliver_sm(pdu):
 
     _start = 0
     if _udhi:
-        udh = parse_udh(pdu.short_message[:6])
-        _start = udh['len']+1
-        if udh['part_num'] == 1:
-            smpp_messages[udh['csms_ref']]=[]
-        log.debug('Part %s of %s' % (udh['part_num'], udh['parts']))
-        smpp_messages[udh['csms_ref']].append(pdu.short_message[_start:])
-        if udh['part_num'] == udh['parts']:
-            _final = ''.join(smpp_messages[udh['csms_ref']])
-            smpp_messages[udh['csms_ref']] = None
-            log.debug("Full SMS Message: %s" % _final.decode(code2charset[pdu.data_coding]))
-            #local_submit_one('LOCAL_TEST', pdu.destination_addr, _final.decode(code2charset[pdu.data_coding]))
+        try:
+            _udh_length = ord(pdu.short_message[:1])
+            _start = _udh_length+1
+            udh = parse_udh(pdu.short_message[:_udh_length])
+            if not udh:
+                log.debug('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
+                return consts.smpplib.SMPP_ESME_ROK
+            if udh['part_num'] == 1:
+                smpp_messages[udh['csms_ref']]=[]
+            log.debug('Part %s of %s' % (udh['part_num'], udh['parts']))
+            smpp_messages[udh['csms_ref']].append(pdu.short_message[_start:])
+            if udh['part_num'] == udh['parts']:
+                _final = ''.join(smpp_messages[udh['csms_ref']])
+                smpp_messages[udh['csms_ref']] = None
+                log.debug("Full SMS Message: %s" % _final.decode(code2charset[pdu.data_coding]))
+                #local_submit_one('LOCAL_TEST', pdu.destination_addr, _final.decode(code2charset[pdu.data_coding]))
+        except Exception as ex:
+            log.debug("UDHI: Other Exception: %s", str(ex))
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            log.debug(message)
+            return smpplib.consts.SMPP_ESME_RSYSERR
+
     try:
         log_msg = pdu.short_message[_start:].decode(code2charset[pdu.data_coding])
     except UnicodeDecodeError as ex:
