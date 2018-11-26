@@ -44,11 +44,12 @@ def cs(l, exit=0):
         exit()
 
 def parse_udh(data):
-    if len(data) != 6:
-        return False
     udh = {}
     udh['len'] = ord(data[0])
     udh['iei'] = ord(data[1])
+    if udh['iei'] != smpplib.consts.SMPP_UDHIEIE_CONCATENATED:
+        log.debug('Unhandled IEI: %i', udh['iei'])
+    return False
     udh['header_len'] = ord(data[2])
     udh['csms_ref'] = ord(data[3])
     udh['parts'] = ord(data[4])
