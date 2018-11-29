@@ -48,7 +48,7 @@ def parse_udh(data):
     udh['len'] = ord(data[0])
     udh['iei'] = ord(data[1])
     if udh['iei'] != smpplib.consts.SMPP_UDHIEIE_CONCATENATED:
-        log.debug('Unhandled IEI: %i', udh['iei'])
+        log.error('Unhandled IEI: %i', udh['iei'])
     return False
     udh['header_len'] = ord(data[2])
     udh['csms_ref'] = ord(data[3])
@@ -99,7 +99,7 @@ def rx_deliver_sm(pdu):
             _start = _udh_length+1
             udh = parse_udh(pdu.short_message[:_udh_length])
             if udh is False:
-                log.debug('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
+                log.warning('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
                 return smpplib.consts.SMPP_ESME_ROK
             if udh['part_num'] == 1:
                 smpp_messages[udh['csms_ref']]=[]
