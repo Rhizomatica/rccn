@@ -154,11 +154,12 @@ if __name__ == '__main__':
     else:
         hlrsync_log.setLevel(logging.INFO)
 
+    if options.cron:
+        wait=random.randint(0,120)
+        print "Waiting %s seconds..." % wait
+        time.sleep(wait)
+
     if options.hours or options.minutes:
-        if options.cron:
-            wait=random.randint(0,120)
-            print "Waiting %s seconds..." % wait
-            time.sleep(wait)
         if options.until:
             until=int(options.until)
         else:
@@ -169,8 +170,4 @@ if __name__ == '__main__':
             hours=int(options.hours)
         hlr_sync(hours,until)
     else:
-        if options.cron:
-            wait=random.randint(0,20)
-            print "Waiting %s seconds..." % wait
-            time.sleep(wait)
         hlr_sync(0,0)
