@@ -51,6 +51,43 @@ def get_last_sync_time():
         hlrsync_log.error('PG_HLR database error getting last sync time')
         sys.exit(1)
 
+def cleanup_hlrs():
+    ''' Get all the MSISDNs that are in the local hlr with our prefix that no
+    longer exist in the local subscribers table and delete them from riak and
+     from our copy of the HLR '''
+    try:
+        cur = db_conn.cursor()
+        rk_hlr = riak_client.bucket('hlr')
+        sql = ("SELECT hlr.id, hlr.msisdn, hlr.home_bts, hlr.authorized, subscribers.authorized"
+               " FROM hlr LEFT JOIN subscribers ON hlr.msisdn=subscribers.msisdn"
+               " WHERE hlr.msisdn LIKE %(prefix)s AND subscribers.msisdn IS NULL")
+        cur.execute(sql,  {'prefix': config['internal_prefix']+'%'})
+        pg_gone_sub = cur.fetchall()
+        hlrsync_log.info('Got %s Stale Subscribers in local HLR' % len(pg_gone_sub))
+        for sub in pg_gone_sub:
+            if sub[4] is None:
+                try:
+                    r_sub = rk_hlr.get_index('msisdn_bin', sub[1], timeout=540)
+                    for imsi_key in r_sub.results:
+                        r_obj = rk_hlr.get(imsi_key)
+                        if r_obj.exists and r_obj.data['msisdn'] == sub[1]:
+                            hlrsync_log.debug("Removing msisdn(%s), imsi(%s) from d_hlr.",
+                                               sub[1], imsi_key)
+                            r_obj.remove_indexes().delete()
+                        elif r_obj.exists:
+                            hlrsync_log.debug("msisdn(%s belongs to imsi(%s) in d_hlr.",
+                                              imsi_key, r_obj.data['msisdn'])
+                        else:
+                            hlrsync_log.debug("imsi(%s) not in d_hlr.", imsi_key)
+                except riak.RiakError as ex:
+                    hlrsync_log.exception(ex)
+            hlrsync_log.debug("Removing id(%s) msisdn(%s) from Local HLR." % (sub[0], sub[1]))
+            sql = "DELETE FROM hlr where id = %(id)s"
+            cur.execute(sql, {'id': sub[0]})
+            db_conn.commit()
+    except psycopg2.DatabaseError as ex:
+        hlrsync_log.exception(ex)
+
 def hlr_sync(hours,until):
     try:
         rk_hlr = riak_client.bucket('hlr')
@@ -145,6 +182,8 @@ if __name__ == '__main__':
         help="Sync from the d_hlr until HOURS ago instead of now, requires -s")
     parser.add_option("-m", "--minutes", dest="minutes",
         help="Sync from the d_hlr since MINUTES ago (-s) instead of last update")
+    parser.add_option("-e", "--expunge", dest="expunge", action="store_true",
+        help="Clean removed subscribers from the HLRs")
     parser.add_option("-d", "--debug", dest="debug", action="store_true",
         help="Turn on debug logging")
     (options, args) = parser.parse_args()
@@ -158,6 +197,10 @@ if __name__ == '__main__':
         wait=random.randint(0,120)
         print "Waiting %s seconds..." % wait
         time.sleep(wait)
+
+    if options.expunge:
+        cleanup_hlrs()
+        sys.exit()
 
     if options.hours or options.minutes:
         if options.until:
