@@ -110,7 +110,7 @@ def update_list(subscribers):
             else:
                 roaming_log.info('Subscriber %s/%s is still roaming' % (msisdn,number))
         except NumberingException as e:
-            roaming_log.debug("Couldn't retrieve Subscriber for IMSI (%s) %s" % (msisdn,e))
+            roaming_log.debug("Couldn't retrieve Subscriber (%s) %s" % (msisdn,e))
 
         except SubscriberException as e:
             roaming_log.error("An error ocurred adding the roaming number %s: %s" % (number, e))
@@ -167,7 +167,7 @@ def update_local_connected():
                             #sub.delete(msisdn[0])
                             continue
             # extension is in pg_hlr
-            roaming_log.info("%s is at %s acording to local hlr" % (msisdn[0], bts))
+            roaming_log.debug("%s is at %s acording to local hlr" % (msisdn[0], bts))
             
             if  bts != config['local_ip']:
                 try:
