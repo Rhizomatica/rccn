@@ -75,7 +75,7 @@ def cleanup_hlrs():
                                                sub[1], imsi_key)
                             r_obj.remove_indexes().delete()
                         elif r_obj.exists:
-                            hlrsync_log.debug("msisdn(%s belongs to imsi(%s) in d_hlr.",
+                            hlrsync_log.warning("msisdn(%s belongs to imsi(%s) in d_hlr.",
                                               imsi_key, r_obj.data['msisdn'])
                         else:
                             hlrsync_log.debug("imsi(%s) not in d_hlr.", imsi_key)
