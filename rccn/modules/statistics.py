@@ -161,10 +161,10 @@ class LiveStatistics:
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
 
-    def get_recent_sms_avg(self,per,ago):
+    def get_recent_sms_avg(self, per, ago):
         try:
             cur = db_conn.cursor()
-            cur.execute(("SELECT avg(count) FROM ( "
+            cur.execute(("SELECT COALESCE(avg(count), 0) FROM ( "
                          "SELECT date_trunc(%(per)s,send_stamp), count(*) "
                          "FROM SMS where send_stamp > (now() - interval %(ago)s)"
                          " group by 1) alias"), { 'per': per, 'ago': ago })
@@ -175,9 +175,6 @@ class LiveStatistics:
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
-
-
-
 
     def get_recent_call_count(self,ago):
         try:
