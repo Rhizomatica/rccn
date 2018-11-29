@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-"""Get info from Riak about an extension"""
 ############################################################################
 #
 # RCCN is free software: you can redistribute it and/or modify
@@ -105,7 +104,7 @@ def get(msisdn, imsi, auth):
 
         if riak_imsi and riak_imsi.count(riak_imsi[0]) != len(riak_imsi):
             print "\033[91;1m More than ONE entry in this index! \033[0m"
-            advise("!!More than ONE entry in this index: %s" % msisdn)
+            # advise("!!More than ONE entry in this index: %s" % msisdn)
         if not riak_ext or not len(riak_imsi):
             print '\033[93mExtension %s not found\033[0m, adding to D_HLR' % (msisdn)
             sub._provision_in_distributed_hlr(imsi, msisdn)
