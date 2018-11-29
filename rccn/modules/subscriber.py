@@ -23,6 +23,7 @@ import sys
 sys.path.append("..")
 from config import *
 import obscvty
+from ESL import *
 
 class SubscriberException(Exception):
     pass
@@ -164,20 +165,20 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
-    def get_all_expire(self):
+    def get_sip_connected(self):
         try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select extension,expire_lu from subscriber where length(extension) = 11")
-            subscribers = sq_hlr_cursor.fetchall()
-            if subscribers == []:
-                raise SubscriberException('No subscribers found')
-            else:
-                sq_hlr.close()
-                return subscribers
-        except sqlite3.Error as e:
-            sq_hlr.close()
-            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+            _sip_connected = []
+            con = ESLconnection("127.0.0.1", "8021", "ClueCon")
+            e = con.api("show registrations")
+            reg=e.getBody()
+            lines=reg.split('\n')
+            for line in lines[1:]:
+                vals=line.split(',')
+                if len(vals) < 10:
+                    return _sip_connected
+                _sip_connected.append([vals[0]])
+        except Exception as ex:
+            log.info('Exception: %s' % ex)
 
     def get_all_connected(self):
         try:
