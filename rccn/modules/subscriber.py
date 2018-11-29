@@ -765,7 +765,7 @@ class Subscriber:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT)
             for key in subscriber.results:
-                rk_hlr.get(key).delete()
+                rk_hlr.get(key).remove_indexes().delete()
 
         except riak.RiakError as e:
             raise SubscriberException('RK_HLR error: %s' % e)
