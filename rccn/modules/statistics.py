@@ -44,7 +44,7 @@ class LiveStatistics:
         data['ld']=self.get_recent_call_count('1 hour')
         data['ls']=self.get_recent_call_count('24 hours')
         data['ss']=self.get_recent_sms_count('1 hour')
-        data['sa']=round(self.get_recent_sms_avg('hour', '30 days'), 2)
+        data['sa']=round(self.get_recent_sms_avg('hour', '6 hours'), 2)
         data['ut']=self.get_uptime()
         data['la']=os.getloadavg()
         data['v']=self.get_linev()
