@@ -161,14 +161,13 @@ def rx_deliver_sm(pdu):
             log.error("Unable to handle SMS for %s: %s" % (pdu.destination_addr[:6], ex))
             return smpplib.consts.SMPP_ESME_RINVDSTADR
 
-    #log.info("SMS from %s to %s" % (valid_src[2], valid_dest[2]) )
-
     log.debug('Registered Delivery: %s' % pdu.registered_delivery)
     log.debug('ESM Class %s' % pdu.esm_class)
     if int(pdu.esm_class) == 4:
         pdu.esm_class = 8
-        log.info('Delivery Report for msg_ref: %s %s ' %
-                  (pdu.user_message_reference, ''))
+        log.info('--> RX Delivery Report for Uref(%s): %s ' %
+                  (pdu.user_message_reference, pdu.short_message))
+        pdu.short_message = ' '
     if config.config['local_ip'] == dest_ip:
         ret = local_pass_pdu(pdu)
         return smpplib.consts.SMPP_ESME_ROK
