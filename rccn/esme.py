@@ -170,6 +170,8 @@ def rx_deliver_sm(pdu):
         pdu.short_message = ' '
     if config.config['local_ip'] == dest_ip:
         ret = local_pass_pdu(pdu)
+        if pdu.esm_class != 8:
+            sms.save(pdu.source_addr, pdu.destination_addr, 'SMS_LOCAL')
         return smpplib.consts.SMPP_ESME_ROK
     else:
         # Pass it off to the Queue. what to do here? send it to the remote site?
@@ -178,7 +180,10 @@ def rx_deliver_sm(pdu):
         # what if the remote site is down
         try:
             #tremote = threading.Thread(target=remote_pass_pdu)
-            return remote_pass_pdu(pdu, dest_ip)
+            stat = remote_pass_pdu(pdu, dest_ip)
+            if stat == smpplib.consts.SMPP_ESME_ROK and pdu.esm_class != 8:
+                sms.save(pdu.source_addr, pdu.destination_addr, 'SMS_INTERNAL')
+            return stat
         except Exception as e:
             log.error("exception from remote_pass_pdu %s", str(e))
             # Something bad happened
@@ -313,6 +318,8 @@ if __name__ == "__main__":
     SubscriberException = config.subscriber.SubscriberException
     num = config.Numbering()
     NumberingException = config.numbering.NumberingException
+    sms = config.SMS()
+    SMSException = config.sms.SMSException
     #open a VTY console, don't bring up and down all the time.
     #vty = obscvty.VTYInteract('OpenBSC', '127.0.0.1', 4242)
     log.info('Starting up ESME...')
