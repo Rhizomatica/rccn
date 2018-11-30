@@ -96,6 +96,7 @@ def get(msisdn, imsi, auth):
         else:
             print "\033[91;1m!! Didn't get hlr key for imsi %s\033[0m" % imsi
             riak_ext = False
+
         if riak_ext and auth == 1 and riak_auth == 1 and (riak_ext != msisdn):
             imsi_clash(imsi, msisdn, riak_ext)
             return
@@ -103,8 +104,13 @@ def get(msisdn, imsi, auth):
         riak_imsi = bucket.get_index('msisdn_bin', msisdn, timeout=RIAK_TIMEOUT).results
 
         if riak_imsi and riak_imsi.count(riak_imsi[0]) != len(riak_imsi):
-            print "\033[91;1m More than ONE entry in this index! \033[0m"
-            # advise("!!More than ONE entry in this index: %s" % msisdn)
+            print "\033[91;1m Different entries in this index! \033[0m"
+            advise("!!More than ONE entry in this index: %s %s %s" % (msisdn,riak_imsi[0],riak_imsi[1]))
+        if riak_imsi and len(riak_imsi) > 1 and riak_imsi.count(riak_imsi[0]) == len(riak_imsi):
+            print "\033[91;1m Duplicate entries in this index. \033[0m"
+            tmp_obj = bucket.get(riak_imsi[1])
+            tmp_obj.remove_index()
+            tmp_obj.store()
         if not riak_ext or not len(riak_imsi):
             print '\033[93mExtension %s not found\033[0m, adding to D_HLR' % (msisdn)
             sub._provision_in_distributed_hlr(imsi, msisdn)
