@@ -130,14 +130,14 @@ def rx_deliver_sm(pdu):
         log.error("Unable to handle SMS for %s: SMPP_TON_INTL" % (pdu.destination_addr))
         return smpplib.consts.SMPP_ESME_RINVDSTTON
     try:
-        valid_src = sub.get(pdu.source_addr)
-        if not sub.is_authorized(pdu.source_addr, 0):
+        valid_src = num.is_number_known(pdu.source_addr)
+        if (not num.is_number_internal(pdu.source_addr) and
+            not sub.is_authorized(pdu.source_addr, 0)):
             log.error("Unable to handle SMS from %s: Unauthorised" % (pdu.source_addr))
             return smpplib.consts.SMPP_ESME_RINVSRCADR
     except SubscriberException as ex:
         log.error("Unable to handle SMS from %s: %s" % (pdu.source_addr, ex))
         return smpplib.consts.SMPP_ESME_RINVSRCADR
-
     try:
         if check_extensions(pdu):
             return smpplib.consts.SMPP_ESME_ROK
