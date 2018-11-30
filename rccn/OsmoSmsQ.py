@@ -367,7 +367,7 @@ def display_queue(smsq):
             print "\033[34m------------------------------------\033[0m"
             print "SMSQ ID: " + mid
             print "Created: " + sms[1]
-            print "From: " + src +  " to: "  + dest 
+            print "From: " + src +  " to: "  + dest
             if sms[2] is not None:
                 print "Sent: " + str(sms[2])
             else:
@@ -391,6 +391,8 @@ def display_queue(smsq):
             print 'Caught Exception Encoding: %s %s on Line %s' % (e, sys.exc_info()[1], sys.exc_info()[2].tb_lineno)
             
         if options.brief:
+            if item['is_report'] == 1:
+                charset = "\033[96mREPORT\033[0m"
             if options.colour:
                 idc=str(91+int(parts))
                 sentc = '96' if sms[2] is None else '92'
