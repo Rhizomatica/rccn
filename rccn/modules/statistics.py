@@ -170,8 +170,10 @@ class LiveStatistics:
                          " group by 1) alias"), { 'per': per, 'ago': ago })
             if cur.rowcount > 0:
                 sub = cur.fetchone()
+                cur.close()
                 return sub[0]
             else:
+                cur.close()
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
@@ -183,8 +185,10 @@ class LiveStatistics:
                         { 'ago': ago } )
             if cur.rowcount > 0:
                 sub = cur.fetchone()
+                cur.close()
                 return sub[0]
             else:
+                cur.close()
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
@@ -214,6 +218,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT count(*) FROM cdr')
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total calls: %s' % e)
@@ -223,6 +228,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT sum(billsec)/60 FROM cdr')
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total minutes: %s' % e)
@@ -232,6 +238,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT round(avg(billsec),2) FROM cdr')
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total minutes: %s' % e)
@@ -241,6 +248,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT count(*) FROM cdr WHERE context=%(context)s', {'context': context})
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total minutes: %s' % e)
@@ -257,6 +265,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
+            cur.close()
             if data == []:
                 raise StatisticException('No calls data found')
             else:
@@ -276,6 +285,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
+            cur.close()
             if data == []:
                 raise StatisticException('No calls minutes data found')
             else:
@@ -295,6 +305,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
+            cur.close()
             if data == []:
                 raise StatisticException('No calls context data found')
             else:
@@ -310,6 +321,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT round(sum(cost),2) FROM cdr')
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total spent: %s' % e)
@@ -319,6 +331,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT round(avg(cost),2) FROM cdr')
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total spent: %s' % e)
@@ -328,6 +341,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT sum(amount) FROM credit_history')
             data = cur.fetchone()
+            cur.close()
             return data[0]
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error getting total spent on credits: %s' % e)
@@ -337,6 +351,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute('SELECT destination_name,round(sum(cost),2) FROM cdr WHERE cost IS NOT NULL GROUP BY destination_name ORDER BY sum(cost) DESC OFFSET 0 LIMIT 9')
             data = cur.fetchall()
+            cur.close()
             if data == []:
                 raise StatisticException('No top destinations found')
             else:                   
@@ -356,6 +371,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
+            cur.close()
             if data == []:
                 raise StatisticException('No costs data found')
             else:
@@ -375,6 +391,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
+            cur.close()
             if data == []:
                 raise StatisticException('No credits data found')
             else:
