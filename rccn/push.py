@@ -39,23 +39,23 @@ def check(auth, recent, hours=2, single=''):
     """ Get sub from the local PG db and see their status in riak """
     cur = db_conn.cursor()
     if single:
-        cur.execute("SELECT msisdn,name FROM Subscribers WHERE msisdn=%s", [single])
+        cur.execute("SELECT msisdn,name,authorized FROM Subscribers WHERE msisdn=%s", [single])
     if recent == 0:
-        cur.execute("SELECT msisdn,name FROM Subscribers WHERE authorized=%s", str(auth))
+        cur.execute("SELECT msisdn,name,authorized FROM Subscribers WHERE authorized=%s", str(auth))
     if recent == 1:
-        sql = "SELECT msisdn,created FROM Subscribers WHERE authorized=%s AND created > NOW() -interval '%s hours'" % (str(auth), hours)
+        sql = "SELECT msisdn,name,authorized FROM Subscribers WHERE authorized=%s AND created > NOW() -interval '%s hours'" % (str(auth), hours)
         cur.execute(sql)
     if cur.rowcount > 0:
         print 'Subscriber Count: %s ' % (cur.rowcount)
         _subs=cur.fetchall()
         n=cur.rowcount
-        for msisdn,name in _subs:
+        for msisdn,name,authorized in _subs:
             print '----------------------------------------------------'
             print "%s: Checking %s %s" % (n, msisdn, name)
             imsi=osmo_ext2imsi(msisdn)
             if imsi:
                 print "Local IMSI: \033[96m%s\033[0m" % (imsi)
-                get(msisdn, imsi, auth)
+                get(msisdn, imsi, authorized)
             else:
                 msg="""
                 Local Subscriber %s from PG Not Found on OSMO HLR!
@@ -110,6 +110,7 @@ def get(msisdn, imsi, auth):
             print "\033[91;1m Duplicate entries in this index. \033[0m"
             tmp_obj = bucket.get(riak_imsi[1])
             tmp_obj.remove_index()
+            tmp_obj.add_index('modified_int', int(time.time()))
             tmp_obj.store()
         if not riak_ext or not len(riak_imsi):
             print '\033[93mExtension %s not found\033[0m, adding to D_HLR' % (msisdn)
@@ -196,6 +197,6 @@ if __name__ == '__main__':
         check(auth,-1,0,options.single)
         exit()
     if options.recent:
-        check(auth,options.recent,1)
+        check(auth,1,options.recent)
     else:
         check(auth,0)
