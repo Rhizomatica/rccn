@@ -196,6 +196,26 @@ def rrd_date(debug):
     os.system("%s/bin/./platform_create_rrd.sh" % rhizomatica_dir)
     print 'Done'
 
+def riak_add():
+    print('Adding Site Info to Riak... ').ljust(40),
+
+    riak_config = {
+        'site_name': site_name,
+        'postcode': postcode,
+        'pbxcode': pbxcode,
+        'network_name': network_name,
+        'ip_address': vpn_ip_address}
+
+    riak_add_cmd = (
+        "curl -X PUT http://%s:8098/buckets/sites/keys/%s "
+        "-H \"Content-Type: application/json\" "
+        "-d '%s'" % (
+            riak_ip_address,
+            postcode+pbxcode,
+            json.dumps(riak_config)))
+
+    os.system(riak_add_cmd)
+    print 'Done'
 
 print 'RCCN Installation script\n'
 
@@ -205,8 +225,8 @@ if __name__ == '__main__':
         help="Full Install; Run all the installation routines")
     parser.add_option("-u", "--user", dest="user", action="store_true",
         help="Configure the User in the user database (resets the password to whatever is in the python config)")
-    parser.add_option("-r", "--res", dest="res", action="store_true",
-        help="Reserved")
+    parser.add_option("-r", "--riak", dest="riak", action="store_true",
+        help="Add site info to Riak")
     parser.add_option("-s", "--sqlite", dest="sqlite", action="store_true",
         help="Only Setup the OsmoCom NITB Sqlite3 HLR database. (nitb must be run once before you do this)")
     parser.add_option("-d", "--debug", dest="debug", action="store_true",
@@ -241,7 +261,7 @@ if options.user:
 if options.sqlite:
     osmo_hlr(debug)
 
-if options.res:
-    print "OK!"
+if options.riak:
+    riak_add()
 
 print '\nRCCN Installation completed'
