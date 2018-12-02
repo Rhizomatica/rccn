@@ -48,6 +48,7 @@ def check(auth, recent, hours=2, single=''):
     if cur.rowcount > 0:
         print 'Subscriber Count: %s ' % (cur.rowcount)
         _subs=cur.fetchall()
+        cur.close()
         n=cur.rowcount
         for msisdn,name,authorized in _subs:
             print '----------------------------------------------------'
