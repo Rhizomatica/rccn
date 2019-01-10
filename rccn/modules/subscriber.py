@@ -165,6 +165,21 @@ class Subscriber:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
 
+    def get_all_expire(self):
+        try:
+            sq_hlr = sqlite3.connect(sq_hlr_path)
+            sq_hlr_cursor = sq_hlr.cursor()
+            sq_hlr_cursor.execute("select extension,expire_lu from subscriber where length(extension) = 11")
+            subscribers = sq_hlr_cursor.fetchall()
+            if subscribers == []:
+                raise SubscriberException('No subscribers found')
+            else:
+                sq_hlr.close()
+                return subscribers
+        except sqlite3.Error as e:
+            sq_hlr.close()
+            raise SubscriberException('SQ_HLR error: %s' % e.args[0])
+
     def get_sip_connected(self):
         try:
             _sip_connected = []
