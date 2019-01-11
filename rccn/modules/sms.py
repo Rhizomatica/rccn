@@ -377,6 +377,7 @@ class SMS:
             # Never happen....
             raise SMSException('Error sending SMS to site %s' % server)
 
+
     def local_smpp_submit_sm(self, source, destination, unicode_text, str_text=''):
         if use_kannel == 'yes':
             try:
@@ -390,6 +391,14 @@ class SMS:
                 return
             except IOError:
                 raise SMSException('Error connecting to Kannel to send SMS')
+
+        global _sent
+        def _smpp_rx_submit_resp(pdu):
+            global _sent
+            sms_log.info("Sent (%s)", pdu.message_id)
+            if pdu.command == "submit_sm_resp":
+                _sent = pdu.status
+
         try:
             source = network_name if source == '10000' else source
             if not source.isdigit():
@@ -401,9 +410,11 @@ class SMS:
             parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(unicode_text)
             smpp_client = smpplib.client.Client("127.0.0.1", 2775, 90)
             smpplib.client.logger.setLevel('INFO')
-            smpp_client.set_message_sent_handler(lambda pdu: sms_log.info("Sent (%s)", pdu.message_id))
+            smpp_client.set_message_received_handler(lambda pdu: sms_log.info("Rcvd while sending (%s)", pdu.command))
+            smpp_client.set_message_sent_handler(_smpp_rx_submit_resp)
             smpp_client.connect()
             smpp_client.bind_transceiver(system_id="ISMPP", password="Password")
+            _sent = -1
             for part in parts:
                 pdu = smpp_client.send_message(
                     source_addr_ton=ston,
@@ -417,7 +428,8 @@ class SMS:
                     short_message=part,
                     registered_delivery=False,
                 )
-                smpp_client.read_once()
+                while _sent < 0:
+                    smpp_client.read_once()
             smpp_client.unbind()
             smpp_client.disconnect()
             del pdu

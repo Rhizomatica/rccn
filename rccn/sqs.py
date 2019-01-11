@@ -55,13 +55,23 @@ if options.debug:
     sms_log.setLevel('DEBUG')
 
 def smpp_sumbit(src, dest, utext, bts, report=False):
+    global _sent
+
+    def _smpp_rx_submit_resp(pdu):
+        global _sent
+        sms_log.info("Sent (%s)", pdu.message_id)
+        if pdu.command == "submit_sm_resp":
+            _sent = pdu.status
+
     try:
         parts, encoding_flag, msg_type_flag = smpplib.gsm.make_parts(utext)
         smpp_client = smpplib.client.Client(bts, 2775, 90)
         smpplib.client.logger.setLevel('INFO')
-        smpp_client.set_message_sent_handler(lambda pdu: sms_log.info("Sent (%s)", pdu.message_id))
+        smpp_client.set_message_received_handler(lambda pdu: sms_log.info("Rcvd while sending (%s)", pdu.command))
+        smpp_client.set_message_sent_handler(_smpp_rx_submit_resp)
         smpp_client.connect()
         smpp_client.bind_transceiver(system_id="ISMPP", password="Password")
+        _sent = -1
         for part in parts:
             pdu = smpp_client.send_message(
                 source_addr_ton=smpplib.consts.SMPP_TON_ALNUM,
@@ -75,7 +85,8 @@ def smpp_sumbit(src, dest, utext, bts, report=False):
                 short_message=part,
                 registered_delivery=report,
             )
-            smpp_client.read_once()
+            while _sent < 0:
+                smpp_client.read_once()
         smpp_client.unbind()
         smpp_client.disconnect()
         del pdu
@@ -85,6 +96,7 @@ def smpp_sumbit(src, dest, utext, bts, report=False):
         if isinstance(ex, smpplib.exceptions.PDUError):
             smpp_client.unbind()
             smpp_client.disconnect()
+            sms_log.info('Remote said %s', str(ex))
             return ex.args[1]
         raise cn.SMSException('Unable to Submit Message via SMPP: (%s)', str(ex))
 
