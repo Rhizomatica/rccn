@@ -70,7 +70,7 @@ def smpp_sumbit(src, dest, utext, bts, report=False):
         smpp_client.set_message_received_handler(lambda pdu: sms_log.info("Rcvd while sending (%s)", pdu.command))
         smpp_client.set_message_sent_handler(_smpp_rx_submit_resp)
         smpp_client.connect()
-        smpp_client.bind_transceiver(system_id="ISMPP", password="Password")
+        smpp_client.bind_transmitter(system_id="ISMPP", password="Password")
         _sent = -1
         for part in parts:
             pdu = smpp_client.send_message(
