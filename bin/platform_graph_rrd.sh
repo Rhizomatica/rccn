@@ -97,9 +97,13 @@ GPRINT:curV:"Current\: %3.0lf %s"
 rrdtool graph $RHIZO_DIR/graphs/latency-$age.png --start -$age -aPNG -w 600 -l 80 -u 160 --vertical-label='ms' -t "Average Latency sampled c/5m" \
 DEF:min=$RHIZO_DIR/latency.rrd:latency:MIN \
 DEF:max=$RHIZO_DIR/latency.rrd:latency:MAX \
+DEF:vmin=$RHIZO_DIR/vpnlatency.rrd:vpnlatency:MIN \
+DEF:vmax=$RHIZO_DIR/vpnlatency.rrd:vpnlatency:MAX \
 VDEF:curL=max,LAST \
 LINE1:min#0000AA:"Minimum" \
 LINE1:max#00AA00:"Maximum" \
+LINE1:vmin#F000AA:"VPN Minimum" \
+LINE1:vmax#F0AA00:"VPN Maximum" \
 GPRINT:curL:"Current Latency\: %3.0lf %s"
 
 
