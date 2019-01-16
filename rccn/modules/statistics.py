@@ -155,8 +155,10 @@ class LiveStatistics:
                         { 'ago': ago } )
             if cur.rowcount > 0:
                 sub = cur.fetchone()
+                cur.close()
                 return sub[0]
             else:
+                cur.close()
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
