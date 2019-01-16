@@ -23,7 +23,7 @@ fi
 
 latency=`fping -t 1000 -i 250 -s -q -c4 "$LATENCY_HOST" 2>&1 | grep '(avg' | cut -d\  -f2`
 vpnlatency=`fping -t 1000 -i 250 -s -q -c4 "$LATENCY_TINC" 2>&1 | grep '(avg' | cut -d\  -f2`
-if [ -n "$latency" ] && [ -n "$tlatency" ]; then
+if [ -n "$latency" ] && [ -n "$vpnlatency" ]; then
   echo "$latency/$vpnlatency" > /tmp/latency
   /usr/bin/rrdtool update $RHIZO_DIR/latency.rrd N:$latency
   /usr/bin/rrdtool update $RHIZO_DIR/vpnlatency.rrd N:$vpnlatency
