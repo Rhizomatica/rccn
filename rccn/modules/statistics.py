@@ -155,10 +155,10 @@ class LiveStatistics:
                         { 'ago': ago } )
             if cur.rowcount > 0:
                 sub = cur.fetchone()
-                cur.close()
+                db_conn.commit()
                 return sub[0]
             else:
-                cur.close()
+                db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
@@ -172,10 +172,10 @@ class LiveStatistics:
                          " group by 1) alias"), { 'per': per, 'ago': ago })
             if cur.rowcount > 0:
                 sub = cur.fetchone()
-                cur.close()
+                db_conn.commit()
                 return sub[0]
             else:
-                cur.close()
+                db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
@@ -187,10 +187,10 @@ class LiveStatistics:
                         { 'ago': ago } )
             if cur.rowcount > 0:
                 sub = cur.fetchone()
-                cur.close()
+                db_conn.commit()
                 return sub[0]
             else:
-                cur.close()
+                db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
@@ -267,7 +267,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
-            cur.close()
+            db_conn.commit()
             if data == []:
                 raise StatisticException('No calls data found')
             else:
@@ -287,7 +287,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
-            cur.close()
+            db_conn.commit()
             if data == []:
                 raise StatisticException('No calls minutes data found')
             else:
@@ -307,7 +307,7 @@ class CallsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
-            cur.close()
+            db_conn.commit()
             if data == []:
                 raise StatisticException('No calls context data found')
             else:
@@ -373,7 +373,7 @@ class CostsStatistics:
             cur = db_conn.cursor()
             cur.execute(query)
             data = cur.fetchall()
-            cur.close()
+            db_conn.commit()
             if data == []:
                 raise StatisticException('No costs data found')
             else:
