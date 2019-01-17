@@ -29,6 +29,7 @@ class Dialplan:
     Logic to assign the call to the right context
     """
     NOT_CREDIT_ENOUGH = '002_saldo_insuficiente.gsm'
+    NOT_REGISTERED = '015_no_access.gsm'
     WRONG_NUMBER = '007_el_numero_no_es_corecto.gsm'
 
     def __init__(self, session):
@@ -59,9 +60,7 @@ class Dialplan:
         :param ann: Filename of the announcement to be played
         :type ann: str
         """
-        self.session.answer()
         self.session.execute('playback', '%s' % ann)
-        self.session.hangup()
 
     def auth_context(self, mycontext):
         """
@@ -85,7 +84,8 @@ class Dialplan:
                 # subscriber not authorized to call
                 # TODO: register announcement of subscriber
                 # not authorized to call
-                self.play_announcement(self.NOT_CREDIT_ENOUGH)
+                self.play_announcement(self.NOT_REGISTERED)
+                self.session.hangup('CALL_REJECTED')
         except SubscriberException as e:
             log.error(e)
             # play announcement error
@@ -282,5 +282,7 @@ class Dialplan:
                                 'invalid number format')
                             processed = 1
                             self.play_announcement(self.WRONG_NUMBER)
+                            self.session.hangup('UNALLOCATED_NUMBER')
             except NumberingException as e:
                 log.error(e)
+                self.play_announcement('005_todas_las_lineas_estan_ocupadas.gsm')
