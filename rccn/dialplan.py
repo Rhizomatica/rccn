@@ -121,6 +121,12 @@ class Dialplan:
             
             self.session.setVariable('context','EMERGENCY')
             self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
+
+        if self.destination_number[:1] == "*" && 'support_contact' in vars():
+            log.info('Support Call (%s)' % self.destination_number)
+            self.session.setVariable('destination_number', support_contact)
+            self.destination_number = support_contact
+            self.context.destination_number = support_contact
             
         if processed == 0:
             # check if destination number is an incoming call
