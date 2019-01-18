@@ -28,20 +28,21 @@ class NumberingException(Exception):
     pass
 
 class Numbering:
-    
+
     def is_number_sip_connected(self, session, number):
         try:
             session.execute('set', "sofia_contact_=${sofia_contact("+number+")}")
-            _sofia_contact=session.getVariable("sofia_contact_")
+            _sofia_contact = session.getVariable("sofia_contact_")
             if _sofia_contact == 'error/user_not_registered':
                 session.execute('set', "sofia_contact_=${sofia_contact(*/"+number+"@"+wan_ip_address+")}")
-                _sofia_contact=session.getVariable("sofia_contact_")
+                _sofia_contact = session.getVariable("sofia_contact_")
             log.info('Sofia Contact: %s' % _sofia_contact)
             if _sofia_contact == '' or _sofia_contact == 'error/user_not_registered':
                 return False
             return _sofia_contact
         except Exception as ex:
             log.info('Exception: %s' % ex)
+            return False
 
     def is_number_sip_connected_no_session(self, number):
         # Carefult with this, seems to lock up FS console if called from chatplan.
@@ -49,10 +50,10 @@ class Numbering:
         try:
             con = ESLconnection("127.0.0.1", "8021", "ClueCon")
             e = con.api("sofia_contact "+str(number))
-            _sofia_contact=e.getBody()
+            _sofia_contact = e.getBody()
             if _sofia_contact == 'error/user_not_registered':
-                e = con.api( "sofia_contact */" + str(number) + "@" + str(wan_ip_address) )
-                _sofia_contact=e.getBody()
+                e = con.api("sofia_contact */" + str(number) + "@" + str(wan_ip_address))
+                _sofia_contact = e.getBody()
             log.info('Sofia Contact: %s' % _sofia_contact)
             if _sofia_contact == '' or _sofia_contact == 'error/user_not_registered':
                 return False
@@ -75,7 +76,7 @@ class Numbering:
 
     def fivetoeleven(self, source_number, destination_number):
         """ Convert a five digit extension to 11 digits based on the caller. """
-        if len(destination_number) !=5:
+        if len(destination_number) != 5:
             return destination_number
         return source_number[:6] + destination_number
 
@@ -96,7 +97,7 @@ class Numbering:
             else:
                 return False
         except psycopg2.DatabaseError as e:
-            raise NumberingException('Database error checking if number is local:' % e )
+            raise NumberingException('Database error checking if number is local:' % e)
 
     def is_number_known(self, number):
         try:
@@ -130,7 +131,7 @@ class Numbering:
             return False
 
     def is_number_here(self, number):
-        log.info('%s %s %s %s' % (self.calling_host,mncc_ip_address,number[:6],config['internal_prefix']))
+        log.info('%s %s %s %s' % (self.calling_host, mncc_ip_address, number[:6], config['internal_prefix']))
         if self.calling_host == mncc_ip_address and number[:6] == config['internal_prefix']:
             # If we are here and are a local number, then we can't be roaming
             log.warn('%s is here' % number)
@@ -146,12 +147,13 @@ class Numbering:
                     if subscriber['authorized'] == 1:
                         return True
                     else:
-                        raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' % (number, subscriber['current_bts']))
+                        raise NumberingException('RK_DB subscriber %s is roaming on %s but is not authorized' %
+                                                 (number, subscriber['current_bts']))
             return False
         except psycopg2.DatabaseError as e:
             raise NumberingException('PG_HLR error checking if number is in roaming:' % e)
 
-    def get_dhlr_entry(self,imsi):
+    def get_dhlr_entry(self, imsi):
         try:
             rk_hlr = riak_client.bucket('hlr')
             subscriber = rk_hlr.get(str(imsi), timeout=RIAK_TIMEOUT)
@@ -182,13 +184,13 @@ class Numbering:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sql=('SELECT Equipment.imei, Subscriber.imsi, '
-            'Subscriber.extension, Subscriber.updated '
-            'FROM Equipment, EquipmentWatch, Subscriber '
-            'WHERE EquipmentWatch.equipment_id=Equipment.id '
-            'AND EquipmentWatch.subscriber_id=Subscriber.id '
-            'AND Equipment.imei=? '
-            'ORDER BY Subscriber.updated DESC LIMIT 1;')
+            sql = ('SELECT Equipment.imei, Subscriber.imsi, '
+                   'Subscriber.extension, Subscriber.updated '
+                   'FROM Equipment, EquipmentWatch, Subscriber '
+                   'WHERE EquipmentWatch.equipment_id=Equipment.id '
+                   'AND EquipmentWatch.subscriber_id=Subscriber.id '
+                   'AND Equipment.imei=? '
+                   'ORDER BY Subscriber.updated DESC LIMIT 1;')
             print sql
             sq_hlr_cursor.execute(sql, [(imei)])
             extensions = sq_hlr_cursor.fetchall()
@@ -199,12 +201,12 @@ class Numbering:
             raise NumberingException('SQ_HLR error: %s' % e.args[0])
 
     def get_imei_autocomplete(self, partial_imei=''):
-        try: 
+        try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            sql='SELECT DISTINCT Equipment.imei FROM Equipment '
-            if partial_imei!='':
-                sql+='WHERE Equipment.imei LIKE ? ORDER BY Equipment.imei ASC'
+            sql = 'SELECT DISTINCT Equipment.imei FROM Equipment '
+            if partial_imei != '':
+                sql += 'WHERE Equipment.imei LIKE ? ORDER BY Equipment.imei ASC'
                 sq_hlr_cursor.execute(sql, [(partial_imei+'%')])
             else:
                 sq_hlr_cursor.execute(sql)
@@ -212,8 +214,8 @@ class Numbering:
             sq_hlr.close()
             if imeis == []:
                 return []
-            if len(imeis)==1:
-                data=self.get_msisdn_from_imei(imeis[0][0])
+            if len(imeis) == 1:
+                data = self.get_msisdn_from_imei(imeis[0][0])
                 return data
             else:
                 return imeis
@@ -277,7 +279,7 @@ class Numbering:
                 else:
                     raise NumberingException('RK_DB Error no IP found for site %s' % site)
             except socket.error as err:
-                    raise NumberingException('RK_DB Connection Unavailable %s' % str(err))
+                raise NumberingException('RK_DB Connection Unavailable %s' % str(err))
         else:
             return result[0][0]
 
@@ -289,10 +291,13 @@ class Numbering:
                 dest = callee[1:2]
             if re.search(r'^00', callee) != None:
                 dest = callee[2:3]
-            cur.execute('select callerid from dids,providers where callerid like %(prefix)s limit 1', {'prefix': '+'+dest+'%'} )
+            cur.execute('select callerid from dids,providers where callerid like %(prefix)s limit 1',
+                        {'prefix': '+'+dest+'%'})
             callerid = cur.fetchone()
             if callerid == None:
-                cur.execute('select callerid from dids,providers where providers.id = dids.provider_id and providers.active = 1 order by dids.id asc limit 1')
+                cur.execute("select callerid from dids,providers where "
+                            "providers.id = dids.provider_id and "
+                            "providers.active = 1 order by dids.id asc limit 1")
                 callerid = cur.fetchone()
             if callerid != None:
                 return callerid[0]
@@ -304,7 +309,8 @@ class Numbering:
     def get_did_subscriber(self, destination_number):
         try:
             cur = db_conn.cursor()
-            cur.execute('select subscriber_number from dids where phonenumber=%(number)s', {'number': destination_number})
+            cur.execute('select subscriber_number from dids where phonenumber=%(number)s',
+                        {'number': destination_number})
             dest = cur.fetchone()
             if dest != None:
                 return dest[0]
@@ -323,7 +329,7 @@ class Numbering:
         except psycopg2.DatabaseError, e:
             raise NumberingException('Database error getting the Gateway: %s' % e)
 
-    def is_number_mxcel(self,number):
+    def is_number_mxcel(self, number):
         try:
             if len(number) != 10:
                 log.debug("Number %s length not 10" % number)
@@ -343,5 +349,5 @@ class Numbering:
             raise NumberingException('Database error getting the Number Type: %s' % e)
 
 if __name__ == '__main__':
-	num = Numbering()
-	num.is_number_roaming('66666139666')
+    num = Numbering()
+    num.is_number_roaming('66666139666')
