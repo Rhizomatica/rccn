@@ -46,7 +46,7 @@ class Context:
         self.session.setVariable('context', 'OUTBOUND')
         subscriber_number = self.session.getVariable('caller_id_number')
         # check subscriber balance
-        log.debug('Check subscriber %s balance' % subscriber_number)
+        log.debug('Check subscriber %s balance', subscriber_number)
         try:
             current_subscriber_balance = Decimal(self.subscriber.get_balance(subscriber_number))
         except SubscriberException as e:
@@ -55,7 +55,7 @@ class Context:
             # play announcement and hangup call
             # TODO: announcement of general error
 
-        log.debug('Current subscriber balance: %.2f' % current_subscriber_balance)
+        log.debug('Current subscriber balance: %.2f', current_subscriber_balance)
         if current_subscriber_balance > Decimal('0.00'):
             # subscriber has enough balance to make a call
             log.debug('Get call rate')
@@ -63,17 +63,16 @@ class Context:
 
             rate = self.billing.get_rate(self.destination_number)
             total_call_duration = self.billing.get_call_duration(current_subscriber_balance, rate[3])
-
-            log.info('Total duration for the call before balance end is set to %d sec' % total_call_duration)
-
+            log.info('Total duration for the call before balance end is set to %d sec', total_call_duration)
             mid_announcement = total_call_duration - 30
-
-            self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % total_call_duration)
+            self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' %
+                                 total_call_duration)
             if total_call_duration > 60:
-                self.session.execute('set', 'execute_on_answer_2=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' % mid_announcement)
-            
-            self.session.execute('set', 'execute_on_answer_3=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' % (total_call_duration - 3))
-
+                self.session.execute('set',
+                                     'execute_on_answer_2=sched_broadcast +%s playback::003_saldo_esta_por_agotarse.gsm' %
+                                     mid_announcement)
+            self.session.execute('set', 'execute_on_answer_3=sched_broadcast +%s playback::004_saldo_se_ha_agotado.gsm' %
+                                 (total_call_duration - 3))
             # set correct caller id based on the active provider
             try:
                 caller_id = self.numbering.get_callerid(subscriber_number,self.destination_number)
@@ -89,7 +88,7 @@ class Context:
             outbound_codec = 'G729'
 
             if caller_id != None:
-                log.info('Set caller id to %s' % caller_id)
+                log.info('Set caller id to %s', caller_id)
                 self.session.setVariable('effective_caller_id_number', '%s' % caller_id)
                 self.session.setVariable('effective_caller_id_name', '%s' % caller_id)
                 self.session.execute('set', 'sip_h_P-Charge-Info=%s' % subscriber_number)
@@ -207,7 +206,7 @@ class Context:
         #    log.error(e)
         try:
             log.debug('Check if Number is a Valid Local Number')
-            if (self.numbering.is_number_local(self.destination_number)):
+            if self.numbering.is_number_local(self.destination_number):
                 subscriber_number = self.destination_number
             else:
                 subscriber_number = None
@@ -216,7 +215,7 @@ class Context:
 
         # FIXME: (soon) Remove all this code duplication from the dialplan
         if subscriber_number != None:
-            log.info('DID assigned to: %s' % subscriber_number) 
+            log.info('DID assigned to: %s', subscriber_number)
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
                     log.info('Send call to internal subscriber %s' % subscriber_number)
@@ -248,18 +247,17 @@ class Context:
                     log.info('Subscriber %s doesn\'t exist or is not authorized' % subscriber_number)
             except SubscriberException as e:
                 log.error(e)
-                # internal error
-                # TODO: announcement of general error
-                self.session.execute('playback','007_el_numero_no_es_corecto.gsm')
+                self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
         else:
             self.session.answer()
-            loop_count=0
-            while self.session.ready() == True and loop_count < 6:
+            loop_count = 0
+            while self.session.ready() and loop_count < 6:
                 loop_count += 1
                 log.debug('Playback welcome message %s', loop_count)
                 log.debug('Collect DTMF to call internal number')
-                dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm", "007_el_numero_no_es_corecto.gsm", "\\d+")
-                log.debug('Collected digits: %s' % dest_num)
+                dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm",
+                                                         "007_el_numero_no_es_corecto.gsm", "\\d+")
+                log.debug('Collected digits: %s', dest_num)
                 if self.session.ready() != True:
                     return
 
@@ -270,7 +268,7 @@ class Context:
                     elif len(dest_num) == 11:
                         self.destination_number = dest_num
                     if self.numbering.is_number_roaming(self.destination_number):
-                        log.info('Destination number %s is roaming' % self.destination_number)
+                        log.info('Destination number %s is roaming', self.destination_number)
                         self.roaming('inbound')
                 except NumberingException as e:
                     log.error(e)
