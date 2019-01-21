@@ -149,7 +149,7 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
         return _sms
     except sqlite3.Error as sqlerror:
         sq_hlr.close()
-        raise Exception('SQ_HLR error: %s' % sqlerror.args[0])
+        raise Exception('Oops. SQL error: %s, %s' % (sqlerror.args[0], sql))
 
 def build_msgs(smsq):
     ret = []
