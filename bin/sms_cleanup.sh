@@ -21,7 +21,7 @@ logc "Total SMS: $total_sms Delivered: $total_sms_delivered SMS older than 4 day
 logc "Cleanup DB"
 
 echo "DELETE from SMS where created < datetime(\"now\", \"-6 hours\") and sent is not null;" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
-echo "DELETE from SMS where created < datetime(\"now\", \"-4 day\") and src_addr='10000' and sent is null;" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
+echo "DELETE from SMS where created < datetime(\"now\", \"-7 day\") and src_ton=5 and sent is null;" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
 if [[ $(date +%d) == "1" ]]; then
   echo "DELETE from SMS where created < datetime(\"now\", \"-3 month\");" | sqlite3 -init <(echo .timeout 1000) $SMS_DB
 fi
