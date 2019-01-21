@@ -402,9 +402,11 @@ def display_queue(smsq):
                 charset = "\033[96mREPORT\033[0m"
             if options.colour:
                 idc=str(91+int(parts))
-                sentc = '96' if sms[2] is None else '92'
-                print ( '\033[%sm%s\033[0m \033[95m%s\033[0m \033[91m%s\033[0m %s \033[1;%sm%s \033[0m'
-                % ( idc, sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), sentc, text1[:100] ) )
+                textc = '96' if sms[2] is None else '92'
+                textb = '0;03' if ston is 5 else '1'
+                fromc = '1;89' if ston is 5 else '95'
+                print ( '\033[%sm%s\033[0m \033[%sm%s\033[0m \033[91m%s\033[0m %s \033[%s;%sm%s \033[0m'
+                % ( idc, sms[0], fromc, src.ljust(11), dest.ljust(11), charset.ljust(8), textb, textc, text1[:100] ) )
             else:
                 print sms[0], src.ljust(11), dest.ljust(11), charset.ljust(8), text1[:100]
         else:    
