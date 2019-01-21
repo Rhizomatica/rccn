@@ -129,9 +129,9 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
         else:
             op = "="
         if src != '':
-            sql = sql + ' AND src_addr' + op + src
+            sql = sql + ' AND src_addr' + op + '"' + src + '"'
         if dest != '':
-            sql = sql + ' AND dest_addr' + op + dest
+            sql = sql + ' AND dest_addr' + op + '"' + dest + '"'
         if both:
             sql = sql + ' AND (src_addr like "%' + both + '%" OR dest_addr like "%' + both + '%")'
         if nosys:
