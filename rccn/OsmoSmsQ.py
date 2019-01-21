@@ -99,7 +99,8 @@ def parse_udh(s):
     udh['part_num'] = ord(s[5])
     return udh
 
-def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', dest = '', both=None, negate = False, limit = 0, order = False):
+def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', dest = '',
+               both=None, negate = False, limit = 0, order = False, nosys = False):
     global db_revision
     try:
         sq_hlr = sqlite3.connect(sq_hlr_path)
@@ -133,6 +134,8 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
             sql = sql + ' AND dest_addr' + op + dest
         if both:
             sql = sql + ' AND (src_addr like "%' + both + '%" OR dest_addr like "%' + both + '%")'
+        if nosys:
+            sql = sql + ' AND src_ton != 5'
         if order == False:
             sql = sql + ' ORDER BY created ASC '
         else:
@@ -184,6 +187,7 @@ def build_msgs(smsq):
           coding = sms[10]
           udhdr = sms[11]
           src = sms[12]
+          ston = sms[13]
           dest = sms[15]
           userdata = sms[18]
           header = sms[19]
@@ -194,6 +198,7 @@ def build_msgs(smsq):
           coding = sms[8]   
           udhdr = sms[9]
           src = sms[10]
+          ston = sms[11]
           dest = sms[13]
           coding = sms[8]
           userdata = sms[16]
@@ -337,6 +342,7 @@ def build_msgs(smsq):
         r['sms'] = sms
         r['mid'] = mid
         r['src'] = src
+        r['ston'] = ston
         r['dest'] = dest
         r['coding'] = coding
         r['charset'] = charset
@@ -358,6 +364,7 @@ def display_queue(smsq):
         utext = item['text']        
         charset = item['charset']
         src = item['src']
+        ston = item['ston']
         dest = item['dest']
         coding = item['coding']
         n = n + 1
@@ -453,6 +460,8 @@ if __name__ == '__main__':
             help="Filter on both (with like match)")
     parser.add_option("-n", "--negate", dest="negate", action="store_true",
             help="Negate to/from search")        
+    parser.add_option("-N", "--no-system", dest="nosys", action="store_true",
+            help="Don't display message from system (TON ALPHA)")
     parser.add_option("-w", "--where", dest="where", default='',
         help="Specify SQL where condition")
     parser.add_option("-l", "--limit", dest="limit", default=0,
@@ -486,6 +495,6 @@ if __name__ == '__main__':
         msgs=build_msgs(smsq)        
         display_queue(msgs)
     else:
-        smsq = read_queue(0, options.unsent, options.sent, options.where, options.src, options.dest, options.both, options.negate, options.limit, options.order)
+        smsq = read_queue(0, options.unsent, options.sent, options.where, options.src, options.dest, options.both, options.negate, options.limit, options.order, options.nosys)
         msgq=build_msgs(smsq)
         display_queue(msgq)
