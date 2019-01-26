@@ -723,7 +723,7 @@ class Subscriber:
             sq_hlr_cursor.execute('select extension,imsi from subscriber where extension=?', [(msisdn)])
             extension = sq_hlr_cursor.fetchone()
             if  extension == None:
-                raise SubscriberException('Extension not found in the HLR')
+                raise SubscriberException('Extension not found in the OsmoHLR')
             imsi = extension[1]
         except sqlite3.Error as e:
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
