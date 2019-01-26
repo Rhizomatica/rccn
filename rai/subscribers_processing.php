@@ -64,8 +64,8 @@
 
     try {
     	$sub = new Subscriber();
-	$connected_subscribers = $sub->getAllConnected();
-        $roaming = $sub->getAllConnected(true);
+        $connected_subscribers = $sub->getAllConnected();
+        $roaming = $sub->getAllConnected('roaming');
         $sip = $sub->getAllConnected('sip');
     }
     catch (SubscriberException $e) { }
