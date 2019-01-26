@@ -148,7 +148,7 @@ class SubscriberRESTService:
                 authorized, subscription_status, location, equipment, roaming))
         try:
             sub = Subscriber()
-            if  authorized != '':
+            if authorized != '':
                 sub.authorized(msisdn, authorized)
             if subscription_status != '':
                 sub.subscription(msisdn, subscription_status)
