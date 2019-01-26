@@ -80,9 +80,18 @@ class Subscriber
         }
 
 
-	public function getAllConnected($roaming=false) {
+	public function getAllConnected($type='gsm') {
 		try {
-			$mypath = ($roaming == true) ? '/all_foreign' : '/all_connected';  
+			switch ($type) {
+				case 'sip':
+					$mypath = '/all_sip';
+					break;
+				case 'roaming':
+					$mypath = '/all_foreign';
+					break;
+				default:
+					$mypath='/all_connected';
+			}
 			$response = \Httpful\Request::get($this->path.$mypath)->expectsJson()->send();
 			$data = $response->body;
 		} catch (Httpful\Exception\ConnectionErrorException $e) {

@@ -66,6 +66,7 @@
     	$sub = new Subscriber();
 	$connected_subscribers = $sub->getAllConnected();
         $roaming = $sub->getAllConnected(true);
+        $sip = $sub->getAllConnected('sip');
     }
     catch (SubscriberException $e) { }
 
@@ -235,10 +236,12 @@
     {
 
         if ( $rai_filter == 'RAI-all-disconnected' &&
-            ( in_array($aRow['msisdn'],$connected_subscribers) || in_array($aRow['msisdn'],$roaming) ) ) {
+            ( in_array($aRow['msisdn'],$connected_subscribers) || in_array($aRow['msisdn'],$roaming) ||
+              in_array($aRow['msisdn'],$sip)) ) {
             continue;
         }
-        if ($rai_filter == 'RAI-all-connected' && !in_array($aRow['msisdn'],$connected_subscribers) ) {
+        if ($rai_filter == 'RAI-all-connected' && !in_array($aRow['msisdn'],$connected_subscribers) &&
+            !in_array($aRow['msisdn'],$sip) ) {
             continue;
         }
         if ($rai_filter == 'RAI-all-roaming' && $aRow['current_bts'] == $aRow['home_bts'] ) {
@@ -267,6 +270,7 @@
                 "<img title='"._('Roaming on')." ".$aRow['current_bts']."' src='img/led-roam.gif' /> " : '';
 
             }
+            $content .= (in_array($aRow[$aColumns[$i]],$sip)) ? "<!--📞-->☎️ " : "";
             $content.= $aRow[$aColumns[$i]];
             $row[]=$content;
 	    }
