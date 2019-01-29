@@ -63,7 +63,7 @@ class Numbering:
 
     def is_number_intl(self, destination_number):
         if (destination_number[0] == '+' or
-            destination_number[:2] == '00'):
+                destination_number[:2] == '00'):
             log.debug('Called number is an international call')
             return True
         return False
@@ -77,7 +77,7 @@ class Numbering:
         """
         try:
             if (len(destination_number) != 10 or
-                re.search(r'^(00|\+)', destination_number) is not None):
+                    re.search(r'^(00|\+)', destination_number) is not None):
                 return destination_number
             if self.is_number_mxcel(destination_number):
                 destination_number = '00521' + destination_number
