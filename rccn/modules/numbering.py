@@ -49,11 +49,11 @@ class Numbering:
         # That is to say, don't connect back via ESL from the chatplan.
         try:
             con = ESLconnection("127.0.0.1", "8021", "ClueCon")
-            e = con.api("sofia_contact "+str(number))
-            _sofia_contact = e.getBody()
+            esl = con.api("sofia_contact "+str(number))
+            _sofia_contact = esl.getBody()
             if _sofia_contact == 'error/user_not_registered':
-                e = con.api("sofia_contact */" + str(number) + "@" + str(wan_ip_address))
-                _sofia_contact = e.getBody()
+                esl = con.api("sofia_contact */" + str(number) + "@" + str(wan_ip_address))
+                _sofia_contact = esl.getBody()
             log.info('Sofia Contact: %s' % _sofia_contact)
             if _sofia_contact == '' or _sofia_contact == 'error/user_not_registered':
                 return False
