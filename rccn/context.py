@@ -46,6 +46,22 @@ class Context:
         self.billing = modules[2]
         self.configuration = modules[3]
 
+    def get_audio_file(self, disposition):
+        return {
+            "DESTINATION_OUT_OF_ORDER" : "008_el_numero_no_esta_disponible.gsm",
+            "NO_ANSWER"                : "008_el_numero_no_esta_disponible.gsm",
+            "NO_USER_RESPONSE"         : "008_el_numero_no_esta_disponible.gsm",
+            "SUBSCRIBER_ABSENT"        : "008_el_numero_no_esta_disponible.gsm",
+            "USER_BUSY"                : "009_el_numero_esta_ocupado.gsm",
+            "UNALLOCATED_NUMBER"       : "007_el_numero_no_es_corecto.gsm",
+            "NO_ROUTE_DESTINATION"     : "005_todas_las_lineas_estan_ocupadas.gsm",
+            "INVALID_GATEWAY"          : "010_no_puede_ser_enlazada.gsm",
+            "GATEWAY_DOWN"             : "010_no_puede_ser_enlazada.gsm",
+            "CALL_REJECTED"            : "007_el_numero_no_es_corecto.gsm",
+            "NORMAL_TEMPORARY_FAILURE" : "010_no_puede_ser_enlazada.gsm", # B-leg IP unreachable
+            "RECOVERY_ON_TIMER_EXPIRE" : "011_no_hay_conx_a_comunidad.gsm", # Timeout
+            "SERVICE_UNAVAILABLE"      : "016_oops.gsm"
+        }.get(disposition, "016_oops.gsm")
 
     def bridge(self, callee):
         """ All calls that are progressing arrive here
