@@ -309,7 +309,11 @@ class Numbering:
     def get_callerid(self, caller, callee):
         try:
             cur = db_conn.cursor()
-            # to still be decided the logic of dids
+            cur.execute('SELECT callerid FROM dids WHERE subscriber_number = %(caller)s LIMIT 1',
+                        {'caller': caller})
+            callerid = cur.fetchone()
+            if not callerid is None:
+                return callerid[0]
             if callee[0] == '+':
                 dest = callee[1:2]
             if re.search(r'^00', callee) != None:
