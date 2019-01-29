@@ -23,7 +23,6 @@
 from config import *
 from context import Context
 
-
 class Dialplan:
     """
     Logic to assign the call to the right context
@@ -37,7 +36,6 @@ class Dialplan:
     def __init__(self, session):
         """ init """
         self.session = session
-
         self.destination_number = self.session.getVariable(
             'destination_number')
         self.calling_number = self.session.getVariable('caller_id_number')
@@ -46,7 +44,6 @@ class Dialplan:
         self.subscriber = Subscriber()
         self.numbering = Numbering()
         self._n = self.numbering
-
         self.billing = Billing()
         self.configuration = Configuration()
 
@@ -70,11 +67,8 @@ class Dialplan:
 
         :param mycontext: The context to route the call to
         """
-        # check if the subscriber is authorized to
-        # make calls before sending the call to the context
-        log.debug(
-            'Check if subscriber %s is registered and authorized'
-            % self.calling_number)
+        log.debug('Check if subscriber %s is registered and authorized',
+                  self.calling_number)
         try:
             if self.subscriber.is_authorized(self.calling_number, 0):
                 log.debug('Subscriber is registered and authorized to call')
@@ -83,9 +77,6 @@ class Dialplan:
             else:
                 self.session.setVariable('context', mycontext.upper())
                 log.info('Subscriber is not registered or authorized to call')
-                # subscriber not authorized to call
-                # TODO: register announcement of subscriber
-                # not authorized to call
                 self.play_announcement(self.NOT_REGISTERED)
                 self.session.hangup('CALL_REJECTED')
         except SubscriberException as e:
