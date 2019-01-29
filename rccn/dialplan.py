@@ -29,8 +29,10 @@ class Dialplan:
     Logic to assign the call to the right context
     """
     NOT_CREDIT_ENOUGH = '002_saldo_insuficiente.gsm'
+    NOT_AUTH = '013_no_autorizado.gsm'
     NOT_REGISTERED = '015_no_access.gsm'
     WRONG_NUMBER = '007_el_numero_no_es_corecto.gsm'
+    ERROR = '016_oops.gsm'
 
     def __init__(self, session):
         """ init """
