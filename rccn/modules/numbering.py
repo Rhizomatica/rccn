@@ -61,6 +61,33 @@ class Numbering:
         except Exception as ex:
             log.info('Exception: %s' % ex)
 
+    def is_number_intl(self, destination_number):
+        if (destination_number[0] == '+' or
+            destination_number[:2] == '00'):
+            log.debug('Called number is an international call')
+            return True
+        return False
+
+    def detect_mx_short_dial(self, destination_number):
+        """
+        Try to acertain if a mexican number dialled as
+        10 digits is celular based on the data rates we
+        got from upstream Voip.
+
+        """
+        try:
+            if (len(destination_number) != 10 or
+                re.search(r'^(00|\+)', destination_number) is not None):
+                return destination_number
+            if self.is_number_mxcel(destination_number):
+                destination_number = '00521' + destination_number
+            else:
+                destination_number = '0052' + destination_number
+            log.info('Translated dialled 10 digit number to %s' % destination_number)
+            return destination_number
+        except NumberingException as e:
+            log.error(e)
+
     def is_number_did(self, destination_number):
         try:
             cur = db_conn.cursor()
