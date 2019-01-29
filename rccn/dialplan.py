@@ -94,6 +94,200 @@ class Dialplan:
             # TODO: register announcement of general error
             self.play_announcement(self.NOT_CREDIT_ENOUGH)
 
+    def check_external(self):
+        self.destination_number = self.numbering.detect_mx_short_dial(self.destination_number)
+        self.session.setVariable("destination_number", self.destination_number)
+
+        if self.numbering.is_number_intl(self.destination_number):
+            log.debug('Called number is an external number '
+                      'send call to OUTBOUND context')
+            self.auth_context('outbound')
+            return True
+
+    def check_registered(self):
+        if len(self.calling_number) != 11:
+            self.play_announcement(self.NOT_REGISTERED)
+            self.session.hangup('CALL_REJECTED')
+            return False
+        if self.numbering.is_number_known(self.calling_number):
+            return True
+        return False
+
+    def check_emergency(self):
+        if emergency_contact == '':
+            log.info('!Emergency call but no emergency contact!')
+            return False
+        log.info('Emergency call send call to emergency contact %s',
+                 emergency_contact)
+
+        # check if emergency_contacts is a list of numbers
+        dial_str = ''
+        if ',' in emergency_contact:
+            emg_numbers = emergency_contact.split(',')
+            last = emg_numbers[-1]
+            for emg in emg_numbers:
+                if emg == last:
+                    dial_str += 'sofia/internal/sip:'+emg+'@'+mncc_ip_address+':5050'
+                else:
+                    dial_str += 'sofia/internal/sip:'+emg+'@'+mncc_ip_address+':5050,'
+        else:
+            dial_str = 'sofia/internal/sip:'+emergency_contact+'@'+mncc_ip_address+':5050'
+
+        self.session.setVariable('context', 'EMERGENCY')
+        # FIXME: codec? non mncc option?
+        self.session.execute('bridge', "{absolute_codec_string='GSM'}"+dial_str)
+        return True
+
+    def check_support(self):
+        if not 'support_contact' in globals():
+            log.info('Support Call but no support number :(')
+            return False
+        log.info('!!Support Call (%s)', self.destination_number)
+        self.session.setVariable('context', "SUPPORT")
+        self.session.setVariable('destination_number', support_contact)
+        self.destination_number = support_contact
+        self.context.destination_number = support_contact
+        return self.context.bridge(support_contact)
+
+    def check_did(self):
+        if self.calling_host == mncc_ip_address:
+            return False
+        try:
+            if not self._n.is_number_did(self.destination_number):
+                return False
+        except NumberingException as _ex:
+            log.error(_ex)
+            return -1
+        log.info('Called number is a DID')
+        log.info("Caller from: %s", self.calling_host)
+        if self.calling_host == mncc_ip_address:
+            log.info("Call to DID from GSM side.")
+            self.play_announcement(self.NOT_AUTH)
+            self.session.hangup('OUTGOING_CALL_BARRED')
+            return -1
+        log.debug('Execute context INBOUND call')
+        self.session.setVariable('inbound_loop', '0')
+        return self.context.inbound()
+
+    def check_roaming(self):
+        log.debug('Check call from(%s/%s) for roaming', self.calling_number, self.calling_host)
+        if self.check_roaming_caller():
+            return True
+        return self.check_roaming_destination()
+
+    def check_roaming_caller(self):
+        if (self.calling_host == mncc_ip_address and # CALLER is LOCAL
+                self.calling_number[:6] != config['internal_prefix']): # so has to be "roaming"
+            try:
+                _tagged_roaming = self._n.is_number_roaming(self.calling_number)
+            except NumberingException as _ex:
+                log.error(_ex)
+                self.play_announcement(self.NOT_AUTH)
+                self.session.hangup('SERVICE_UNAVAILABLE')
+                return True
+            log.info('Calling number %s is roaming (%s)', self.calling_number, _tagged_roaming)
+            self.context.roaming_caller()
+            return True
+
+    def check_roaming_destination(self):
+        try:
+            _tagged_roaming = self._n.is_number_roaming(self.destination_number)
+            if (self.calling_host != mncc_ip_address and
+                    self.destination_number[:6] != config['internal_prefix'] and
+                    self._n.is_number_known(self.destination_number)):
+                log.info('Incoming call to Foreign destination: %s', self.destination_number)
+                self.context.roaming()
+                return True
+            if _tagged_roaming:
+                log.info('Local origin call to Roaming destination: %s', self.destination_number)
+                self.context.roaming()
+                return True
+        except NumberingException as _ex:
+            # FIXME: note difference between exception for unauth and other.
+            log.error(_ex)
+            self.play_announcement(self.ERROR)
+            self.session.hangup('SERVICE_UNAVAILABLE')
+            return True
+
+    def check_incoming(self):
+        """
+        Call coming from SIP world extension@sip.rhizomatica.org
+        routed here based on prefix. roaming caller not possible.
+        """
+        if self.calling_host == mncc_ip_address:
+            return False
+        if (isinstance(sip_central_ip_address,str) and self.calling_host == sip_central_ip_address or
+                isinstance(sip_central_ip_address,list) and self.calling_host in sip_central_ip_address):
+            log.info("Incoming call from SIP server")
+            if self.check_roaming_destination():
+                return True
+            self.context.local()
+            return True
+
+    def check_local(self):
+        try:
+            log.info('Check if called number is local')
+            is_local_number = self._n.is_number_local(self.destination_number)
+            is_internal_number = self._n.is_number_internal(self.calling_number)
+            is_right_len = lambda num: len(num) == 11
+
+            if is_local_number and is_right_len(self.destination_number):
+                log.info('Called number is a local number')
+                self.context.destination_number = self.destination_number
+                if not self.subscriber.is_authorized(self.destination_number, 0):
+                    log.info(
+                        'Destination subscriber is NOT '
+                        'authorized to receive calls')
+                    self.play_announcement(self.NOT_AUTH)
+                    self.session.hangup('OUTGOING_CALL_BARRED')
+                    return True
+                if is_internal_number and is_right_len(self.calling_number):
+                    log.info('INTERNAL call from another site')
+                    self.context.local()
+                    return True
+                else:
+                    log.info('Send call to LOCAL context')
+                    self.auth_context('local')
+                    return True
+        except NumberingException as _ex:
+            log.error(_ex)
+            self.play_announcement(self.ERROR)
+            return False
+        return False
+
+    def check_extension(self):
+        log.debug('Check if called number is an extension')
+        if self.destination_number in extensions_list:
+            log.info(
+                'Called number is an extension, '
+                'execute extension handler')
+            self.session.setVariable('context', 'EXTEN')
+            extension = importlib.import_module(
+                'extensions.ext_' + self.destination_number,
+                'extensions')
+            try:
+                log.debug('Exec handler')
+                extension.handler(self.session)
+                return True
+            except ExtensionException as _ex:
+                log.error(_ex)
+                self.play_announcement(self.ERROR)
+
+    def check_internal(self):
+        try:
+            log.debug('Check if called number is a full '
+                      'number for another site')
+            if self._n.is_number_internal(self.destination_number):
+                log.info(
+                    'Called number seems to be for another site send call to '
+                    'INTERNAL context')
+                self.auth_context('internal')
+                return True
+        except NumberingException as _ex:
+            log.error(_ex)
+            self.play_announcement(self.ERROR)
+        return False
+
     def lookup(self):
         """
         Dialplan processing to route call to the right context
