@@ -120,8 +120,10 @@ class Subscriber:
             cur.execute('SELECT * FROM subscribers')
             if cur.rowcount > 0:
                 sub = cur.fetchall()
+                cur.close()
                 return sub
             else:
+                cur.close()
                 raise SubscriberException('PG_HLR No subscribers found')
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
