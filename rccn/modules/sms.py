@@ -333,7 +333,7 @@ class SMS:
         # We don't trust the caller to send us unicode, or to send a correct charset, if any.
         sms_log.info('Type of text: %s', type(text))
 
-        if use_kannel == 'yes':
+        if 'use_kannel' in globals() and use_kannel == 'yes':
             str_text, unicode_text = self.prepare_txt_for_kannel(text, charset)
         else:
             str_text = ''
@@ -379,7 +379,7 @@ class SMS:
 
 
     def local_smpp_submit_sm(self, source, destination, unicode_text, str_text=''):
-        if use_kannel == 'yes':
+        if 'use_kannel' in globals() and use_kannel == 'yes':
             try:
                 enc_text = urllib.urlencode({'text': str_text})
                 kannel_post = "http://%s:%d/cgi-bin/sendsms?username=%s&password=%s&charset=%s&coding=%s&to=%s&from=%s&%s"\
