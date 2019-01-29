@@ -94,10 +94,7 @@ class Numbering:
             cur.execute("SELECT phonenumber FROM dids WHERE phonenumber=%(number)s", {'number': destination_number})
             did = cur.fetchone()
             #log.debug("Value of did var: %s" % did)
-            if did != None:
-                return True
-            else:
-                return False
+            return bool(did)
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error checking DID: %s' % e)
 
@@ -150,10 +147,7 @@ class Numbering:
         if len(test) > 1:
             log.warn('!!FIX THIS!! Got more than one home_bts from hlr for %s' % siteprefix)
             sites = riak_client.bucket('sites')
-            if sites.get(siteprefix).exists == True:
-                return True
-            else:
-                return False
+            return bool(sites.get(siteprefix).exists)
         elif len(test) == 1:
             return True
         else:
