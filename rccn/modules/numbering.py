@@ -85,8 +85,8 @@ class Numbering:
                 destination_number = '0052' + destination_number
             log.info('Translated dialled 10 digit number to %s' % destination_number)
             return destination_number
-        except NumberingException as e:
-            log.error(e)
+        except NumberingException as _ex:
+            log.error(_ex)
 
     def is_number_did(self, destination_number):
         try:
