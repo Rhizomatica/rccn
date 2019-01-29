@@ -50,13 +50,13 @@ def input_callback(session, what, obj):
 
 def handler(session, args):
     """ Main calls handler """
+    log.info('\033[90;1m============================== \033[38;5;202mRCCN \033[90;1m==============================')
     session.setVariable('billing', '0')
     destination_number = session.getVariable("destination_number")
     if 'reload_on_call' in globals():
         reload(sys.modules['dialplan'])
-        session.consoleLog('info', 'RCCN Reloaded Dialplan Module in handler.\n')
+        session.consoleLog('info', '\033[38;5;202mRCCN \033[0mReloaded Dialplan Module in handler.\n')
     dialplan = Dialplan(session)
-    log.info('===========================================================================')
     log.info("Lookup dialplan for called number: %s" % destination_number)
     dialplan.lookup()
     log.info('Leaving rccn.handler()')
