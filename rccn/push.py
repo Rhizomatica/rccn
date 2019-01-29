@@ -56,7 +56,7 @@ def check(auth, recent, hours=2, single=''):
             imsi=osmo_ext2imsi(msisdn)
             if imsi:
                 print "Local IMSI: \033[96m%s\033[0m" % (imsi)
-                get(msisdn, imsi, authorized)
+                get(msisdn, imsi, authorized, single)
             else:
                 msg="""
                 Local Subscriber %s from PG Not Found on OSMO HLR!
@@ -78,7 +78,7 @@ def imsi_clash(imsi, ext1, ext2):
     advise(msg)
     print "\033[91;1m" + msg + "\033[0m" 
 
-def get(msisdn, imsi, auth):
+def get(msisdn, imsi, auth, single = False):
     """Do the thing"""
     riak_client = riak.RiakClient(
     host=riak_ip_address,
@@ -133,6 +133,15 @@ def get(msisdn, imsi, auth):
             if data['authorized'] != auth:
                 print "Extension: \033[91mAuthorisation Incorrect\033[0m, Fixing"
                 data['authorized']=auth
+                fix = bucket.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": data['current_bts'], "authorized": data['authorized'], "updated": int(time.time()) })
+                fix.add_index('msisdn_bin', msisdn)
+                fix.add_index('modified_int', int(time.time()))
+                fix.store()
+            if single:
+                print "Updating last update"
+                tmp_obj = bucket.get(imsi)
+                tmp_obj.remove_index()
+                tmp_obj.store()
                 fix = bucket.new(imsi, data={"msisdn": msisdn, "home_bts": config['local_ip'], "current_bts": data['current_bts'], "authorized": data['authorized'], "updated": int(time.time()) })
                 fix.add_index('msisdn_bin', msisdn)
                 fix.add_index('modified_int', int(time.time()))
