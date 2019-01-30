@@ -50,8 +50,8 @@ def input_callback(session, what, obj):
 
 def handler(session, args):
     """ Main calls handler """
-    log.info('\033[90;1m============================== \033[38;5;202mRCCN \033[90;1m==============================')
     session.setVariable('billing', '0')
+    log.info('\033[90;1m============================== \033[38;5;202mRCCN \033[90;1m==============================\033[0m')
     destination_number = session.getVariable("destination_number")
     if 'reload_on_call' in globals():
         reload(sys.modules['dialplan'])
