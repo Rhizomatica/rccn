@@ -50,9 +50,13 @@ def input_callback(session, what, obj):
 
 def handler(session, args):
     """ Main calls handler """
-    session.setVariable('billing', '0')
     log.info('\033[90;1m============================== \033[38;5;202mRCCN \033[90;1m==============================\033[0m')
     destination_number = session.getVariable("destination_number")
+    session.consoleLog("info", "\n\n\033[38;5;202m *\n |_" + "   Call to: " + destination_number +
+                       "\n (O)\n |#|\n '-'  "+
+                       "Rhizomatica Community Cellular Network.\033[0m\n\n")
+    session.setVariable('billing', '0')
+
     if 'reload_on_call' in globals():
         reload(sys.modules['dialplan'])
         session.consoleLog('info', '\033[38;5;202mRCCN \033[0mReloaded Dialplan Module in handler.\n')
