@@ -15,6 +15,7 @@ class Subscriber
 	public $authorized = "";
 	public $balance = "";
 	public $activation_date = "";
+	public $subscription_status = "";
 	public $location = "";
 	public $roaming = 0;
 	public $equipment = "";
