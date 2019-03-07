@@ -148,10 +148,10 @@ class SubscriberRESTService:
                 authorized, subscription_status, location, equipment, roaming))
         try:
             sub = Subscriber()
-            if authorized != '':
-                sub.authorized(msisdn, authorized)
             if subscription_status != '':
                 sub.subscription(msisdn, subscription_status)
+            if  authorized != '':
+                sub.authorized(msisdn, authorized)
             if msisdn != '' and name != '' or balance != '':
                 sub.edit(msisdn, name, balance, location, equipment, roaming)
             data = {'status': 'success', 'error': ''}
