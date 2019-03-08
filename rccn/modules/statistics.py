@@ -185,13 +185,14 @@ class LiveStatistics:
         ''' Get the most common HangUp Cause in last 24 hours '''
         try:
             cur = db_conn.cursor()
-            cur.execute("SELECT count(*) as c, hangup_cause FROM cdr "
-                        "WHERE start_stamp >= now() - interval '1 day' "
+            cur.execute("SELECT count(*) as c, hangup_cause,"
+                        "COUNT(*) / (SUM(COUNT(*)) OVER ())*100 AS percent FROM cdr "
+                        "WHERE start_stamp >= now() - interval '1 hour' "
                         "GROUP BY hangup_cause ORDER BY c DESC LIMIT 1")
             if cur.rowcount > 0:
                 sub = cur.fetchone()
                 db_conn.commit()
-                return sub[1]
+                return sub[1],int(sub[2])
             else:
                 db_conn.commit()
                 return "NONE"
