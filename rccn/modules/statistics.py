@@ -45,6 +45,7 @@ class LiveStatistics:
         data['ls']=self.get_recent_call_count('24 hours')
         data['ss']=self.get_recent_sms_count('1 hour')
         data['sa']=round(self.get_recent_sms_avg('hour', '6 hours'), 2)
+        data['hu']=self.get_common_recent_hup_cause()
         data['ut']=self.get_uptime()
         data['la']=os.getloadavg()
         data['v']=self.get_linev()
@@ -177,6 +178,23 @@ class LiveStatistics:
             else:
                 db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
+        except psycopg2.DatabaseError, e:
+            raise StatisticException('PG_HLR error: %s' % e)
+
+    def get_common_recent_hup_cause(self):
+        ''' Get the most common HangUp Cause in last 24 hours '''
+        try:
+            cur = db_conn.cursor()
+            cur.execute("SELECT count(*) as c, hangup_cause FROM cdr "
+                        "WHERE start_stamp >= now() - interval '1 day' "
+                        "GROUP BY hangup_cause ORDER BY c DESC LIMIT 1")
+            if cur.rowcount > 0:
+                sub = cur.fetchone()
+                db_conn.commit()
+                return sub[1]
+            else:
+                db_conn.commit()
+                return "NONE"
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
 
