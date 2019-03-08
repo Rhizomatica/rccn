@@ -195,7 +195,7 @@ class LiveStatistics:
                 return sub[1],int(sub[2])
             else:
                 db_conn.commit()
-                return "NONE"
+                return "NONE",100
         except psycopg2.DatabaseError, e:
             raise StatisticException('PG_HLR error: %s' % e)
 
