@@ -333,8 +333,8 @@ class Dialplan:
                     self.context.inbound()
                     return
                 if (self.calling_host == sip_central_ip_address or 
-                   self.calling_host == "10.23.0.20" or
-                   self.calling_host == "10.23.0.21"):
+                   self.calling_host == "10.23.0.14" or
+                   self.calling_host == "10.23.0.20"):
                     log.info("Incoming call from SIP server")
                     processed = 1
                     self.context.inbound()
