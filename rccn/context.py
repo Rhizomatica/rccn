@@ -314,17 +314,16 @@ class Context:
                                  (total_call_duration - 3))
             # set correct caller id based on the active provider
             try:
-                caller_id = self.numbering.get_callerid(subscriber_number,self.destination_number)
-            except NumberingException as e:
-                log.error(e)
-
-            '''
-            try:
-                outbound_codec = self.configuration.get_meta('outbound_codec')
-            except ConfigurationException as e:
-                log.error(e)
-            '''
-            outbound_codec = 'G729'
+                '''
+                try:
+                    outbound_codec = self.configuration.get_meta('outbound_codec')
+                except ConfigurationException as e:
+                    log.error(e)
+                '''
+                outbound_codec = 'G729'
+                caller_id = self.numbering.get_callerid(subscriber_number, self.destination_number)
+            except NumberingException as ex:
+                log.error(ex)
 
             if caller_id != None:
                 log.info('Set caller id to %s', caller_id)
@@ -382,22 +381,22 @@ class Context:
                     log.debug('Current subscriber balance: %.2f' % current_subscriber_balance)
                     rate = self.configuration.get_charge_local_calls()
                     if current_subscriber_balance >= rate[0]:
-                        log.info('LOCAL call will be billed at %s after %s seconds' % (rate[0], rate[1]))
+                        log.info('LOCAL call will be billed at %s after %s seconds', rate[0], rate[1])
                         self.session.setVariable('billing', '1')
                     else:
                         log.debug('Subscriber doesn\'t have enough balance to make a call')
-                        self.session.execute('playback', '002_saldo_insuficiente.gsm')
+                        self.session.execute('playback', self.NOT_CREDIT_ENOUGH)
                         self.session.hangup()
                         return
-            except ConfigurationException as e:
-                    log.error(e)
- 
+            except ConfigurationException as _ex:
+                log.error(_ex)
+
         # check if the call duration has to be limited
         try:
             limit = self.configuration.get_local_calls_limit()
             if limit != False:
                 if limit[0] == 1:
-                    log.info('Limit call duration to: %s seconds' % limit[1])
+                    log.info('Limit call duration to: %s seconds', limit[1])
                     self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
         except ConfigurationException as e:
             log.error(e)
