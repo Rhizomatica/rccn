@@ -426,6 +426,73 @@ class Context:
         #self.session.execute('answer')
         #self.session.execute('sleep','1000')
         #self.session.execute('bridge', "loopback/app=voicemail:default ${domain_name} "+str(self.calling_number))
+    def inbound_ivr(self):
+
+        self.session.answer()
+        loop_count = 0
+        while self.session.ready() and loop_count < 6:
+            loop_count += 1
+            log.debug('Playback welcome message %s', loop_count)
+            log.debug('Collect DTMF to call internal number')
+            dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm",
+                                                     self.WRONG_NUMBER, "\\d+")
+            if not self.session.ready():
+                return -1
+            log.debug('Collected digits: %s', dest_num)
+            if len(dest_num) == 5:
+                self.destination_number = config['internal_prefix'] + dest_num
+            elif len(dest_num) == 11:
+                self.destination_number = dest_num
+            try:
+                if self.subscriber.is_authorized(dest_num, 1) and (len(dest_num) == 11 or len(dest_num) == 5):
+                    self._check_inbound_billing()
+                    log.info('Send call to subscriber %s', self.destination_number)
+                    ret = self._check_inbound_roaming()
+                    if not ret:
+                        ret = self.bridge(self.destination_number)
+                        if not ret:
+                            continue
+                        else:
+                            return ret
+                    else:
+                        return ret
+                else:
+                    self._play_error(self.destination_number)
+            except SubscriberException as _ex:
+                log.error(_ex)
+                self.session.execute('playback', self.WRONG_NUMBER)
+                self.session.hangup("UNALLOCATED_NUMBER")
+                return -1
+
+    def _check_inbound_billing(self):
+        try:
+            if self.configuration.check_charge_inbound_calls() == 1:
+                log.info('INBOUND call will be billed')
+                self.session.setVariable('billing', '1')
+        except ConfigurationException as _ex:
+            log.error(_ex)
+
+    def _play_error(self, num):
+        try:
+            self.subscriber.get(config['internal_prefix'] + num)
+            log.info('Subscriber %s is not authorized', num)
+            self.session.execute('playback', self.NOT_AUTH)
+        except SubscriberException:
+            log.info('Subscriber %s doesn\'t exist.', num)
+            self.session.execute('playback', self.WRONG_NUMBER)
+
+    def _check_inbound_roaming(self):
+        try:
+            if self.numbering.is_number_roaming(self.destination_number):
+                log.info('Inbound Called number tagged as roaming on (%s)',
+                         self.numbering.get_current_bts(self.destination_number))
+                self.session.setVariable('context', 'ROAMING_INBOUND')
+                self.bridge(self.destination_number)
+                return True
+        except NumberingException as _ex:
+            log.error(_ex)
+            self.session.execute('playback', self.WRONG_NUMBER)
+        return False
 
     def inbound(self):
         """ Inbound context. Calls coming from the VoIP provider """
