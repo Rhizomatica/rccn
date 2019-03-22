@@ -54,7 +54,8 @@ class Context:
             "SUBSCRIBER_ABSENT"        : "008_el_numero_no_esta_disponible.gsm",
             "USER_BUSY"                : "009_el_numero_esta_ocupado.gsm",
             "UNALLOCATED_NUMBER"       : "007_el_numero_no_es_corecto.gsm",
-            "NO_ROUTE_DESTINATION"     : "005_todas_las_lineas_estan_ocupadas.gsm",
+            "NO_ROUTE_DESTINATION"     : "007_el_numero_no_es_corecto.gsm",
+            "RESOURCE_UNAVAIL"         : "005_todas_las_lineas_estan_ocupadas.gsm",
             "INVALID_GATEWAY"          : "010_no_puede_ser_enlazada.gsm",
             "GATEWAY_DOWN"             : "010_no_puede_ser_enlazada.gsm",
             "CALL_REJECTED"            : "007_el_numero_no_es_corecto.gsm",
@@ -253,7 +254,7 @@ class Context:
             return True
 
         if _context == "SUPPORT":
-            _hup_cause = "NO_ROUTE_DESTINATION"
+            _hup_cause = "RESOURCE_UNAVAIL"
 
         # Playback our own audio based on originate disposition.
         if _orig_disp == "NORMAL_CLEARING" or _orig_disp == "DESTINATION_OUT_OF_ORDER":
