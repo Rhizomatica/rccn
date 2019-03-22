@@ -263,7 +263,8 @@ class Context:
             _hup_cause = "RESOURCE_UNAVAIL"
 
         # Playback our own audio based on originate disposition.
-        if _orig_disp == "NORMAL_CLEARING" or _orig_disp == "DESTINATION_OUT_OF_ORDER":
+        if (_orig_disp == "NORMAL_CLEARING" or _orig_disp == "DESTINATION_OUT_OF_ORDER" or
+                _orig_disp == "NORMAL_TEMPORARY_FAILURE"):
             _audio_f = self.get_audio_file(_hup_cause)
         else:
             _audio_f = self.get_audio_file(_orig_disp)
