@@ -281,11 +281,10 @@ class Context:
         log.debug('Check subscriber %s balance', subscriber_number)
         try:
             current_subscriber_balance = Decimal(self.subscriber.get_balance(subscriber_number))
-        except SubscriberException as e:
-            log.error(e)
-            current_subscriber_balance = 0
-            # play announcement and hangup call
-            # TODO: announcement of general error
+        except SubscriberException as _ex:
+            log.error(_ex)
+            self.session.execute('playback', self.NOT_CREDIT_ENOUGH)
+            self.session.hangup('OUTGOING_CALL_BARRED')
 
         log.debug('Current subscriber balance: %.2f', current_subscriber_balance)
         if current_subscriber_balance > Decimal('0.00'):
