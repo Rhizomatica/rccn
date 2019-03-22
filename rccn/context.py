@@ -224,10 +224,16 @@ class Context:
         self.session.execute('bridge', bridge_str)
         _orig_disp = self.session.getVariable('originate_disposition')
         _ep_disp = self.session.getVariable('endpoint_disposition')
+        _ctime = float(self.session.getVariable('created_time'))/1000000
+        _atime = float(self.session.getVariable('answered_time'))/1000000
+
         # Note that if the A leg hangs up, then the last bridge hangup is not from the connected B-leg.
         _hup_cause = self.session.getVariable('last_bridge_hangup_cause')
         log.info('Bridge Finished with B-leg of Call, orig_disp(%s) ep_disp(%s) hup_cause(%s)',
                  _orig_disp, _ep_disp, _hup_cause)
+        log.info('Approx Timings, S->A(%0.2f) Duration(%0.2f)',
+                 (_atime - _ctime),
+                 (time.time() - _atime))
 
         if _orig_disp == "SUCCESS":
             if _ep_disp == "ANSWER":
