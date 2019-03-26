@@ -440,7 +440,12 @@ class Context:
             loop_count += 1
             log.debug('Playback welcome message %s', loop_count)
             log.debug('Collect DTMF to call internal number')
-            dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm",
+            _greet = "001_bienvenidos.gsm"
+            _path = self.session.getVariable('sound_prefix') + '/' + _greet
+            if not os.path.isfile(_path):
+                log.error("!! Audio file(%s) not found!!", _path)
+                _greet = "000_default.gsm"
+            dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", _greet,
                                                      self.WRONG_NUMBER, "\\d+")
             if not self.session.ready():
                 return -1
