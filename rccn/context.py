@@ -347,21 +347,22 @@ class Context:
         """ Local context. Calls within the same BSC """
         # check if calling number is internal
         calling_number = self.session.getVariable('caller_id_number')
-        if self.numbering.is_number_internal(calling_number) == True:
             self.session.setVariable('context', 'INTERNAL')
+        if self.numbering.is_number_internal(calling_number):
         else:
             self.session.setVariable('context', 'LOCAL')
             # check if local call has to be billed
             try:
                 if self.configuration.check_charge_local_calls() == 1:
-                    log.debug('Check subscriber %s balance' % calling_number)
+                    # if local call has to be billed to local subscriber:
+                    rate = self.configuration.get_charge_local_calls()
+                    log.debug('Check subscriber %s balance', calling_number)
                     try:
                         current_subscriber_balance = Decimal(self.subscriber.get_balance(calling_number))
-                    except SubscriberException as e:
-                        log.error(e)
-                        current_subscriber_balance = 0
-                    log.debug('Current subscriber balance: %.2f' % current_subscriber_balance)
-                    rate = self.configuration.get_charge_local_calls()
+                    except SubscriberException as _ex:
+                        log.error(_ex)
+                        current_subscriber_balance = Decimal(0)
+                    log.debug('Current subscriber balance: %.2f', current_subscriber_balance)
                     if current_subscriber_balance >= rate[0]:
                         log.info('LOCAL call will be billed at %s after %s seconds', rate[0], rate[1])
                         self.session.setVariable('billing', '1')
