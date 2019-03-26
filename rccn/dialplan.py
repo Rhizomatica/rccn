@@ -86,7 +86,8 @@ class Dialplan:
             self.play_announcement(self.NOT_CREDIT_ENOUGH)
 
     def check_external(self):
-        self.destination_number = self.numbering.detect_mx_short_dial(self.destination_number)
+        if len(self.destination_number) == 10:
+            self.destination_number = self.numbering.detect_mx_short_dial(self.destination_number)
         self.session.setVariable("destination_number", self.destination_number)
 
         if self.numbering.is_number_intl(self.destination_number):
@@ -142,7 +143,7 @@ class Dialplan:
 
     def check_did(self):
         if self.calling_host == mncc_ip_address:
-            return False
+            return
         try:
             if not self._n.is_number_did(self.destination_number):
                 return False
@@ -157,7 +158,6 @@ class Dialplan:
             self.session.hangup('OUTGOING_CALL_BARRED')
             return -1
         log.debug('Execute context INBOUND call')
-        self.session.setVariable('inbound_loop', '0')
         return self.context.inbound()
 
     def check_roaming(self):
@@ -210,9 +210,10 @@ class Dialplan:
         if (isinstance(sip_central_ip_address,str) and self.calling_host == sip_central_ip_address or
                 isinstance(sip_central_ip_address,list) and self.calling_host in sip_central_ip_address):
             log.info("Incoming call from SIP server")
+            # TODO: Not sure about this, we also call it from check_roaming()
             if self.check_roaming_destination():
                 return True
-            self.context.local()
+            self.context.inbound()
             return True
 
     def check_local(self):
@@ -247,6 +248,9 @@ class Dialplan:
         return False
 
     def check_extension(self):
+        if (self.calling_host != mncc_ip_address and
+           not self.numbering.is_number_sip_connected(self.session, self.calling_number)):
+            return False
         log.debug('Check if called number is an extension')
         if self.destination_number in extensions_list:
             log.info(
@@ -263,6 +267,7 @@ class Dialplan:
             except ExtensionException as _ex:
                 log.error(_ex)
                 self.play_announcement(self.ERROR)
+                return False
 
     def check_internal(self):
         try:
