@@ -54,7 +54,7 @@ class Dialplan:
 
     def play_announcement(self, ann):
         """
-        Play an announcement and hangup call.
+        Play an announcement.
 
         :param ann: Filename of the announcement to be played
         :type ann: str
@@ -79,8 +79,8 @@ class Dialplan:
                 log.info('Subscriber is not registered or authorized to call')
                 self.play_announcement(self.NOT_REGISTERED)
                 self.session.hangup('CALL_REJECTED')
-        except SubscriberException as e:
-            log.error(e)
+        except SubscriberException as _ex:
+            log.error(_ex)
             # play announcement error
             # TODO: register announcement of general error
             self.play_announcement(self.NOT_CREDIT_ENOUGH)
