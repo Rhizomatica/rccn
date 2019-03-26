@@ -340,7 +340,6 @@ class Context:
         else:
             log.debug('Subscriber doesn\'t have enough balance to make a call')
             # play announcement not enough credit and hangup call
-            self.session.answer()
             self.session.execute('playback', '002_saldo_insuficiente.gsm')
             self.session.hangup()
 
