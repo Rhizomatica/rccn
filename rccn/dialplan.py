@@ -1,6 +1,7 @@
 ############################################################################
 #
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
+# Copyright (C) 2019 keith <keith@rhizomatica.org>
 #
 # Dialplan call routing
 # This file is part of RCCN
@@ -51,6 +52,46 @@ class Dialplan:
                    self.billing, self.configuration]
 
         self.context = Context(session, modules)
+
+    def parse_chans(self, data):
+        chans=[]
+        lines=data.split('\n')
+        for line in lines:
+            if line != '' and line.find(' total.') == -1:
+                values=line.split('|')
+                if values[0]=='uuid':
+                    keys=values
+                    continue
+                chan={}
+                for i,val in enumerate(values):
+                    chan[keys[i]]=val
+                chans.append(chan)
+        return chans
+
+    def check_chans(self, match, max, redirect=''):
+        _count = 0
+        self.session.execute("set", "_temp=${show channels as delim |}")
+        _chans=self.parse_chans(self.session.getVariable('_temp'))
+        for chan in _chans:
+            if chan['dest'] == match:
+                _count += 1
+        log.info("chans %s for [%s]", _count, match)
+        if _count > max:
+            log.info("Channel Capacity for(%s) is exceeded.", match)
+            if redirect == '':
+                announcement = self.context.get_audio_file("RESOURCE_UNAVAIL")
+                self.session.execute('playback', announcement)
+                self.session.hangup()
+                return False
+            i = 0
+            while self.session.ready() and i < 6:
+                self.session.execute('playback', '018_ocupadas.gsm')
+                self.session.execute('playback', '017_marca.gsm')
+                self.session.execute('say', 'es number iterated %s' % redirect)
+                i += 1
+            self.session.hangup()
+            return False
+        return True
 
     def play_announcement(self, ann):
         """
