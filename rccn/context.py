@@ -1,6 +1,7 @@
 ############################################################################
 #
 # Copyright (C) 2013 tele <tele@rhizomatica.org>
+# Copyright (C) 2018 keith <keith@rhizomatica.org>
 #
 # Contexts call processing
 # This file is part of RCCN
@@ -334,26 +335,7 @@ class Context:
                 log.error('Error getting the caller id for the call')
                 self.session.setVariable('effective_caller_id_number', 'Unknown')
                 self.session.setVariable('effective_caller_id_name', 'Unknown')
-            try:
-                gw = self.numbering.get_gateway()
-                if gw == None:
-                    log.error('Error in getting the Gateway to use for the call')
-                log.debug('Use gateway: %s' % gw)
-            except NumberingException as e:
-                log.error(e)
-                # playback error and hangup call
-                # TODO: announcement of general error
-                self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
-                self.session.hangup()
-                
-            self.session.execute('set',"continue_on_fail=USER_BUSY,INVALID_GATEWAY,GATEWAY_DOWN,CALL_REJECTED")
-            self.session.execute('bridge', "{absolute_codec_string='"+outbound_codec+"',sip_cid_type=pid}sofia/gateway/"+gw+'/'+str(self.destination_number))
-            _fail_cause=self.session.getVariable('originate_disposition')
-            log.info('Gateway Finished with Call: %s' % _fail_cause)
-            if _fail_cause == "INVALID_GATEWAY" or _fail_cause == "GATEWAY_DOWN" or _fail_cause == "CALL_REJECTED":
-                self.session.execute('playback', '010_no_puede_ser_enlazada.gsm')
-            if _fail_cause == "USER_BUSY":
-                self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
+            self.bridge(self.destination_number)
         else:
             log.debug('Subscriber doesn\'t have enough balance to make a call')
             # play announcement not enough credit and hangup call
