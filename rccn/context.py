@@ -344,14 +344,12 @@ class Context:
             self.session.hangup()
 
     def local(self):
-        """ Local context. Calls within the same BSC """
-        # check if calling number is internal
+        """ Local context. Calls destined for our BSC """
         calling_number = self.session.getVariable('caller_id_number')
-            self.session.setVariable('context', 'INTERNAL')
         if self.numbering.is_number_internal(calling_number):
+            self.session.setVariable('context', 'INTERNAL_INBOUND')
         else:
             self.session.setVariable('context', 'LOCAL')
-            # check if local call has to be billed
             try:
                 if self.configuration.check_charge_local_calls() == 1:
                     # if local call has to be billed to local subscriber:
@@ -381,33 +379,10 @@ class Context:
                 if limit[0] == 1:
                     log.info('Limit call duration to: %s seconds', limit[1])
                     self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
-        except ConfigurationException as e:
-            log.error(e)
-                        
-        # Experimental local calls to SIP endpoint.
-        if use_sip == 'yes':
-          sip_endpoint=self.numbering.is_number_sip_connected(self.session,self.destination_number)
-          #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
-          if sip_endpoint:
-            self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-            self.session.execute('bridge', "{absolute_codec_string='PCMA,G729'}"+sip_endpoint)
-            _fail_cause=self.session.getVariable('originate_disposition')
-            log.info('SIP Finished with Call: %s' % _fail_cause)
-            return
-        # check subscriber balance if charge local call is configured
-        log.info('Send call to LCR')
-        # Hangup after bridge is true in the dialplan.
-        #self.session.execute('set','hangup_after_bridge=false')
-        self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+str(self.destination_number)+'@'+mncc_ip_address+':5050')
-        _fail_cause=self.session.getVariable('originate_disposition')
-        log.info('LCR Finished with Call: %s' % _fail_cause)
-        if _fail_cause == "DESTINATION_OUT_OF_ORDER" or _fail_cause == "NO_ANSWER":
-            self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
-        if _fail_cause == "USER_BUSY":
-            self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
-        if _fail_cause == "UNALLOCATED_NUMBER":
-            self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')            
+        except ConfigurationException as _ex:
+            log.error(_ex)
+        log.info('Take it to the Bridge..')
+        self.bridge(self.destination_number)
 
         # in case of no answer send call to voicemail
         #log.info('No answer, send call to voicemail')
