@@ -62,8 +62,9 @@ def handler(session, args):
         session.consoleLog('info', '\033[38;5;202mRCCN \033[0mReloaded Dialplan Module in handler.\n')
     dialplan = Dialplan(session)
     log.info("Lookup dialplan for called number: %s" % destination_number)
-    dialplan.lookup()
-    log.info('Leaving rccn.handler()')
+    ret = dialplan.lookup()
+    log.info('Leaving rccn.handler(%s)\n\n\033[90;1m====\033[0m\n', ret)
+    session.consoleLog("info", "\033[38;5;202m!!RCCN!!\n*\n|_\n\n(O)\n|#|\n'-'\033[0m\n")
 
 def xml_fetch(params):
 
