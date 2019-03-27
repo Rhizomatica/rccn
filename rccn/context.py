@@ -320,7 +320,6 @@ class Context:
         log.debug('Current subscriber balance: %.2f', current_subscriber_balance)
         if current_subscriber_balance > Decimal('0.00'):
             # subscriber has enough balance to make a call
-            log.debug('Get call rate')
             self.session.setVariable('billing', '1')
             rate = self.billing.get_rate(self.destination_number)
             total_call_duration = self.billing.get_call_duration(current_subscriber_balance, rate[3])
@@ -404,7 +403,7 @@ class Context:
         loop_count = 0
         while self.session.ready() and loop_count < 6:
             loop_count += 1
-            log.debug('Playback welcome message %s', loop_count)
+            log.debug('Playback welcome message [%s]', loop_count)
             log.debug('Collect DTMF to call internal number')
             _greet = "001_bienvenidos.gsm"
             _path = self.session.getVariable('sound_prefix') + '/' + _greet
@@ -414,6 +413,7 @@ class Context:
             dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", _greet,
                                                      self.WRONG_NUMBER, "\\d+")
             if not self.session.ready():
+                log.debug('Session not ready. Failed to collect digits.')
                 return -1
             log.debug('Collected digits: %s', dest_num)
             if len(dest_num) == 5:
