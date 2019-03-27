@@ -64,16 +64,43 @@ class Numbering:
     def is_number_intl(self, destination_number):
         if (destination_number[0] == '+' or
                 destination_number[:2] == '00'):
-            log.debug('Called number is an international call')
-            return True
+            log.debug('Called number has international prefix.')
+            return self.is_number_intl_valid(destination_number)
         return False
+
+    def is_number_intl_valid(self,destination_number):
+
+        _match = re.split(r'^(00|\+)(1|52)(1?)(.*)$',
+                          destination_number)
+        if len(_match) > 4:
+            return len(_match[4]) == 10
+
+        '''
+        if destination_number[:5] == '00521':
+            return len(destination_number[5:]) == 10
+
+        if destination_number[:4] == '0052':
+            return len(destination_number[4:]) == 10
+
+        if destination_number[:4] == '+521':
+            return len(destination_number[4:]) == 10
+
+        if destination_number[:3] == '+52':
+            return len(destination_number[3:]) == 10
+
+        if destination_number[:3] == '001':
+            return len(destination_number[3:]) == 10
+
+        if destination_number[:2] == '+1':
+            return len(destination_number[2:]) == 10
+        '''
+        return True
 
     def detect_mx_short_dial(self, destination_number):
         """
         Try to acertain if a mexican number dialled as
         10 digits is celular based on the data rates we
         got from upstream Voip.
-
         """
         try:
             if (len(destination_number) != 10 or
