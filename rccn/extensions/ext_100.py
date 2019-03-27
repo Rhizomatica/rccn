@@ -28,8 +28,8 @@ from config import log
 def handler(session):
     ''' Playback own Number to Caller '''
     log.debug('Handler for ext 100, Playback own Number to Caller')
-    session.execute('playback', '014_su_numero_es.gsm')
     calling_number = session.getVariable('caller_id_number')
     session.answer()
+    session.execute('playback', '014_su_numero_es.gsm')
     session.execute('say', 'es number iterated %s' % calling_number)
     session.hangup()
