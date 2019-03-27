@@ -64,7 +64,10 @@ class Dialplan:
                     continue
                 chan = {}
                 for i, val in enumerate(values):
-                    chan[keys[i]] = val
+                    try:
+                        chan[keys[i]] = val
+                    except Exception as ex:
+                        log.debug(ex)
                 chans.append(chan)
         return chans
 
