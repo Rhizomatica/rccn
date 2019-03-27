@@ -170,27 +170,33 @@ class Context:
             INBOUND: Call from Voip Provider
             LOCAL: from local() to local user.
             INTERNAL_INBOUND:  call for local called number is originating another site.
-            ROAMING_LOCAL: A local user is calling a foreign user that is here.
+            ROAMING_LOCAL: A local/internal user is calling a local/foreign user that is here.
             """
             self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
             self.session.execute('set', 'ringback=${us-ring}')
             #self.session.preAnswer()
             add_local_ep()
-            if use_sip and _context != "ROAMING_LOCAL": # Foreign user will not be (SIP) registered here.
+            if use_sip and not self.numbering.is_number_internal(self.destination_number):
+                # Foreign user will not be (SIP) registered here.
                 add_sip_ep()
             if _context == "ROAMING_LOCAL": # Also bridge to home in case our info is incorrect.
                 site_ip = self.numbering.get_site_ip(self.destination_number)
-                add_internal_ep()
+                if site_ip != self.calling_host and site_ip != config['local_ip']: # But don't loop back to origin!
+                    add_internal_ep()
 
-        if _context == 'INTERNAL' or _context == 'ROAMING_INTERNAL' or _context == "ROAMING_INBOUND":
+        if (_context == 'INTERNAL' or _context == 'ROAMING_INTERNAL'
+            or _context == "ROAMING_INBOUND" or _context == "ROAMING_BOTH"):
             """
             INTERNAL:           A-leg: Call to another site.
-            ROAMING_INTERNAL:   A-leg: Call from a roaming user (here), is to another roaming user (might be here) FIXME!!
+            ROAMING_INTERNAL:   A-leg: Call from a roaming user (here), is to another roaming user.
+            ROAMING_BOTH:       A-leg: Call from a roaming user (here) B-leg: callee is roaming here.
             ROAMING_INBOUND:    A-leg: Call from VoIP provider to a (local) roaming user.   B-leg: local,sip,remote
             """
             try:
                 site_ip = self.numbering.get_current_bts(callee)
+                if site_ip == config['local_ip']:
+                    site_ip = self.numbering.get_site_ip(callee)
             except NumberingException as ne:
                 # FIXME: Again, we don't know if not exists or other error :(
                 log.error(ne)
@@ -205,31 +211,34 @@ class Context:
             self.session.execute('set', 'bridge_early_media=true')
             self.session.execute('set', 'ignore_early_media=false')
 
-            if _context == 'ROAMING_INTERNAL' or _context == 'ROAMING_INBOUND':
+            if _context == 'ROAMING_BOTH' or _context == 'ROAMING_INBOUND':
                 self.session.execute('set', 'ringback=${us-ring}')
                 add_local_ep()
                 #add_sip_ep()
-            if site_ip != self.calling_host: # Don't bridge the call back to the origin.
+            if site_ip != self.calling_host and site_ip != config['local_ip']:
+                # Don't bridge the call back to the origin or to our own internal profile.
                 add_internal_ep()
 
         if _context[:8] == 'ROAMING_':
             self.session.execute('set', "continue_on_fail=true")
 
         # Now bridge B-leg of call.
+        log.info('Bridging to (%s) EP(s):', _context)
         for ep in endpoints:
-            log.info('Bridging to (%s) EP:\n------------> (\033[92;1m%s\033[0m)',
-                     _context, ep)
-            #log.info('Bridging to (%s) EP: %s' % (e.split('@')[1].split(':')[0], e))
+            log.info('---> \033[92;1m%s\033[0m', ep)
         bridge_str = ",".join(endpoints)
-        #log.info('%s', bridge_str)
         self.session.execute('bridge', bridge_str)
+
+        # ============== AFTER THE BRIDGE ==============
+
         _orig_disp = self.session.getVariable('originate_disposition')
         _ep_disp = self.session.getVariable('endpoint_disposition')
         _ctime = float(self.session.getVariable('created_time'))/1000000
         _atime = float(self.session.getVariable('answered_time'))/1000000
-
-        # Note that if the A leg hangs up, then the last bridge hangup is not from the connected B-leg.
+        # Note that if the A leg hangs up, then the last bridge hangup
+        # is not from the connected B-leg.
         _hup_cause = self.session.getVariable('last_bridge_hangup_cause')
+
         log.info('Bridge Finished with B-leg of Call, orig_disp(%s) ep_disp(%s) hup_cause(%s)',
                  _orig_disp, _ep_disp, _hup_cause)
         if _atime > 0:
@@ -246,17 +255,29 @@ class Context:
                     return False
                 else:
                     return True
+
         if _orig_disp == "ORIGINATOR_CANCEL":
             self.session.hangup(_orig_disp)
             return True
 
-        if _context[:8] == "ROAMING_" and _orig_disp == "UNALLOCATED_NUMBER":
+        if (_context != "ROAMING_LOCAL" and _context != "ROAMING_BOTH" and
+            _context[:8] == "ROAMING_" and _orig_disp == "UNALLOCATED_NUMBER"):
             # Don't play audio to an incoming roaming call for a number that is
             # unknown to OsmoHLR, this would kill any another bridge.
             # Also it might not be correct.
             self.session.hangup("SUBSCRIBER_ABSENT")
             return
-        if _context == "INTERNAL_INBOUND" or _context == "ROAMING_INTERNAL" or _context == "ROAMING_LOCAL":
+
+        if ((_context == "ROAMING_LOCAL" or _context == "ROAMING_BOTH") and
+            _orig_disp == "UNALLOCATED_NUMBER"):
+            log.debug("Forcing DESTINATION_OUT_OF_ORDER for UNALLOCATED_NUMBER")
+            _orig_disp = "DESTINATION_OUT_OF_ORDER"
+            _hup_cause = "DESTINATION_OUT_OF_ORDER"
+
+        if (self.calling_host != mncc_ip_address and
+            (_context == "INTERNAL_INBOUND" or _context == "ROAMING_INTERNAL" or
+             _context == "ROAMING_LOCAL")):
+            log.debug("Not playing Audio to %s", self.calling_host)
             # Let the caller side deal with audio feedback
             self.session.hangup(_hup_cause)
             return True
