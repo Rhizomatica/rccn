@@ -306,7 +306,6 @@ class Context:
 
     def outbound(self):
         """ Outbound context. Calls to be sent out using the VoIP provider """
-
         self.session.setVariable('context', 'OUTBOUND')
         subscriber_number = self.session.getVariable('caller_id_number')
         # check subscriber balance
@@ -323,7 +322,6 @@ class Context:
             # subscriber has enough balance to make a call
             log.debug('Get call rate')
             self.session.setVariable('billing', '1')
-
             rate = self.billing.get_rate(self.destination_number)
             total_call_duration = self.billing.get_call_duration(current_subscriber_balance, rate[3])
             log.info('Total duration for the call before balance end is set to %d sec', total_call_duration)
@@ -338,12 +336,6 @@ class Context:
                                  (total_call_duration - 3))
             # set correct caller id based on the active provider
             try:
-                '''
-                try:
-                    outbound_codec = self.configuration.get_meta('outbound_codec')
-                except ConfigurationException as e:
-                    log.error(e)
-                '''
                 outbound_codec = 'G729'
                 caller_id = self.numbering.get_callerid(subscriber_number, self.destination_number)
             except NumberingException as ex:
@@ -406,12 +398,6 @@ class Context:
         log.info('Take it to the Bridge..')
         self.bridge(self.destination_number)
 
-        # in case of no answer send call to voicemail
-        #log.info('No answer, send call to voicemail')
-        #self.session.execute('set','default_language=en')
-        #self.session.execute('answer')
-        #self.session.execute('sleep','1000')
-        #self.session.execute('bridge', "loopback/app=voicemail:default ${domain_name} "+str(self.calling_number))
     def inbound_ivr(self):
 
         self.session.answer()
