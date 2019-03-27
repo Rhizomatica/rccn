@@ -466,129 +466,39 @@ class Context:
     def inbound(self):
         """ Inbound context. Calls coming from the VoIP provider """
         self.session.setVariable('context', 'INBOUND')
-        # check if DID is assigned to a subscriber
-        #try:
-        #    log.info('Check if DID is assigned to a subscriber for direct calling')
-        #    subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
-        #except NumberingException as e:
-        #    log.error(e)
+        subscriber_number = None
         try:
-            log.debug('Check if Number is a Valid Local Number')
-            if self.numbering.is_number_local(self.destination_number):
-                subscriber_number = self.destination_number
-            else:
-                subscriber_number = None
-        except NumberingException as e:
-            log.error(e)
+            log.info('Check if (%s) is assigned to a subscriber for direct calling',
+                     self.destination_number)
+            subscriber_number = self.numbering.get_did_subscriber(self.destination_number)
+            if subscriber_number is None:
+                log.debug('Check if Called Number is a Valid Local Subscriber Number')
+                if self.numbering.is_number_local(self.destination_number):
+                    subscriber_number = self.destination_number
+        except NumberingException as _ex:
+            log.error(_ex)
 
-        # FIXME: (soon) Remove all this code duplication from the dialplan
-        if subscriber_number != None:
-            log.info('DID assigned to: %s', subscriber_number)
+        if subscriber_number == None:
+            return self.inbound_ivr()
+        else:
+            log.info('INBOUND call progressing to: %s', subscriber_number)
             try:
                 if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
-                    log.info('Send call to internal subscriber %s' % subscriber_number)
-                    # Experimental local calls to SIP endpoint.
-                    if use_sip == 'yes':
-                      sip_endpoint=self.numbering.is_number_sip_connected(self.session,self.destination_number)
-                      #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
-                      if sip_endpoint:
-                        self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-                        self.session.execute('bridge', "{absolute_codec_string='PCMA,G729,AMR'}"+sip_endpoint)
-                        _fail_cause=self.session.getVariable('originate_disposition')
-                        log.info('SIP Finished with Call: %s' % _fail_cause)
-                        return
-                    log.info('Send call to internal subscriber %s' % subscriber_number)
+                    log.info('Send call to internal subscriber %s', subscriber_number)
                     self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
                     self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
-                    self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
-                    self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+subscriber_number+'@'+mncc_ip_address+':5050')
-                    _fail_cause=self.session.getVariable('originate_disposition')
-                    log.info('LCR Finished with Call: %s' % _fail_cause)
-                    if _fail_cause == "DESTINATION_OUT_OF_ORDER":
-                      self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
-                    elif _fail_cause == "USER_BUSY":
-                      self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
-                    else:
-                      self.session.hangup()
-
+                    if not self._check_inbound_roaming():
+                        self.bridge(subscriber_number)
+                        return True
                 else:
-                    log.info('Subscriber %s doesn\'t exist or is not authorized' % subscriber_number)
-            except SubscriberException as e:
-                log.error(e)
-                self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
-        else:
-            self.session.answer()
-            loop_count = 0
-            while self.session.ready() and loop_count < 6:
-                loop_count += 1
-                log.debug('Playback welcome message %s', loop_count)
-                log.debug('Collect DTMF to call internal number')
-                dest_num = self.session.playAndGetDigits(5, 11, 3, 10000, "#", "001_bienvenidos.gsm",
-                                                         "007_el_numero_no_es_corecto.gsm", "\\d+")
-                log.debug('Collected digits: %s', dest_num)
-                if self.session.ready() != True:
-                    return
-
-                # check if destination subscriber is roaming
-                try:
-                    if len(dest_num) == 5:
-                        self.destination_number = config['internal_prefix']+dest_num
-                    elif len(dest_num) == 11:
-                        self.destination_number = dest_num
-                    if self.numbering.is_number_roaming(self.destination_number):
-                        log.info('Destination number %s is roaming', self.destination_number)
-                        self.roaming('inbound')
-                except NumberingException as e:
-                    log.error(e)
-                    # TODO: play message of destination number unauthorized to receive call
-                    self.session.hangup()
-
-                # Experimental local calls to SIP endpoint.
-                if use_sip == 'yes':
-                  sip_endpoint=self.numbering.is_number_sip_connected(self.session,self.destination_number)
-                  #sip_endpoint=self.numbering.is_number_sip_connected_no_session(self.destination_number)
-                  if sip_endpoint:
-                    self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION,UNALLOCATED_NUMBER")
-                    self.session.execute('bridge', "{absolute_codec_string='PCMA,G729,AMR'}"+sip_endpoint)
-                    _fail_cause=self.session.getVariable('originate_disposition')
-                    log.info('SIP Finished with Call: %s' % _fail_cause)
-                    return
-
-
-                try:
-                    if self.subscriber.is_authorized(dest_num, 1) and (len(dest_num) == 11 or len(dest_num) == 5):
-                        # check if the inbound call has to be billed
-                        try:
-                            if self.configuration.check_charge_inbound_calls() == 1:
-                                log.info('INBOUND call will be billed')
-                                self.session.setVariable('billing', '1')
-                        except ConfigurationException as e:
-                            log.error(e)
-                        # if number is extension add internal prefix
-                        if len(dest_num) == 5:
-                            dest_num = config['internal_prefix'] + dest_num
-                        log.info('Send call to internal subscriber %s' % dest_num)
-                        self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
-                        self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
-                        self.session.execute('set',"continue_on_fail=DESTINATION_OUT_OF_ORDER,USER_BUSY,NO_ANSWER,NO_ROUTE_DESTINATION")
-                        self.session.execute('bridge', "{absolute_codec_string='GSM'}sofia/internal/sip:"+dest_num+'@'+mncc_ip_address+':5050')
-                        _fail_cause=self.session.getVariable('originate_disposition')
-                        log.info('LCR Finished with Call: %s' % _fail_cause)
-                        if _fail_cause == "DESTINATION_OUT_OF_ORDER":
-                          self.session.execute('playback', '008_el_numero_no_esta_disponible.gsm')
-                        elif _fail_cause == "USER_BUSY":
-                          self.session.execute('playback', '009_el_numero_esta_ocupado.gsm')
-                        else:
-                          self.session.hangup()
-                    else:
-                        log.info('Subscriber %s doesn\'t exist' % dest_num)
-                        self.session.execute('playback','007_el_numero_no_es_corecto.gsm')
-
-                except SubscriberException as e:
-                    log.error(e)
-                    # general error playback busy tone
-                    self.session.execute('playback', '007_el_numero_no_es_corecto.gsm')
-                    self.session.hangup()
+                    log.error('DID assigned but subscriber %s does not exist or is not authorized', subscriber_number)
+                    self._play_error(subscriber_number)
+                    return False
+            except SubscriberException as _ex:
+                log.error(_ex)
+                self.session.execute('playback', self.WRONG_NUMBER)
+                self.session.hangup('UNALLOCATED_NUMBER')
+        return -1
 
     def internal(self):
         """ Internal context. Calls for another site routed using internal VPN """
