@@ -112,6 +112,7 @@ class Dialplan:
                   self.calling_number)
         try:
             if self.subscriber.is_authorized(self.calling_number, 0):
+                self.context.destination_number = self.destination_number
                 log.debug('Subscriber is registered and authorized to call')
                 exectx = getattr(self.context, mycontext)
                 exectx()
@@ -264,7 +265,6 @@ class Dialplan:
 
             if is_local_number and is_right_len(self.destination_number):
                 log.info('Called number is a local number')
-                self.context.destination_number = self.destination_number
                 if not self.subscriber.is_authorized(self.destination_number, 0):
                     log.info(
                         'Destination subscriber is NOT '
