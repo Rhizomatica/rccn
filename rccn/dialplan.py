@@ -122,9 +122,7 @@ class Dialplan:
                 self.session.hangup('CALL_REJECTED')
         except SubscriberException as _ex:
             log.error(_ex)
-            # play announcement error
-            # TODO: register announcement of general error
-            self.play_announcement(self.NOT_CREDIT_ENOUGH)
+            self.play_announcement(self.ERROR)
 
     def check_external(self):
         if len(self.destination_number) == 10:
