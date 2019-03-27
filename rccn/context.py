@@ -414,6 +414,8 @@ class Context:
             if not self.session.ready():
                 log.debug('Session not ready. Failed to collect digits.')
                 return -1
+            if dest_num == '':
+                continue
             log.debug('Collected digits: %s', dest_num)
             if len(dest_num) == 5:
                 self.destination_number = config['internal_prefix'] + dest_num
