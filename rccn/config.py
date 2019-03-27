@@ -30,8 +30,9 @@ RIAK_TIMEOUT = 7000
 mode = 'a'
 maxBytes = 104857600
 backupCount = 5
-smlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rccn.log', mode, maxBytes, backupCount)
 formatter = logging.Formatter('%(asctime)s => %(name)-7s: %(levelname)-8s [%(module)s.%(funcName)s:%(lineno)d] %(message)s')
+
+smlog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/rccn.log', mode, maxBytes, backupCount)
 smlog.setFormatter(formatter)
 
 blog = loghandlers.RotatingFileHandler(rhizomatica_dir+'/rccn/log/billing.log', mode, maxBytes, backupCount)
