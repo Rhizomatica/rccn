@@ -54,24 +54,24 @@ class Dialplan:
         self.context = Context(session, modules)
 
     def parse_chans(self, data):
-        chans=[]
-        lines=data.split('\n')
+        chans = []
+        lines = data.split('\n')
         for line in lines:
             if line != '' and line.find(' total.') == -1:
-                values=line.split('|')
-                if values[0]=='uuid':
-                    keys=values
+                values = line.split('|')
+                if values[0] == 'uuid':
+                    keys = values
                     continue
-                chan={}
-                for i,val in enumerate(values):
-                    chan[keys[i]]=val
+                chan = {}
+                for i, val in enumerate(values):
+                    chan[keys[i]] = val
                 chans.append(chan)
         return chans
 
     def check_chans(self, match, max, redirect=''):
         _count = 0
         self.session.execute("set", "_temp=${show channels as delim |}")
-        _chans=self.parse_chans(self.session.getVariable('_temp'))
+        _chans = self.parse_chans(self.session.getVariable('_temp'))
         for chan in _chans:
             if chan['dest'] == match:
                 _count += 1
@@ -248,8 +248,8 @@ class Dialplan:
         """
         if self.calling_host == mncc_ip_address:
             return False
-        if (isinstance(sip_central_ip_address,str) and self.calling_host == sip_central_ip_address or
-                isinstance(sip_central_ip_address,list) and self.calling_host in sip_central_ip_address):
+        if (isinstance(sip_central_ip_address, str) and self.calling_host == sip_central_ip_address or
+                isinstance(sip_central_ip_address, list) and self.calling_host in sip_central_ip_address):
             log.info("Incoming call from SIP server")
             # TODO: Not sure about this, we also call it from check_roaming()
             if self.check_roaming_destination():
@@ -290,7 +290,7 @@ class Dialplan:
 
     def check_extension(self):
         if (self.calling_host != mncc_ip_address and
-           not self.numbering.is_number_sip_connected(self.session, self.calling_number)):
+                not self.numbering.is_number_sip_connected(self.session, self.calling_number)):
             return False
         log.debug('Check if called number is an extension')
         if self.destination_number in extensions_list:
