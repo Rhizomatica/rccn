@@ -72,29 +72,32 @@ class Dialplan:
         return chans
 
     def check_chans(self, match, max, redirect=''):
-        _count = 0
-        self.session.execute("set", "_temp=${show channels as delim |}")
-        _chans = self.parse_chans(self.session.getVariable('_temp'))
-        for chan in _chans:
-            if chan['dest'] == match:
-                _count += 1
-        log.info("chans %s for [%s]", _count, match)
-        if _count > max:
+        i = 0
+        while self.session.ready() and i < 4:
+            _count = 0
+            self.session.execute("set", "_temp=${show channels as delim |}")
+            # Below avoids recursive data returned due to _temp=[channels] being the
+            # current application_data in this channel.
+            self.session.execute("set", "_tmp=1")
+            _chans = self.parse_chans(self.session.getVariable('_temp'))
+            for chan in _chans:
+                if chan['dest'] == match:
+                    _count += 1
+            log.info("Channel Usage(%s) for [%s]", _count, match)
+            if _count < max:
+                return True
             log.info("Channel Capacity for(%s) is exceeded.", match)
             if redirect == '':
                 announcement = self.context.get_audio_file("RESOURCE_UNAVAIL")
                 self.session.execute('playback', announcement)
                 self.session.hangup()
                 return False
-            i = 0
-            while self.session.ready() and i < 6:
-                self.session.execute('playback', '018_ocupadas.gsm')
-                self.session.execute('playback', '017_marca.gsm')
-                self.session.execute('say', 'es number iterated %s' % redirect)
-                i += 1
-            self.session.hangup()
-            return False
-        return True
+            self.session.execute('playback', '018_ocupadas.gsm')
+            self.session.execute('playback', '017_marca.gsm')
+            self.session.execute('say', 'es number iterated %s' % redirect)
+            i += 1
+        self.session.hangup()
+        return False
 
     def play_announcement(self, ann):
         """
@@ -340,8 +343,10 @@ class Dialplan:
         if self.destination_number[:1] == "*":
             return self.check_support()
 
-        if self.destination_number == voip_did:
-            if not self.check_chans(voip_did, 2, str(int(voip_did) + 150)):
+        if ('voip_chans_max' in globals() and
+            'voip_mod' in globals() and
+            self.destination_number == voip_did):
+            if not self.check_chans(voip_did, voip_chans_max, voip_mod(voip_did)):
                 return False
 
         ret = self.check_did()
