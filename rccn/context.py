@@ -254,10 +254,12 @@ class Context:
             _duration = "%0.2f" % (time.time() - _atime)
             log.info('Approx Timings, S->A(%0.2f) Duration(%s)',
                      (_atime - _ctime), _duration)
+        else:
+            _duration = "N/A"
 
         if _orig_disp == "SUCCESS":
             if _ep_disp == "ANSWER":
-                return (_hup_cause + ", "+_duration)
+                return (str(_hup_cause) + ", " + str(_duration))
             if _ep_disp == "EARLY MEDIA":
                 self.session.hangup(_hup_cause)
                 if _hup_cause != "NORMAL_CLEARING":
