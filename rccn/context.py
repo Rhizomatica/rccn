@@ -86,10 +86,9 @@ class Context:
         bridge_params = ''
 
         def add_local_ep():
-            codec = mncc_codec
             bridge_params = ',bridge_early_media=false'
             endpoint = 'sofia/internal/sip:' + str(callee) + '@' + mncc_ip_address + ':' + mncc_port
-            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+            endpoints.append("[absolute_codec_string='^^:" + mncc_codec + "'" + bridge_params + "]" + endpoint)
 
         def add_sip_ep():
             sip_endpoint = self.numbering.is_number_sip_connected(self.session, callee)
