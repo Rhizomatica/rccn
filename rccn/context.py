@@ -240,13 +240,19 @@ class Context:
 
         # ============== AFTER THE BRIDGE ==============
 
-        _orig_disp = self.session.getVariable('originate_disposition')
-        _ep_disp = self.session.getVariable('endpoint_disposition')
+        _orig_disp = str(self.session.getVariable('originate_disposition'))
+        _ep_disp = str(self.session.getVariable('endpoint_disposition'))
         _ctime = float(self.session.getVariable('created_time'))/1000000
         _atime = float(self.session.getVariable('answered_time'))/1000000
         # Note that if the A leg hangs up, then the last bridge hangup
         # is not from the connected B-leg.
-        _hup_cause = self.session.getVariable('last_bridge_hangup_cause')
+        _hup_cause = str(self.session.getVariable('last_bridge_hangup_cause'))
+        if _hup_cause == '':
+            log.info("HUP CAUSE was empty.")
+            _hup_cause = "NORMAL_CLEARING"
+        if _orig_disp == "":
+            log.info("ORIG DISP was empty.")
+            _orig_disp = "NORMAL_CLEARING"
 
         log.info('Bridge Finished with B-leg of Call, orig_disp(%s) ep_disp(%s) hup_cause(%s)',
                  _orig_disp, _ep_disp, _hup_cause)
@@ -261,14 +267,14 @@ class Context:
             if _ep_disp == "ANSWER":
                 return (str(_hup_cause) + ", " + str(_duration))
             if _ep_disp == "EARLY MEDIA":
-                self.session.hangup(_hup_cause)
+                self.session.hangup(str(_hup_cause))
                 if _hup_cause != "NORMAL_CLEARING":
                     return False
                 else:
                     return True
 
         if _orig_disp == "ORIGINATOR_CANCEL":
-            self.session.hangup(_orig_disp)
+            self.session.hangup(str(_orig_disp))
             return True
 
         if (_context != "ROAMING_LOCAL" and _context != "ROAMING_BOTH" and
@@ -290,7 +296,7 @@ class Context:
              _context == "ROAMING_LOCAL")):
             log.debug("Not playing Audio to %s", self.calling_host)
             # Let the caller side deal with audio feedback
-            self.session.hangup(_hup_cause)
+            self.session.hangup(str(_hup_cause))
             return True
 
         if _context == "SUPPORT":
@@ -312,7 +318,7 @@ class Context:
             log.debug('Playback Finished.')
             # Don't hangup here if you want to go back into the inbound loop.
             if not _context == "INBOUND":
-                self.session.hangup(_orig_disp)
+                self.session.hangup(str(_orig_disp))
 
     def outbound(self):
         """ Outbound context. Calls to be sent out using the VoIP provider """
