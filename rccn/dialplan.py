@@ -149,6 +149,9 @@ class Dialplan:
             return False
         if self.numbering.is_number_known(self.calling_number):
             return True
+        log.info('%s is unknown to us.', self.calling_number)
+        self.play_announcement(self.NOT_REGISTERED)
+        self.session.hangup('CALL_REJECTED')
         return False
 
     def check_emergency(self):
