@@ -69,11 +69,12 @@ class Context:
     def bridge(self, callee):
         """ All calls that are progressing arrive here
             Avoids duplication of code
-
-        :param session: FS session
-        :param destination: Where we bridge the call to
         """
-        mncc_codec = 'AMR'
+        # FIXME: Fix all this globals thing.
+        if not 'mncc_codec' in globals():
+            mncc_codec = 'GSM'
+        else:
+            mncc_codec = globals()['mncc_codec']
         mncc_port = '5050'
         inter_port = '5040'
         endpoints = []
