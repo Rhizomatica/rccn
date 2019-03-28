@@ -75,6 +75,11 @@ class Context:
             mncc_codec = 'GSM'
         else:
             mncc_codec = globals()['mncc_codec']
+        if not 'inter_codec' in globals():
+            inter_codec = 'G729'
+        else:
+            inter_codec = globals()['inter_codec']
+
         mncc_port = '5050'
         inter_port = '5040'
         endpoints = []
@@ -95,8 +100,7 @@ class Context:
         def add_internal_ep():
             endpoint = 'sofia/internalvpn/sip:' + str(callee) + '@' + str(site_ip) + ':' + inter_port
             bridge_params = ',bridge_early_media=true'
-            codec = 'AMR:G729'
-            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+            endpoints.append("[absolute_codec_string='^^:" + inter_codec + "'" + bridge_params + "]" + endpoint)
 
         self.session.execute('set', "continue_on_fail="
                              "DESTINATION_OUT_OF_ORDER,"
