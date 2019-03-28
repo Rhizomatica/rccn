@@ -251,13 +251,13 @@ class Context:
         log.info('Bridge Finished with B-leg of Call, orig_disp(%s) ep_disp(%s) hup_cause(%s)',
                  _orig_disp, _ep_disp, _hup_cause)
         if _atime > 0:
-            log.info('Approx Timings, S->A(%0.2f) Duration(%0.2f)',
-                     (_atime - _ctime),
-                     (time.time() - _atime))
+            _duration = "%0.2f" % (time.time() - _atime)
+            log.info('Approx Timings, S->A(%0.2f) Duration(%s)',
+                     (_atime - _ctime), _duration)
 
         if _orig_disp == "SUCCESS":
             if _ep_disp == "ANSWER":
-                return _hup_cause
+                return (_hup_cause + ", "+_duration)
             if _ep_disp == "EARLY MEDIA":
                 self.session.hangup(_hup_cause)
                 if _hup_cause != "NORMAL_CLEARING":
@@ -402,7 +402,7 @@ class Context:
         except ConfigurationException as _ex:
             log.error(_ex)
         log.info('Take it to the Bridge..')
-        self.bridge(self.destination_number)
+        return self.bridge(self.destination_number)
 
     def inbound_ivr(self):
 

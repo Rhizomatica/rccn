@@ -283,8 +283,7 @@ class Dialplan:
                     return True
                 if is_internal_number and is_right_len(self.calling_number):
                     log.info('INTERNAL call from another site')
-                    self.context.local()
-                    return True
+                    return self.context.local()
                 else:
                     log.info('Send call to LOCAL context')
                     self.auth_context('local')
@@ -371,8 +370,9 @@ class Dialplan:
             return
         if self.check_external():
             return
-        if self.check_local():
-            return
+        ret = self.check_local()
+        if ret:
+            return ret
         if self.check_internal():
             return
 
