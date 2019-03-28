@@ -198,16 +198,20 @@ class Context:
             ROAMING_BOTH:       A-leg: Call from a roaming user (here) B-leg: callee is roaming here.
             ROAMING_INBOUND:    A-leg: Call from VoIP provider to a (local) roaming user.   B-leg: local,sip,remote
             """
-            try:
-                site_ip = self.numbering.get_current_bts(callee)
-                if site_ip == config['local_ip']:
-                    site_ip = self.numbering.get_site_ip(callee)
-            except NumberingException as ne:
-                # FIXME: Again, we don't know if not exists or other error :(
-                log.error(ne)
-                self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
-                self.session.hangup('UNALLOCATED_NUMBER')
-                return
+
+            if callee[-5:] == '00000':
+                site_ip = self.numbering.get_site_ip(callee)
+            else:
+                try:
+                    site_ip = self.numbering.get_current_bts(callee)
+                    if site_ip == config['local_ip']:
+                        site_ip = self.numbering.get_site_ip(callee)
+                except NumberingException as ne:
+                    # FIXME: Again, we don't know if not exists or other error :(
+                    log.error(ne)
+                    self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
+                    self.session.hangup('UNALLOCATED_NUMBER')
+                    return
 
             self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_number'))
