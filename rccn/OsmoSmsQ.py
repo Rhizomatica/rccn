@@ -405,6 +405,11 @@ def display_queue(smsq):
                 textc = '96' if sms[2] is None else '92'
                 textb = '0;03' if ston is 5 else '1'
                 fromc = '1;89' if ston is 5 else '95'
+                if options.both == src[-5:]:
+                    textc = '94'
+                    src = src[:6]+'\033[93m'+src[6:]+'\033[0m'
+                if options.both == dest[-5:]:
+                    dest = dest[:6]+'\033[93m'+dest[6:]+'\033[0m'
                 print ( '\033[%sm%s\033[0m \033[%sm%s\033[0m \033[91m%s\033[0m %s \033[%s;%sm%s \033[0m'
                 % ( idc, sms[0], fromc, src.ljust(11), dest.ljust(11), charset.ljust(8), textb, textc, text1[:100] ) )
             else:
