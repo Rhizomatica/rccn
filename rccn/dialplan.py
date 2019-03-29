@@ -92,7 +92,7 @@ class Dialplan:
                 self.session.execute('playback', announcement)
                 self.session.hangup()
                 return False
-            self.session.execute('playback', '018_ocupadas.gsm')
+            #self.session.execute('playback', '018_ocupadas.gsm')
             self.session.execute('playback', '017_marca.gsm')
             self.session.execute('say', 'es number iterated %s' % redirect)
             i += 1
@@ -205,6 +205,7 @@ class Dialplan:
             log.info("Call to DID from GSM side.")
             self.play_announcement(self.NOT_AUTH)
             self.session.hangup('OUTGOING_CALL_BARRED')
+            #self.session.hangup('CALL_REJECTED')
             return -1
         log.debug('Execute context INBOUND call')
         return self.context.inbound()
@@ -321,6 +322,7 @@ class Dialplan:
             extension = importlib.import_module(
                 'extensions.ext_' + self.destination_number,
                 'extensions')
+            reload(sys.modules['extensions.ext_' + self.destination_number])
             try:
                 log.debug('Exec handler')
                 extension.handler(self.session)
