@@ -53,9 +53,9 @@ def handler(session, args):
     log.info('\033[90;1m============================== \033[38;5;202mRCCN \033[90;1m==============================\033[0m')
     caller = session.getVariable("caller_id_number")
     destination_number = session.getVariable("destination_number")
-    session.consoleLog("info", "\n\n\033[38;5;202m *  Call from: "+ caller +"\n |_" +
+    session.consoleLog("notice", "\n\n\033[38;5;202m *  Call from: "+ caller +"\n |_" +
                        "   Call to: " + destination_number +
-                       "\n (O)\n |#|\n '-'  " +
+                       "\n (\033[91;0mO\033[38;5;202m)\n |#|\n '-'  " +
                        "Rhizomatica Community Cellular Network.\033[0m\n\n")
     session.setVariable('billing', '0')
 
@@ -66,7 +66,7 @@ def handler(session, args):
     log.info("Lookup dialplan for called number: %s" % destination_number)
     ret = dialplan.lookup()
     log.info('Leaving rccn.handler(%s)\n\n\033[90;1m====\033[0m\n', ret)
-    session.consoleLog("info", "== \033[38;5;202mRCCN - [ %s->%s (%s) ] \033[0m\n" %
+    session.consoleLog("notice", "== \033[38;5;202mRCCN - [ %s->%s (%s) ] \033[0m\n" %
                        (caller, destination_number, ret))
 
 def xml_fetch(params):
