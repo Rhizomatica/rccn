@@ -265,6 +265,20 @@ class Dialplan:
             self.context.inbound()
             return True
 
+    def check_test(self):
+        if self.destination_number == config['internal_prefix'] + '00000':
+            self.session.answer()
+            self.session.execute("sched_hangup", "+600")
+            self.session.execute("displace_session",
+                                 "tone_stream://%(250,300,860,840);%(150,9000,740,760);loops=-1 mux")
+            self.session.execute("echo")
+            return True
+        if self.destination_number == config['internal_prefix'] + '00001':
+            self.session.answer()
+            self.session.execute("sched_hangup", "+600")
+            self.session.execute("playback", test_playback)
+            return True
+
     def check_local(self):
         try:
             log.info('Check if called number is local')
@@ -374,6 +388,8 @@ class Dialplan:
         if ret:
             return ret
         if self.check_internal():
+            return
+        if self.check_test():
             return
 
         log.info('EOF: Unknown Number')
