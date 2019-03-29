@@ -371,6 +371,12 @@ class Context:
             self.session.execute('playback', '002_saldo_insuficiente.gsm')
             self.session.hangup()
 
+    def get_local_chans(self):
+        self.session.execute("set",
+            "_internalcount=${regex(${show channels like "+ mncc_ip_address +
+            "}|/[^0-9]*([0-9])* total./|%1)}")
+        return self.session.getVariable('_internalcount')
+
     def local(self):
         """ Local context. Calls destined for our BSC """
         calling_number = self.session.getVariable('caller_id_number')
@@ -400,15 +406,20 @@ class Context:
             except ConfigurationException as _ex:
                 log.error(_ex)
 
-        # check if the call duration has to be limited
-        try:
-            limit = self.configuration.get_local_calls_limit()
-            if limit != False:
-                if limit[0] == 1:
-                    log.info('Limit call duration to: %s seconds', limit[1])
-                    self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
-        except ConfigurationException as _ex:
-            log.error(_ex)
+        # Check if the call duration has to be limited
+        if not ('unlimit_chans_max' in globals() and int(self.get_local_chans()) < unlimit_chans_max):
+            try:
+                limit = self.configuration.get_local_calls_limit()
+                if limit != False:
+                    if limit[0] == 1:
+                        log.info('Limit call duration to: %s seconds', limit[1])
+                        self.session.execute('playback', 'tone_stream://%(200,50,650,500);loops=2')
+                        self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
+                        self.session.execute('set',
+                                             'execute_on_answer_2=sched_broadcast +%s playback::tone_stream://%%(200,50,650,500);loops=2' %
+                                              (limit[1] - 10))
+            except ConfigurationException as _ex:
+                log.error(_ex)
         log.info('Take it to the Bridge..')
         return self.bridge(self.destination_number)
 
