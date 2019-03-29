@@ -125,12 +125,12 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error checking DID: %s' % e)
 
-    def fivetoeleven(self, source_number, destination_number):
+    def fivetoeleven(self, source_number, destination_number, logger):
         """ Convert a five digit extension to 11 digits based on the caller. """
         if len(destination_number) != 5:
             return destination_number
         elevendigit_number = source_number[:6] + destination_number
-        log.info('5 digit destination : %s->%s' % (destination_number, elevendigit_number))
+        logger.info('5 digit destination : %s->%s' % (destination_number, elevendigit_number))
         return elevendigit_number
 
     def is_number_local(self, destination_number):

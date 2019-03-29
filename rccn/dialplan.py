@@ -377,7 +377,7 @@ class Dialplan:
         if not self.check_registered():
             return False
 
-        self.destination_number = self._n.fivetoeleven(self.calling_number, self.destination_number)
+        self.destination_number = self._n.fivetoeleven(self.calling_number, self.destination_number, log)
         self.context.destination_number = self.destination_number
 
         if self.check_extension():

@@ -148,7 +148,7 @@ def rx_deliver_sm(pdu):
         log.warning("PDU has no user_message_reference.")
         pdu.user_message_reference = 0
     try:
-        pdu.destination_addr = num.fivetoeleven(pdu.source_addr, pdu.destination_addr)
+        pdu.destination_addr = num.fivetoeleven(pdu.source_addr, pdu.destination_addr, log)
         dest_ip = num.get_current_bts(pdu.destination_addr)
     except NumberingException as ex:
         log.error("Unable to handle SMS for %s: %s" % (pdu.destination_addr, ex))
