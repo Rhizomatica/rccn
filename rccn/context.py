@@ -384,9 +384,9 @@ class Context:
             self.session.setVariable('context', 'INTERNAL_INBOUND')
         else:
             self.session.setVariable('context', 'LOCAL')
+            # Check if local call has to be billed to local subscriber:
             try:
                 if self.configuration.check_charge_local_calls() == 1:
-                    # if local call has to be billed to local subscriber:
                     rate = self.configuration.get_charge_local_calls()
                     log.debug('Check subscriber %s balance', calling_number)
                     try:
