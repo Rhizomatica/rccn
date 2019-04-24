@@ -223,7 +223,7 @@ class Dialplan:
         return self.check_roaming_destination()
 
     def check_roaming_caller(self):
-        if (self.calling_host == mncc_ip_address and # CALLER is LOCAL
+        if (self.caller_is_local() and
                 self.calling_number[:6] != config['internal_prefix']): # so has to be "roaming"
             try:
                 _tagged_roaming = self._n.is_number_roaming(self.calling_number)
@@ -316,8 +316,7 @@ class Dialplan:
         return False
 
     def check_extension(self):
-        if (self.calling_host != mncc_ip_address and
-                not self.numbering.is_number_sip_connected(self.session, self.calling_number)):
+        if not self.caller_is_local():
             return False
         log.debug('Check if called number is an extension')
         if self.destination_number in extensions_list:
