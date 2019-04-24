@@ -47,6 +47,7 @@ class Dialplan:
         self._n = self.numbering
         self.billing = Billing()
         self.configuration = Configuration()
+        self.local_caller_check = False
 
         modules = [self.subscriber, self.numbering,
                    self.billing, self.configuration]
@@ -130,6 +131,13 @@ class Dialplan:
         except SubscriberException as _ex:
             log.error(_ex)
             self.play_announcement(self.ERROR)
+
+    def caller_is_local(self):
+        if self.local_caller_check:
+            return self.local_caller_check
+        self.local_caller_check = (self.calling_host == mncc_ip_address or
+                self.numbering.is_number_sip_connected(self.session, self.calling_number))
+        return self.local_caller_check
 
     def check_external(self):
         if len(self.destination_number) == 10:
