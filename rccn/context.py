@@ -63,6 +63,8 @@ class Context:
             "CALL_REJECTED"            : "007_el_numero_no_es_corecto.gsm",
             "NORMAL_TEMPORARY_FAILURE" : "010_no_puede_ser_enlazada.gsm", # B-leg IP unreachable
             "RECOVERY_ON_TIMER_EXPIRE" : "011_no_hay_conx_a_comunidad.gsm", # Timeout
+            "INCOMING_CALL_BARRED"     : "013_no_autorizado.gsm",
+            "OUTGOING_CALL_BARRED"     : "015_no_access.gsm",
             "SERVICE_UNAVAILABLE"      : "016_oops.gsm"
         }.get(disposition, "016_oops.gsm")
 
