@@ -235,6 +235,10 @@ class Dialplan:
             log.info('Calling number %s is roaming (%s)', self.calling_number, _tagged_roaming)
             self.context.roaming_caller()
             return True
+        if (not self.caller_is_local() and
+                self.calling_number[:6] == config['internal_prefix']):
+            log.info('Our roaming user (%s) is calling (%s) here.', self.calling_number, self.destination_number)
+            self.context.roaming_caller()
 
     def check_roaming_destination(self):
         try:
