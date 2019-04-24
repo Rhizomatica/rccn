@@ -185,7 +185,7 @@ class Dialplan:
         return True
 
     def check_support(self):
-        if not 'support_contact' in globals():
+        if not 'support_contact' in globals() or support_contact == '':
             log.info('Support Call but no support number :(')
             self.play_announcement("RESOURCE_UNAVAIL")
             return False
