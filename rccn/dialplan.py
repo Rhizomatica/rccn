@@ -89,8 +89,7 @@ class Dialplan:
                 return True
             log.info("Channel Capacity for(%s) is exceeded.", match)
             if redirect == '':
-                announcement = self.context.get_audio_file("RESOURCE_UNAVAIL")
-                self.session.execute('playback', announcement)
+                self.play_announcement("RESOURCE_UNAVAIL")
                 self.session.hangup()
                 return False
             #self.session.execute('playback', '018_ocupadas.gsm')
@@ -100,13 +99,11 @@ class Dialplan:
         self.session.hangup()
         return False
 
-    def play_announcement(self, ann):
+    def play_announcement(self, status):
         """
         Play an announcement.
-
-        :param ann: Filename of the announcement to be played
-        :type ann: str
         """
+        ann = self.context.get_audio_file(status)
         self.session.execute('playback', '%s' % ann)
 
     def auth_context(self, mycontext):
@@ -126,11 +123,11 @@ class Dialplan:
             else:
                 self.session.setVariable('context', mycontext.upper())
                 log.info('Subscriber is not registered or authorized to call')
-                self.play_announcement(self.NOT_REGISTERED)
+                self.play_announcement("OUTGOING_CALL_BARRED")
                 self.session.hangup('CALL_REJECTED')
         except SubscriberException as _ex:
             log.error(_ex)
-            self.play_announcement(self.ERROR)
+            self.play_announcement("SERVICE_UNAVAILABLE")
 
     def caller_is_local(self):
         if self.local_caller_check:
@@ -152,13 +149,13 @@ class Dialplan:
 
     def check_registered(self):
         if len(self.calling_number) != 11:
-            self.play_announcement(self.NOT_REGISTERED)
+            self.play_announcement("OUTGOING_CALL_BARRED")
             self.session.hangup('CALL_REJECTED')
             return False
         if self.numbering.is_number_known(self.calling_number):
             return True
         log.info('%s is unknown to us.', self.calling_number)
-        self.play_announcement(self.NOT_REGISTERED)
+        self.play_announcement("OUTGOING_CALL_BARRED")
         self.session.hangup('CALL_REJECTED')
         return False
 
@@ -190,6 +187,7 @@ class Dialplan:
     def check_support(self):
         if not 'support_contact' in globals():
             log.info('Support Call but no support number :(')
+            self.play_announcement("RESOURCE_UNAVAIL")
             return False
         log.info('!!Support Call (%s)', self.destination_number)
         self.session.setVariable('context', "SUPPORT")
@@ -211,7 +209,7 @@ class Dialplan:
         log.info("Caller from: %s", self.calling_host)
         if self.calling_host == mncc_ip_address:
             log.info("Call to DID from GSM side.")
-            self.play_announcement(self.NOT_AUTH)
+            self.play_announcement("OUTGOING_CALL_BARRED")
             self.session.hangup('OUTGOING_CALL_BARRED')
             #self.session.hangup('CALL_REJECTED')
             return -1
@@ -231,7 +229,7 @@ class Dialplan:
                 _tagged_roaming = self._n.is_number_roaming(self.calling_number)
             except NumberingException as _ex:
                 log.error(_ex)
-                self.play_announcement(self.NOT_AUTH)
+                self.play_announcement("INCOMING_CALL_BARRED")
                 self.session.hangup('SERVICE_UNAVAILABLE')
                 return True
             log.info('Calling number %s is roaming (%s)', self.calling_number, _tagged_roaming)
@@ -254,7 +252,7 @@ class Dialplan:
         except NumberingException as _ex:
             # FIXME: note difference between exception for unauth and other.
             log.error(_ex)
-            self.play_announcement(self.ERROR)
+            self.play_announcement("SERVICE_UNAVAILABLE")
             self.session.hangup('SERVICE_UNAVAILABLE')
             return True
 
@@ -301,7 +299,7 @@ class Dialplan:
                     log.info(
                         'Destination subscriber is NOT '
                         'authorized to receive calls')
-                    self.play_announcement(self.NOT_AUTH)
+                    self.play_announcement("INCOMING_CALL_BARRED")
                     self.session.hangup('OUTGOING_CALL_BARRED')
                     return True
                 if is_internal_number and is_right_len(self.calling_number):
@@ -313,7 +311,7 @@ class Dialplan:
                     return True
         except NumberingException as _ex:
             log.error(_ex)
-            self.play_announcement(self.ERROR)
+            self.play_announcement("SERVICE_UNAVAILABLE")
             return False
         return False
 
@@ -352,7 +350,7 @@ class Dialplan:
                 return True
         except NumberingException as _ex:
             log.error(_ex)
-            self.play_announcement(self.ERROR)
+            self.play_announcement("SERVICE_UNAVAILABLE")
         return False
 
     def lookup(self):
@@ -403,5 +401,5 @@ class Dialplan:
             return
 
         log.info('EOF: Unknown Number')
-        self.play_announcement(self.WRONG_NUMBER)
+        self.play_announcement("UNALLOCATED_NUMBER")
         self.session.hangup('UNALLOCATED_NUMBER')
