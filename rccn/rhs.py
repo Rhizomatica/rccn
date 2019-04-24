@@ -113,6 +113,7 @@ def hlr_sync(hours,until):
                 hlrsync_log.info('Found %s subscribers updated since %s' % (total_sub, last_run_datetime) )
             else:
                 hlrsync_log.info('Found %s subscribers updated since last run' % total_sub)
+            _c=1
             for result in subscribers.results:
                 sub = rk_hlr.get(result, timeout=RIAK_TIMEOUT)
                 if sub.exists:
@@ -149,7 +150,7 @@ def hlr_sync(hours,until):
                                 except Exception as e:
                                     print str(e)
                             else:
-                                hlrsync_log.debug('Subscriber %s exists but no update necessary' % sub.data['msisdn'])
+                                hlrsync_log.debug('[%s] Subscriber %s exists but no update necessary' % (_c, sub.data['msisdn']))
                         else:
                             hlrsync_log.info('Subscriber %s does not exist, add to the PG_HLR' % sub.data['msisdn'])
                             hlrsync_log.debug('msisdn[%s] home_bts[%s] current_bts[%s] authorized[%s] updated[%s]' % 
@@ -160,6 +161,7 @@ def hlr_sync(hours,until):
                             {'msisdn': sub.data['msisdn'], 'home_bts': sub.data['home_bts'], 'current_bts': sub.data['current_bts'], 'authorized': sub.data['authorized'], 'updated': update_date})
 
                         db_conn.commit()
+                        _c+=1
                     except psycopg2.DatabaseError as e:
                         hlrsync_log.error('PG_HLR Database error in getting subscriber: %s' % e) 
         else:
