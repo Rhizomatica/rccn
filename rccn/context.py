@@ -415,7 +415,8 @@ class Context:
                 if limit != False:
                     if limit[0] == 1:
                         log.info('Limit call duration to: %s seconds', limit[1])
-                        self.session.execute('playback', 'tone_stream://%(200,50,650,500);loops=2')
+                        self.session.execute('set',
+                                                 'execute_on_media=playback::tone_stream://%(100,50,650,500);loops=2 mux')
                         self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' % limit[1])
                         self.session.execute('set',
                                              'execute_on_answer_2=sched_broadcast +%s playback::tone_stream://%%(200,50,650,500);loops=2' %
