@@ -434,8 +434,12 @@ class SMS:
             smpp_client.disconnect()
             del pdu
             del smpp_client
-        except (IOError, smpplib.exceptions.ConnectionError, smpplib.exceptions.PDUError) as ex:
+        except (IOError, smpplib.exceptions.ConnectionError) as ex:
             raise SMSException('Unable to Submit Message via SMPP %s' % str(ex))
+        except smpplib.exceptions.PDUError as ex:
+            smpp_client.unbind()
+            smpp_client.disconnect()
+            raise SMSException('SMPP Error Submitting Message %s' % str(ex))
 
     def check_decode0338(self, text):
         try:
