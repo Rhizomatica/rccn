@@ -350,7 +350,7 @@ class SMS:
                 if self.save_sms:
                     sms_log.info('Save SMS in the history')
                     self.save(source, destination, self.context)
-                    return True
+                return True
             except SMSException as ex:
                 raise SMSException("Local submit: %s" % str(ex))
                 return False
