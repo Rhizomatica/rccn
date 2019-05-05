@@ -352,7 +352,7 @@ class SMS:
                     self.save(source, destination, self.context)
                 return True
             except SMSException as ex:
-                raise SMSException("Local submit: %s" % str(ex))
+                sms_log.error("Local submit failed: %s" % str(ex))
                 return False
 
         try:
