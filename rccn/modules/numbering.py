@@ -114,6 +114,7 @@ class Numbering:
             return destination_number
         except NumberingException as _ex:
             log.error(_ex)
+            return destination_number
 
     def is_number_did(self, destination_number):
         try:
