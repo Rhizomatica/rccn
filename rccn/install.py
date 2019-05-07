@@ -65,6 +65,31 @@ def db_init(debug):
     else:
         print 'Done'
 
+def db_prefix(table):
+    print('Adding PREFIX table... ').ljust(40),
+    try:
+        cur.execute(
+            "CREATE TABLE " +  table + " ("
+            "a VARCHAR(33) NOT NULL, "
+            "b DECIMAL NOT NULL, "
+            "d DECIMAL NOT NULL)"
+        )
+    except psycopg2.DatabaseError as e:
+        print 'Database error creating prefix table: %s' % e
+        return False
+    else:
+        print 'Done'
+        return True
+
+def db_prefix_data(sql_file):
+    print('Loading prefix data... ').ljust(40),
+    try:
+        cur.execute(open(rhizomatica_dir + '/db/' + sql_file + '.sql', 'r').read())
+    except psycopg2.DatabaseError as e:
+        print 'Database error loading data: %s' % e
+    else:
+        print 'Done'
+
 def db_site(debug):
     print('Adding Site Info to PGSQL... ').ljust(40),
     try:
@@ -229,6 +254,8 @@ if __name__ == '__main__':
         help="Add site info to Riak")
     parser.add_option("-s", "--sqlite", dest="sqlite", action="store_true",
         help="Only Setup the OsmoCom NITB Sqlite3 HLR database. (nitb must be run once before you do this)")
+    parser.add_option("-p", "--prefix", dest="prefix",
+        help="Only create and insert the data for the prefix table. (not run by default)")
     parser.add_option("-d", "--debug", dest="debug", action="store_true",
         help="Turn on debug logging")
     (options, args) = parser.parse_args()
@@ -260,6 +287,14 @@ if options.user:
 
 if options.sqlite:
     osmo_hlr(debug)
+
+if options.prefix:
+    sql_file = rhizomatica_dir + '/db/' + options.prefix + '.sql'
+    if os.path.isfile(sql_file):
+        if db_prefix(options.prefix):
+            db_prefix_data(options.prefix)
+    else:
+        print("%s not found." % sql_file)
 
 if options.riak:
     riak_add()
