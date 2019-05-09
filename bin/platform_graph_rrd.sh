@@ -173,22 +173,23 @@ rrdtool graph $RHIZO_DIR/graphs/memory-$age.png --start -$age -aPNG -w 600 -t "M
 rrdtool graph $RHIZO_DIR/graphs/disk-$age.png --start -$age -aPNG --vertical-label='MB' -w 600 -t "Disk Usage" -r -l 0 \
 "DEF:roottotal=$RHIZO_DIR/disk.rrd:sizetot:AVERAGE" \
 "DEF:rootused=$RHIZO_DIR/disk.rrd:sizeused:AVERAGE" \
-'CDEF:bo=roottotal,UN,0,roottotal,IF,0,GT,UNKN,INF,IF' \
+'CDEF:bo=roottotal,UN,0,roottotal,IF,0,GT,UNKN,INF,IF,1000,/' \
 'AREA:bo#DDDDDD:' \
-"AREA:rootused#190821" \
-'CDEF:root=roottotal,0,+' \
+'CDEF:rootfree=roottotal,rootused,-,1000,/' \
+'CDEF:root=roottotal,0,+,1000,/' \
+'CDEF:ruG=rootused,0,+,1000,/' \
+"AREA:root#107021" \
+"AREA:ruG#CC2020" \
 'VDEF:sumr=root,LAST' \
-GPRINT:sumr:"Total %0.2lf MB" \
-'VDEF:lasr=rootused,LAST' \
-GPRINT:lasr:"Used %0.2lf MB" \
-'CDEF:rootPu=rootused,100,*,root,/' \
+GPRINT:sumr:"Total %0.2lf GB" \
+'VDEF:lasr=ruG,LAST' \
+GPRINT:lasr:"Used %0.2lf GB" \
+'CDEF:rootPu=rootused,100,*,roottotal,/' \
 'VDEF:procr=rootPu,LAST' \
 GPRINT:procr:"%0.2lf%%\\n" \
-'CDEF:rootfree=roottotal,rootused,-' \
-"AREA:rootfree#9933cc" \
 'VDEF:lasr2=rootfree,LAST' \
 GPRINT:lasr2:"Free %0.2lf MB" \
-'CDEF:procar=rootfree,100,*,roottotal,/' \
+'CDEF:procar=rootfree,100,*,root,/' \
 'VDEF:procar2=procar,LAST' \
 GPRINT:procar2:"%1.2lf%%"
 
