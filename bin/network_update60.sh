@@ -9,6 +9,9 @@ done
 mybts=`echo "show bts" | nc -q1 localhost 4242 | grep ^BTS | awk '{ print $2 }'`
 echo $mybts > $RHIZO_DIR/mybts
 
+trx=`echo "show trx" | nc -q1 0 4242 | grep Baseband.*OK | wc -l`
+echo $trx > /tmp/trxOK
+
 for bts in $mybts ; do
   eval _channels_$bts=`echo "show bts $bts" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\// {tch=substr($0,33,1)}; /SDCCH8/ {sdcch=substr($0,33,1)} END {print tch":"sdcch}'`
 done

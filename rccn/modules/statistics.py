@@ -54,6 +54,7 @@ class LiveStatistics:
         fs_con=ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
         data['c']=self.get_fs_calls(fs_con)
         data['gw']=self.get_fs_status(fs_con)
+        data['trx']=self.get_trxOK()
         fs_con.disconnect()
         return data
 
@@ -228,6 +229,13 @@ class LiveStatistics:
     def get_latency(self):
         try:
             with open('/tmp/latency', 'r') as f:
+                return f.readline()
+        except IOError:
+            return ''
+
+    def get_trxOK(self):
+        try:
+            with open('/tmp/trxOK', 'r') as f:
                 return f.readline()
         except IOError:
             return ''
