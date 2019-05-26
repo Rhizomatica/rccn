@@ -43,7 +43,6 @@ fi
 if [ ! -f $RHIZO_DIR/latency.rrd ]; then
 rrdtool create $RHIZO_DIR/latency.rrd --step 300 \
 'DS:latency:GAUGE:600:0:U' \
-'DS:vpnlatency:GAUGE:600:0:U' \
 'RRA:AVERAGE:0.5:1:2016' \
 'RRA:MIN:0.5:1:8928' \
 'RRA:MAX:0.5:1:8928'
