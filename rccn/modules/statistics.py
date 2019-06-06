@@ -342,6 +342,51 @@ class CallsStatistics:
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error. time range: %s query: %s db error: %s' % (time_range, query, e))
 
+    def get_outbound_minutes(self,month):
+        query = """
+        SELECT d as \"Month\",
+        range,
+        t as \"Average mins used per group\",
+        n as \"Number of users in GROUP\",
+        cast (100 * n / (sum(n) OVER ()) as numeric(10,2)) \"percentage of users\",
+        cast (100 * s / (sum(s) OVER ()) as numeric(10,2)) \"percentage of minutes\",
+        s as \"Total minutes used by group\"
+        FROM (
+            select
+            d,
+            round(avg(total_mins)::numeric,2) as t,
+            count(caller_id_number) as n,
+            sum(total_mins) as s,
+            (case when total_mins = 0 then '0 - ZERO mins'
+            when total_mins >0 and total_mins <= 5 then '1 - ZERO to five mins'
+            when total_mins > 5 and total_mins <= 20 then '2 - five to twenty mins'
+            when total_mins > 20 and total_mins <= 60 then '3 - twenty to sixty mins'
+            when total_mins > 60 and total_mins <= 120 then '4 - sixty to 120 mins'
+            else '5 - MORE than 120 mins'
+            end) as range
+            from
+            (   select
+                    caller_id_number,
+                    round((sum(billsec)::float/60)::numeric,2) as total_mins,
+                    to_char(date_trunc('month', start_stamp),'YYYY-MM-Mon') as d
+                FROM public.cdr
+                where context = 'OUTBOUND'
+                and date_trunc('month',start_stamp) >= '2019-%s-01'
+                GROUP BY caller_id_number, d
+                order by total_mins desc
+            ) as data
+            group by range, d
+        ) as final
+        order by d asc, range desc, \"percentage of minutes\" desc
+        """
+        try:
+            cur = db_conn.cursor()
+            cur.execute(query % month)
+            data = cur.fetchall()
+            db_conn.commit()
+            return data
+        except psycopg2.DatabaseError as e:
+            raise StatisticException('Database error(%s)' % (e))
 
 class CostsStatistics:
 
