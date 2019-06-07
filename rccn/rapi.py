@@ -465,6 +465,7 @@ class StatisticsRESTService:
 
     @route('/calls/obm')
     def get_outbound_mins(self, request, year, month):
+        api_log.info('%s - [GET] %s/calls/obm' % (request.getHost().host, self.path))
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_outbound_minutes(year, month), cls=PGEncoder)
