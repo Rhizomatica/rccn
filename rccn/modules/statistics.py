@@ -371,7 +371,7 @@ class CallsStatistics:
                     to_char(date_trunc('month', start_stamp),'YYYY-MM-Mon') as d
                 FROM public.cdr
                 where context = 'OUTBOUND'
-                and date_trunc('month',start_stamp) >= %(stamp)s
+                and date_trunc('month',start_stamp) BETWEEN %(start)s AND %(end)s::timestamp -interval '1 second'
                 GROUP BY caller_id_number, d
                 order by total_mins desc
             ) as data
@@ -381,7 +381,10 @@ class CallsStatistics:
         """
         try:
             cur = db_conn.cursor()
-            mquery = cur.mogrify(query, { 'stamp': year + "-" + month + "-" + "01" })
+            mquery = cur.mogrify(query, {
+                'start': year + "-" + month + "-" + "01",
+                'end': str(int(year)+1) + "-" + month + "-" + "01"
+                })
             cur.execute(mquery)
             data = cur.fetchall()
             db_conn.commit()
