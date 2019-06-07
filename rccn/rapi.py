@@ -464,10 +464,10 @@ class StatisticsRESTService:
         return data
 
     @route('/calls/obm')
-    def get_outbound_mins(self, request, month):
+    def get_outbound_mins(self, request, year, month):
         try:
             stats = CallsStatistics()
-            data = json.dumps(stats.get_outbound_minutes(month), cls=PGEncoder)
+            data = json.dumps(stats.get_outbound_minutes(year, month), cls=PGEncoder)
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
         return str(data)

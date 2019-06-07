@@ -342,7 +342,7 @@ class CallsStatistics:
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error. time range: %s query: %s db error: %s' % (time_range, query, e))
 
-    def get_outbound_minutes(self,month):
+    def get_outbound_minutes(self, year, month):
         query = """
         SELECT d as \"Month\",
         range,
@@ -371,7 +371,7 @@ class CallsStatistics:
                     to_char(date_trunc('month', start_stamp),'YYYY-MM-Mon') as d
                 FROM public.cdr
                 where context = 'OUTBOUND'
-                and date_trunc('month',start_stamp) >= '2019-%s-01'
+                and date_trunc('month',start_stamp) >= %(stamp)s
                 GROUP BY caller_id_number, d
                 order by total_mins desc
             ) as data
@@ -381,7 +381,8 @@ class CallsStatistics:
         """
         try:
             cur = db_conn.cursor()
-            cur.execute(query % month)
+            mquery = cur.mogrify(query, { 'stamp': year + "-" + month + "-" + "01" })
+            cur.execute(mquery)
             data = cur.fetchall()
             db_conn.commit()
             return data
