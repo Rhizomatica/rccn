@@ -385,9 +385,12 @@ class CallsStatistics:
             cur.execute(mquery)
             data = cur.fetchall()
             db_conn.commit()
+            cur.close()
             return data
         except psycopg2.DatabaseError as e:
-            raise StatisticException('Database error(%s)' % (e))
+            db_conn.commit()
+            cur.close()
+            raise StatisticException('Database error(%s)' % (str(e) + " " + mquery ))
 
 class CostsStatistics:
 
