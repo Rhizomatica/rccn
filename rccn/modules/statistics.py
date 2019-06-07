@@ -348,8 +348,8 @@ class CallsStatistics:
         range,
         t as \"Average mins used per group\",
         n as \"Number of users in GROUP\",
-        cast (100 * n / (sum(n) OVER (PARTITION BY d)) as numeric(10,2)) \"percentage of users\",
-        cast (100 * s / (sum(s) OVER (PARTITION BY d)) as numeric(10,2)) \"percentage of minutes\",
+        cast (100 * n / NULLIF(sum(n) OVER (PARTITION BY d),0) as numeric(10,2)) \"percentage of users\",
+        cast (100 * s / NULLIF(sum(s) OVER (PARTITION BY d),0) as numeric(10,2)) \"percentage of minutes\",
         s as \"Total minutes used by group\"
         FROM (
             select
