@@ -10,6 +10,10 @@ mybts=`echo "show bts" | nc -q1 localhost 4242 | grep ^BTS | awk '{ print $2 }'`
 echo $mybts > $RHIZO_DIR/mybts
 
 trx=`echo "show trx" | nc -q1 0 4242 | grep Baseband.*OK | wc -l`
+if [ "$trx" = "0" ] ; then
+	# For some reason, it can fail, if 0, try once more, avoid false negative.
+	trx=`echo "show trx" | nc -q1 0 4242 | grep Baseband.*OK | wc -l`
+fi
 echo $trx > /tmp/trxOK
 
 for bts in $mybts ; do
