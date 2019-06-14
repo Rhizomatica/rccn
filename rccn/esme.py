@@ -259,6 +259,8 @@ def remote_pass_pdu(pdu, dest_ip):
 
 def local_pass_pdu(pdu):
 
+    if pdu.user_message_reference is None:
+        pdu.user_message_reference = 0
     return client.send_message(
         service_type=pdu.service_type,
         source_addr_ton=int(pdu.source_addr_ton),
