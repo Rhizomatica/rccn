@@ -467,6 +467,8 @@ class Context:
             elif len(dest_num) == 11:
                 self.destination_number = dest_num
             try:
+                if self.check_test():
+                    return True
                 if self.subscriber.is_authorized(dest_num, 1) and (len(dest_num) == 11 or len(dest_num) == 5):
                     self._check_inbound_billing()
                     log.info('Send call to subscriber %s', self.destination_number)
