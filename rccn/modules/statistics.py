@@ -342,6 +342,54 @@ class CallsStatistics:
         except psycopg2.DatabaseError as e:
             raise StatisticException('Database error. time range: %s query: %s db error: %s' % (time_range, query, e))
 
+    def get_sms_stat(self, year, month):
+        query = """
+        SELECT d as \"Month\",
+        range,
+        a as \"Average SMS sent per group\",
+        n \"Number of users in GROUP\",
+        cast (100 * n / NULLIF(sum(n) OVER (partition by d),0) as numeric(10,2)) \"percentage of users\",
+        cast (100 * t / NULLIF(sum(t) OVER (partition by d),0) as numeric(10,2)) \"percentage of SMS\",
+        t as \"Total SMS sent by group\"
+        FROM (
+            SELECT d,
+            round(avg(total_sms)::numeric,2) as a,
+            count(source_addr) as n,
+            sum(total_sms) as t,
+            (case when total_sms = 0 then '0 - ZERO SMS'
+            when total_sms >0 and total_sms <= 20 then '1 - ZERO to twenty SMS'
+            when total_sms > 20 and total_sms <= 100 then '2 - twenty to 100 SMS'
+            when total_sms > 100 and total_sms <= 500 then '3 - 100 to 500 SMS'
+            else '4 - MORE than 500 SMS'
+            end) as range
+            FROM (
+                SELECT
+                to_char(date_trunc('month', send_stamp),'YYYY-MM-Mon') as d,
+                source_addr,
+                count(source_addr) as total_sms from SMS
+                WHERE date_trunc('month',send_stamp) BETWEEN %(start)s AND %(end)s::timestamp -interval '1 second'
+                group by source_addr, d
+                ) as data
+            group by range, d
+        ) as final
+        order by d asc, range desc
+        """
+        try:
+            cur = db_conn.cursor()
+            mquery = cur.mogrify(query, {
+                'start': year + "-" + month + "-" + "01",
+                'end': str(int(year)+1) + "-" + month + "-" + "01"
+                })
+            cur.execute(mquery)
+            data = cur.fetchall()
+            db_conn.commit()
+            cur.close()
+            return data
+        except psycopg2.DatabaseError as e:
+            db_conn.commit()
+            cur.close()
+            raise StatisticException('Database error(%s)' % (str(e) + " " + mquery ))
+
     def get_outbound_minutes(self, year, month):
         query = """
         SELECT d as \"Month\",

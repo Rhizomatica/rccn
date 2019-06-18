@@ -463,6 +463,16 @@ class StatisticsRESTService:
         api_log.info(data)
         return data
 
+    @route('/sms/stat')
+    def get_sms_stat(self, request, year, month):
+        api_log.info('%s - [GET] %s/calls/obm' % (request.getHost().host, self.path))
+        try:
+            stats = CallsStatistics()
+            data = json.dumps(stats.get_sms_stat(year, month), cls=PGEncoder)
+        except StatisticException as e:
+            data = {'status': 'failed', 'error': str(e)}
+        return str(data)
+
     @route('/calls/obm')
     def get_outbound_mins(self, request, year, month):
         api_log.info('%s - [GET] %s/calls/obm' % (request.getHost().host, self.path))
