@@ -145,7 +145,7 @@ class Maintenance:
         if table != 'cdr' and table != 'sms':
             return -1
 
-        filename = table + "-" + str(start_year) + "-" + str(start_month) + "-" + str(n_of_months) + ".sql.gz"
+        filename = table + "-" + str(start_year) + "-" + str(start_month) + "-" + str(n_of_months) + ".sql"
         try:
             self.check_archive_file(filename)
         except Exception as error:
