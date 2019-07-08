@@ -327,6 +327,16 @@ class Dialplan:
                 self.play_announcement(self.ERROR)
                 return False
 
+    def check_webphone(self):
+        log.debug('Check Special Extension')
+        if not 'webphone_prefix' in globals():
+            return False
+        if (isinstance(webphone_prefix, list) and
+                self.destination_number[:5] in webphone_prefix):
+            self.auth_context('webphone')
+            return True
+        return False
+
     def check_internal(self):
         try:
             log.debug('Check if called number is a full '
@@ -384,6 +394,8 @@ class Dialplan:
         ret = self.check_local()
         if ret:
             return ret
+        if self.check_webphone():
+            return
         if self.check_internal():
             return
         if self.context.check_test():

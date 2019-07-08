@@ -233,6 +233,18 @@ class Context:
         if _context[:8] == 'ROAMING_':
             self.session.execute('set', "continue_on_fail=true")
 
+        if _context == 'WEBPHONE':
+            if not callee[:5] in webphone_prefix:
+                log.error('Webphone context without a webphone callee number?')
+                self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
+                self.session.hangup('UNALLOCATED_NUMBER')
+            self.session.execute('set', 'ringback=%(500,300,440,400);%(450,800,440,400)')
+            codec = 'PCMA'
+            bridge_params = ''
+            gw = 'rhizomatica'
+            endpoint = 'sofia/gateway/' + gw + '/' + str(callee)
+            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+
         # Now bridge B-leg of call.
         log.info('Bridging to (%s) EP(s):', _context)
         for ep in endpoints:
@@ -321,6 +333,11 @@ class Context:
             # Don't hangup here if you want to go back into the inbound loop.
             if not _context == "INBOUND":
                 self.session.hangup(str(_orig_disp))
+
+    def webphone(self):
+
+        self.session.setVariable('context', 'WEBPHONE')
+        self.bridge(self.destination_number)
 
     def outbound(self):
         """ Outbound context. Calls to be sent out using the VoIP provider """
