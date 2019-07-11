@@ -91,6 +91,7 @@ def xml_fetch(params):
 def chat(message, args):
     if 'reload_on_call' in globals():
         reload(sys.modules['modules.sms'])
+    message.addHeader("final_delivery", "true")
     source = message.getHeader("from_user")
     destination = message.getHeader("to_user")
     text = message.getBody()
@@ -103,7 +104,6 @@ def chat(message, args):
       # before this function has completed, the whole ESL blocks and we sit and wait.
       # Probably I need to be dropping these messages into a queue anyway.
       # For now, drop them to a RAPI that forks a thread so we can get outta here.
-      message.chat_execute('stop')
       handler = urllib2.HTTPHandler()
       opener = urllib2.build_opener(handler)
       values = {'source': source, 'destination': destination, 'charset': charset, 'coding': coding, 'text': text}
