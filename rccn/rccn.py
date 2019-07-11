@@ -89,6 +89,8 @@ def xml_fetch(params):
     return xml
 
 def chat(message, args):
+    if 'reload_on_call' in globals():
+        reload(sys.modules['modules.sms'])
     source = message.getHeader("from_user")
     destination = message.getHeader("to_user")
     text = message.getBody()
