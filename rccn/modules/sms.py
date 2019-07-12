@@ -257,7 +257,9 @@ class SMS:
             sms_log.info('Source_authorized: %s Destination_authorized: %s' % (str(source_authorized), str(destination_authorized)))
 
 
-            if not source_authorized and not self.numbering.is_number_internal(source):
+            if (not source_authorized and
+                    not self.numbering.is_number_internal(source) and
+                    not self.numbering.is_number_webphone(source)):
                 sms_log.info('Sender unauthorized send notification message (EXT)')
                 self.context = 'SMS_UNAUTH'
                 self.coding = 2
