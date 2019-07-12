@@ -73,6 +73,46 @@ class SMS:
                 return True
         return False
 
+    def webphone_sms(self, source, destination, text, coding):
+        if not ('webphone_prefix' in globals() and
+                isinstance(webphone_prefix, list) and
+                isinstance(sip_central_ip_address, list)):
+            sms_log.warning('SMS for Webphone but required config missing.')
+            return False
+            if not self.destination[:5] in webphone_prefix:
+                sms_log.warning('WEBPHONE SMS for non webphone extension?')
+            return False
+        sms_log.debug('WEBPHONE SMS from %s for %s [%s] [%s]', (source, destination, text, coding))
+        self.source = source+'@sip.rhizomatica.org'
+        self.destination = destination
+        self.text = text
+        simple_dest = self.destination+'@'+ sip_central_ip_address[0]
+        sip_profile = 'outgoing'
+        try:
+            event = ESL.ESLevent("CUSTOM", "SMS::SEND_MESSAGE")
+
+            sms_log.debug('SMS to SIP: Source is %s' % self.source)
+            sms_log.debug('SMS to SIP: Dest: %s' % simple_dest)
+            sms_log.debug('Text: %s' % self.text.decode(self.charset, 'replace'))
+
+            event.addHeader("from", self.source)
+            event.addHeader("to", simple_dest)
+            event.addHeader("sip_profile", sip_profile)
+            event.addHeader("dest_proto", "sip")
+            event.addHeader("type", "text/plain")
+            # Todo, see how we can actually get the result of this back here?
+            #event.addHeader("blocking", "true")
+            event.addBody(text.encode(self.charset, 'replace'))
+
+            con = ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
+            ret = con.sendEvent(event)
+            con.disconnect()
+            sms_log.info('WEBPHONE SMS SENT Status:[%s]', ret)
+            return True
+        except Exception as excep:
+            sms_log.info('Exception with Webphone SMS or FS Event: %s' % excep)
+            return False
+
     def sip_sms(self):
         if use_sip != 'yes':
             return False

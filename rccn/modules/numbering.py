@@ -153,7 +153,15 @@ class Numbering:
         except psycopg2.DatabaseError as e:
             raise NumberingException('Database error checking if number is local:' % e)
 
+    def is_number_webphone(self, number):
+        if ('webphone_prefix' in globals() and
+                isinstance(webphone_prefix, list) and
+                number[:5] in webphone_prefix):
+            return True
+
     def is_number_known(self, number):
+        if self.is_number_webphone(number):
+            return True
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
@@ -289,6 +297,9 @@ class Numbering:
 
 
     def get_current_bts(self, number):
+        if (self.is_number_webphone(number) and
+                isinstance(sip_central_ip_address, list)):
+            return sip_central_ip_address[0]
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT current_bts FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})

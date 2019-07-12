@@ -175,6 +175,15 @@ def rx_deliver_sm(pdu):
         if pdu.esm_class != 8:
             sms.save(pdu.source_addr, pdu.destination_addr, 'SMS_LOCAL')
         return smpplib.consts.SMPP_ESME_ROK
+    if (hasattr(config, 'sip_central_ip_address') and
+            isinstance(config.sip_central_ip_address, list) and
+            config.sip_central_ip_address[0] == dest_ip):
+        log.info('--> RX SMS for Webphone(%s): %s ' %
+                  (pdu.user_message_reference, pdu.short_message))
+        if sms.webphone_sms(pdu.source_addr, pdu.destination_addr, pdu.short_message, pdu.data_coding):
+            return smpplib.consts.SMPP_ESME_ROK
+        else:
+            return smpplib.consts.SMPP_ESME_RSYSERR
     else:
         # Pass it off to the Queue. what to do here? send it to the remote site?
         # via rapi?
