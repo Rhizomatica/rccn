@@ -267,6 +267,10 @@ class Dialplan:
         """
         if self.calling_host == mncc_ip_address:
             return False
+        if self.numbering.is_number_webphone(self.calling_number):
+            log.info("Incoming Call from Webphone")
+            if self.context.check_test():
+                return True
         if (isinstance(sip_central_ip_address, str) and self.calling_host == sip_central_ip_address or
                 isinstance(sip_central_ip_address, list) and self.calling_host in sip_central_ip_address):
             log.info("Incoming call from SIP server")
