@@ -317,6 +317,9 @@ class SMS:
                         raise SMSException('Receive SMS error: %s' % e)
                 else:
                     # check if sms is for another location
+                    if self.numbering.is_number_webphone(destination):
+                        self.webphone_sms(source, destination, text, self.coding)
+                        return
                     if self.numbering.is_number_internal(destination) and len(destination) == 11:
                         sms_log.info('SMS is for another site')
                         try:
