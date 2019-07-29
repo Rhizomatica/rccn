@@ -184,6 +184,9 @@ class Context:
             self.session.execute('set', 'ringback=${us-ring}')
             #self.session.preAnswer()
             add_local_ep()
+            if _context == "SUPPORT" and not self.numbering.is_number_local(self.destination_number):
+                site_ip = self.numbering.get_site_ip(self.destination_number)
+                add_internal_ep()
             if use_sip and not self.numbering.is_number_internal(self.destination_number):
                 # Foreign user will not be (SIP) registered here.
                 add_sip_ep()
