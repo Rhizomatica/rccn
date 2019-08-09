@@ -48,6 +48,7 @@ class LiveStatistics:
         data['hu']=self.get_common_recent_hup_cause()
         data['ut']=self.get_uptime()
         data['la']=os.getloadavg()
+        data['kl']=os.uname()[2]
         data['v']=self.get_linev()
         data['lat']=self.get_latency()
         data['p']=self.get_puppet_lr()
