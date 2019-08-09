@@ -179,6 +179,10 @@ class Context:
             INTERNAL_INBOUND:  call for local called number is originating another site.
             ROAMING_LOCAL: A local/internal user is calling a local/foreign user that is here.
             """
+            if 'lcls' in globals() and lcls == 1:
+                if _context == 'LOCAL' or _context == "ROAMING_LOCAL":
+                    self.session.setVariable('bypass_media_after_bridge', 'true')
+
             self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
             self.session.execute('set', 'ringback=${us-ring}')
