@@ -52,6 +52,8 @@ class LiveStatistics:
         data['v']=self.get_linev()
         data['lat']=self.get_latency()
         data['p']=self.get_puppet_lr()
+        data['yy']=datetime.datetime.now().year
+        data['mm']=datetime.datetime.now().month
         fs_con=ESL.ESLconnection("127.0.0.1", "8021", "ClueCon")
         data['c']=self.get_fs_calls(fs_con)
         data['gw']=self.get_fs_status(fs_con)
