@@ -399,8 +399,10 @@ class CallsStatistics:
         range,
         t as \"Average mins used per group\",
         n as \"Number of users in GROUP\",
+        c as \"Cost for users in GROUP\",
         cast (100 * n / NULLIF(sum(n) OVER (PARTITION BY d),0) as numeric(10,2)) \"percentage of users\",
         cast (100 * s / NULLIF(sum(s) OVER (PARTITION BY d),0) as numeric(10,2)) \"percentage of minutes\",
+        cast (100 * c / NULLIF(sum(c) OVER (PARTITION BY d),0) as numeric(10,2)) \"percentage of cost\",
         s as \"Total minutes used by group\"
         FROM (
             select
@@ -408,6 +410,7 @@ class CallsStatistics:
             round(avg(total_mins)::numeric,2) as t,
             count(caller_id_number) as n,
             sum(total_mins) as s,
+            sum(c) as c,
             (case when total_mins = 0 then '0 - ZERO mins'
             when total_mins >0 and total_mins <= 5 then '1 - ZERO to five mins'
             when total_mins > 5 and total_mins <= 20 then '2 - five to twenty mins'
@@ -419,6 +422,7 @@ class CallsStatistics:
             (   select
                     caller_id_number,
                     round((sum(billsec)::float/60)::numeric,2) as total_mins,
+                    sum(cost) as c,
                     to_char(date_trunc('month', start_stamp),'YYYY-MM-Mon') as d
                 FROM public.cdr
                 where context = 'OUTBOUND'
