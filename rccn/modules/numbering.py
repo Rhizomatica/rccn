@@ -107,7 +107,7 @@ class Numbering:
                     re.search(r'^(00|\+)', destination_number) is not None):
                 return destination_number
             if self.is_number_mxcel(destination_number):
-                destination_number = '00521' + destination_number
+                destination_number = '0052' + destination_number
             else:
                 destination_number = '0052' + destination_number
             log.info('Translated dialled 10 digit number to %s' % destination_number)
