@@ -398,7 +398,7 @@ class Numbering:
     def is_number_mxcel(self, destination_number):
         try:
             if len(destination_number) != 10:
-                log.debug("Number %s length not 10" % number)
+                log.debug("Number %s length not 10" % destination_number)
                 return False
             number = '521'+destination_number
             cur = db_conn.cursor()
