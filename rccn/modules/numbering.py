@@ -366,13 +366,13 @@ class Numbering:
                 dest = callee[1:2]
             if re.search(r'^00', callee) != None:
                 dest = callee[2:3]
-            cur.execute('select callerid from dids,providers where callerid like %(prefix)s limit 1',
+            cur.execute('SELECT callerid FROM dids,providers WHERE callerid LIKE %(prefix)s LIMIT 1',
                         {'prefix': '+'+dest+'%'})
             callerid = cur.fetchone()
             if callerid == None:
-                cur.execute("select callerid from dids,providers where "
-                            "providers.id = dids.provider_id and "
-                            "providers.active = 1 order by dids.id asc limit 1")
+                cur.execute("SELECT callerid FROM dids,providers WHERE "
+                            "providers.id = dids.provider_id AND "
+                            "providers.active = 1 ORDER BY dids.id asc LIMIT 1")
                 callerid = cur.fetchone()
             db_conn.commit()
             if callerid != None:
@@ -385,7 +385,7 @@ class Numbering:
     def get_did_subscriber(self, destination_number):
         try:
             cur = db_conn.cursor()
-            cur.execute('select subscriber_number from dids where phonenumber=%(number)s',
+            cur.execute('SELECT subscriber_number FROM dids WHERE phonenumber=%(number)s',
                         {'number': destination_number})
             dest = cur.fetchone()
             db_conn.commit()
@@ -397,7 +397,7 @@ class Numbering:
     def get_gateway(self):
         try:
             cur = db_conn.cursor()
-            cur.execute('select provider_name from providers where active = 1')
+            cur.execute('SELECT provider_name FROM providers WHERE active = 1')
             gw = cur.fetchone()
             db_conn.commit()
             if gw != None:

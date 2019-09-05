@@ -32,7 +32,7 @@ class Configuration:
     def get_site(self):
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute('SELECT * from site')
+            cur.execute('SELECT * FROM site')
             site_conf = cur.fetchone()
             db_conn.commit()
             cur.close()
@@ -44,7 +44,7 @@ class Configuration:
     def get_site_config(self):
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute('SELECT * from configuration')
+            cur.execute('SELECT * FROM configuration')
             site_conf = cur.fetchone()
             db_conn.commit()
             cur.close()

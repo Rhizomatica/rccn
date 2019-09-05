@@ -153,7 +153,7 @@ try:
                     log.warning("Could not find Database Migration File")
         except (psycopg2.DatabaseError, OSError) as e:
             log.warning("Failed to Upgrade Database Revision! (%s)" % e)
-    cur.execute('SELECT * from site')
+    cur.execute('SELECT * FROM site')
     site_conf = cur.fetchone()
     config['site_name'] = site_conf['site_name']
     config['internal_prefix'] = site_conf['postcode']+site_conf['pbxcode']
