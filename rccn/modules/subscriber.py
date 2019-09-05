@@ -675,7 +675,17 @@ class Subscriber:
         # status 1 - subscription paid
         try:
             cur = db_conn.cursor()
-            cur.execute('UPDATE subscribers SET subscription_status=%(status)s WHERE msisdn=%(msisdn)s', {'status': status, 'msisdn': msisdn})
+            cur.execute('SELECT subscription_status FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            if cur.rowcount > 0:
+                prev_status = cur.fetchone()
+            else:
+                raise SubscriberException('PG_HLR Subscriber not found')
+            if prev_status[0] == 0 and status == 1:
+                cur.execute('UPDATE subscribers SET subscription_status=%(status)s,subscription_date = NOW() WHERE msisdn=%(msisdn)s',
+                            {'status': status, 'msisdn': msisdn})
+            else:
+                cur.execute('UPDATE subscribers SET subscription_status=%(status)s WHERE msisdn=%(msisdn)s',
+                            {'status': status, 'msisdn': msisdn})
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
