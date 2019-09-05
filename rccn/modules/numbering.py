@@ -121,6 +121,7 @@ class Numbering:
             cur = db_conn.cursor()
             cur.execute("SELECT phonenumber FROM dids WHERE phonenumber=%(number)s", {'number': destination_number})
             did = cur.fetchone()
+            db_conn.commit()
             #log.debug("Value of did var: %s" % did)
             return bool(did)
         except psycopg2.DatabaseError as e:
@@ -143,6 +144,7 @@ class Numbering:
             cur = db_conn.cursor()
             cur.execute('SELECT msisdn FROM subscribers WHERE msisdn=%(number)s', {'number': destination_number})
             dest = cur.fetchone()
+            db_conn.commit()
             if dest != None:
                 destn = dest[0]
                 # check if number is local to the site
@@ -165,6 +167,7 @@ class Numbering:
         try:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
+            db_conn.commit()
             subscriber = cur.fetchone()
             if subscriber != None:
                 return True
@@ -180,6 +183,7 @@ class Numbering:
         cur = db_conn.cursor()
         cur.execute('SELECT DISTINCT home_bts FROM hlr WHERE msisdn like %(prefix)s', {'prefix': siteprefix+'%'})
         test = cur.fetchall()
+        db_conn.commit()
         if len(test) > 1:
             log.warn('!!FIX THIS!! Got more than one home_bts from hlr for %s' % siteprefix)
             sites = riak_client.bucket('sites')
@@ -201,6 +205,7 @@ class Numbering:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
             subscriber = cur.fetchone()
+            db_conn.commit()
             if subscriber != None:
                 if subscriber['home_bts'] != subscriber['current_bts']:
                     if subscriber['authorized'] == 1:
@@ -287,6 +292,7 @@ class Numbering:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT home_bts,current_bts FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
             subscriber = cur.fetchone()
+            db_conn.commit()
             if subscriber != None:
                 return subscriber
             else:
@@ -304,6 +310,7 @@ class Numbering:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT current_bts FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': number})
             subscriber = cur.fetchone()
+            db_conn.commit()
             if subscriber != None:
                 return subscriber['current_bts']
             else:
@@ -330,6 +337,7 @@ class Numbering:
         cur = db_conn.cursor()
         cur.execute('SELECT DISTINCT home_bts FROM hlr WHERE msisdn like %(prefix)s', {'prefix': siteprefix+'%'})
         result = cur.fetchall()
+        db_conn.commit()
         if len(result) != 1:
             log.warn('!!FIX THIS!! Did not get ONE home_bts from hlr for %s', siteprefix)
             log.debug('Trying Riak...')
@@ -352,6 +360,7 @@ class Numbering:
                         {'caller': caller})
             callerid = cur.fetchone()
             if not callerid is None:
+                db_conn.commit()
                 return callerid[0]
             if callee[0] == '+':
                 dest = callee[1:2]
@@ -365,6 +374,7 @@ class Numbering:
                             "providers.id = dids.provider_id and "
                             "providers.active = 1 order by dids.id asc limit 1")
                 callerid = cur.fetchone()
+            db_conn.commit()
             if callerid != None:
                 return callerid[0]
             else:
@@ -378,6 +388,7 @@ class Numbering:
             cur.execute('select subscriber_number from dids where phonenumber=%(number)s',
                         {'number': destination_number})
             dest = cur.fetchone()
+            db_conn.commit()
             if dest != None:
                 return dest[0]
         except psycopg2.DatabaseError as e:
@@ -388,6 +399,7 @@ class Numbering:
             cur = db_conn.cursor()
             cur.execute('select provider_name from providers where active = 1')
             gw = cur.fetchone()
+            db_conn.commit()
             if gw != None:
                 return gw[0]
             else:
@@ -406,6 +418,7 @@ class Numbering:
                 WHERE length(d::text) > 6 ORDER BY length(d::text) DESC
                 """)
             prefixes = cur.fetchall()
+            db_conn.commit()
             for prefix in prefixes:
                 if number.startswith(prefix[0]):
                     log.info('MX cel Matched Prefix for "%s"', prefix[1])

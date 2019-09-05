@@ -593,8 +593,8 @@ class SMS:
             db_conn.rollback()
             raise SMSException('PG_HLR error saving SMS in the history: %s' % e)
         finally:
-            cur.close()
             db_conn.commit()
+            cur.close()
 
     def send_immediate(self, num, text):
         appstring = 'OpenBSC'

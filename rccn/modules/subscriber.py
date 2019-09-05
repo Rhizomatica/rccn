@@ -679,6 +679,7 @@ class Subscriber:
             if cur.rowcount > 0:
                 prev_status = cur.fetchone()
             else:
+                db_conn.commit()
                 raise SubscriberException('PG_HLR Subscriber not found')
             if prev_status[0] == 0 and status == 1:
                 cur.execute('UPDATE subscribers SET subscription_status=%(status)s,subscription_date = NOW() WHERE msisdn=%(msisdn)s',
@@ -689,6 +690,7 @@ class Subscriber:
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
+                db_conn.commit()
                 raise SubscriberException('PG_HLR Subscriber not found')
         except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error changing subscriber subscription status: %s' % e)
@@ -723,6 +725,7 @@ class Subscriber:
             if cur.rowcount > 0:
                 db_conn.commit()
             else:
+                db_conn.commit()
                 raise SubscriberException('PG_HLR No subscriber found')
         except psycopg2.DatabaseError, e:
             cur.execute("rollback")

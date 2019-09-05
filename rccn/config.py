@@ -138,6 +138,7 @@ try:
     cur.execute("SELECT value from meta WHERE key='db_revision'")
     PG_revision=cur.fetchone()
     if PG_revision[0] != db_revision:
+    db_conn.commit()
         try:
             log.info("Upgrading DB Revision to Version %s" % db_revision)
             revision_dir=rhizomatica_dir + '/db/migration/'
@@ -161,6 +162,7 @@ try:
     # load SMS shortcode into global config
     cur.execute('SELECT smsc_shortcode,sms_sender_unauthorized,sms_destination_unauthorized FROM configuration')
     smsc = cur.fetchone()
+    db_conn.commit()
     config['smsc'] = smsc[0]
     config['sms_source_unauthorized'] = smsc[1]
     config['sms_destination_unauthorized'] = smsc[2]

@@ -49,8 +49,10 @@ class Credit:
         try:
             cur = db_conn.cursor()
             cur.execute('UPDATE subscribers SET balance=%(new_balance)s WHERE msisdn=%(msisdn)s', {'new_balance': Decimal(str(new_balance)), 'msisdn': msisdn})
+            db_conn.commit()
             sms.send(config['smsc'], msisdn, sms_credit_added % (credit, new_balance))
         except psycopg2.DatabaseError as e:
+            db_conn.rollback()
             raise CreditException('PG_HLR error updating subscriber balance: %s' % e)
 
         # insert transaction into the credit history
@@ -97,6 +99,8 @@ class Credit:
             cur = db_conn.cursor()
             cur.execute('SELECT authorized,subscription_status,SUM(balance) FROM subscribers GROUP BY authorized,subscription_status')
             result = cur.fetchall()
+            db_conn.commit()
+            cur.close()
         except psycopg2.DatabaseError as e:
             raise CreditException('PG_HLR getting sum of balance: %s' % e)
         return result
@@ -123,6 +127,7 @@ class Credit:
                         "AND start_stamp >= %s and start_stamp < %s", (fr, to) )
             result.append(cur.fetchone())
             db_conn.commit()
+            cur.close()
         except psycopg2.DatabaseError as e:
             raise CreditException('PG_HLR getting monthly credit details: %s' % e)
         return result
@@ -161,6 +166,8 @@ class Credit:
             data={ 'fr': fr, 'to': to}
             cur.execute(sql, data)
             result = cur.fetchall()
+            db_conn.commit()
+            cur.close()
             """
             cur.execute("SELECT date_part('YEAR', created)::varchar as y,"
                         "date_part('MONTH', created)::varchar AS m,"

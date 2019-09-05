@@ -34,6 +34,8 @@ class Configuration:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * from site')
             site_conf = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if site_conf != None:
                 return site_conf
         except psycopg2.DatabaseError as e:
@@ -44,6 +46,8 @@ class Configuration:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * from configuration')
             site_conf = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if site_conf != None:
                 return site_conf
         except psycopg2.DatabaseError as e:
@@ -54,6 +58,8 @@ class Configuration:
             cur = db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute('SELECT * FROM locations')
             locations = cur.fetchall()
+            db_conn.commit()
+            cur.close()
             if locations != None:
                 return locations
 	    else:
@@ -66,6 +72,8 @@ class Configuration:
             cur = db_conn.cursor()
             cur.execute('SELECT limit_local_calls,limit_local_minutes FROM configuration')
             limit = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if limit != None:
                 return (limit[0], limit[1] * 60)
             else:
@@ -79,6 +87,8 @@ class Configuration:
             cur = db_conn.cursor()
             cur.execute('SELECT charge_local_calls FROM configuration')
             charge = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if charge != None:
                 return charge[0]
             else:
@@ -91,6 +101,8 @@ class Configuration:
             cur = db_conn.cursor()
             cur.execute('SELECT charge_local_rate,charge_local_rate_type FROM configuration')
             charge = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if charge != None:
                 return charge
             else:
@@ -103,6 +115,8 @@ class Configuration:
             cur = db_conn.cursor()
             cur.execute('SELECT charge_inbound_calls FROM configuration')
             charge = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if charge != None:
                 return charge[0]
             else:
@@ -115,6 +129,8 @@ class Configuration:
             cur = db_conn.cursor()
             cur.execute('SELECT charge_inbound_rate,charge_inbound_rate_type FROM configuration')
             charge = cur.fetchone()
+            db_conn.commit()
+            cur.close()
             if charge != None:
                 return charge
             else:

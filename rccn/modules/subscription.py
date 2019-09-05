@@ -59,8 +59,10 @@ class Subscription:
             if count > 0:
                 subscribers_list = cur.fetchall()
                 self.logger.info('Found %s subscribers with unpaid subscription to the service' % count)
+                db_conn.commit()
                 return subscribers_list
             else:
+                db_conn.commit()
                 self.logger.info('PG_HLR Everyone paid, we are good to go')
         except psycopg2.DatabaseError as e:
             raise SubscriptionException('PG_HLR error getting subscribers subscription_status: %s' % e)
@@ -89,6 +91,7 @@ class Subscription:
             if count > 0:
                 self.logger.info('Found %d subscribers to be deactivated' % count)
                 subscribers_list = cur.fetchall()
+                db_conn.commit()
                 for mysub in subscribers_list:
                     self.logger.debug('Send SMS that account is deactivated to %s' % mysub[0])
                     sms.send(config['smsc'],mysub[0], msg)
@@ -98,6 +101,7 @@ class Subscription:
                     except SubscriberException as e:
                         raise SubscriptionException('PG_HLR error in deactivating subscription: %s' % e)
             else:
+                db_conn.commit()
                 self.logger.info('No subscribers need to be deactivate')
         except psycopg2.DatabaseError as e:
             raise SubscriptionException('PG_HLR error in checking subscriptions to deactivate: %s' % e)
