@@ -137,22 +137,24 @@ try:
     cur = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT value from meta WHERE key='db_revision'")
     PG_revision=cur.fetchone()
-    if PG_revision[0] != db_revision:
     db_conn.commit()
-        try:
-            log.info("Upgrading DB Revision to Version %s" % db_revision)
-            revision_dir=rhizomatica_dir + '/db/migration/'
-            current=int(PG_revision[0])
-            revisions=os.listdir(revision_dir)
-            while current < int(db_revision):
-                current = current + 1
-                filename = [fn for fn in revisions if int(fn[:3]) == current]
-                if len(filename) and os.path.isfile(revision_dir + filename[0]):
-                    cur.execute(open(revision_dir + filename[0], 'r').read())
-                else:
-                    log.warning("Could not find Database Migration File")
-        except (psycopg2.DatabaseError, OSError) as e:
-            log.warning("Failed to Upgrade Database Revision! (%s)" % e)
+    if 'argv' in dir(sys):
+        log.info("Config is loaded by %s", os.path.basename(sys.argv[0]))
+        if os.path.basename(sys.argv[0]) == 'rapi.py' and PG_revision[0] != db_revision:
+            try:
+                log.info("Upgrading DB Revision to Version %s" % db_revision)
+                revision_dir=rhizomatica_dir + '/db/migration/'
+                current=int(PG_revision[0])
+                revisions=os.listdir(revision_dir)
+                while current < int(db_revision):
+                    current = current + 1
+                    filename = [fn for fn in revisions if int(fn[:3]) == current]
+                    if len(filename) and os.path.isfile(revision_dir + filename[0]):
+                        cur.execute(open(revision_dir + filename[0], 'r').read())
+                    else:
+                        log.warning("Could not find Database Migration File")
+            except (psycopg2.DatabaseError, OSError) as e:
+                log.warning("Failed to Upgrade Database Revision! (%s)" % e)
     cur.execute('SELECT * FROM site')
     site_conf = cur.fetchone()
     config['site_name'] = site_conf['site_name']
