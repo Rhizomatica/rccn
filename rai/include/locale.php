@@ -12,7 +12,9 @@ if (isset($_SESSION['lang'])) {
             $langs=array_flip($langs);
             ksort($langs, SORT_NUMERIC);
           }
-          $_lang=substr(array_pop($langs),0,2);
+          $_prio=array_pop($langs);
+          $_lang=substr($_prio,0,2);
+          $langcode=strtolower(substr($_prio,3,4));
           $language=$_lang.'_'.strtoupper($_lang);
         }
 }

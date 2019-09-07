@@ -28,8 +28,14 @@ require_once('include/header.php');
 
 <?php
 	function print_form($post_data, $errors, $language) {
+		global $langcode;
 		$username = ($_POST['username'] != '') ? $_POST['username'] : '';
 		$password = ($_POST['password'] != '') ? $_POST['password'] : '';
+		$_code = array("es"=>'',"en"=>'');
+		$lcl_icon_file = 'img/'.$language."_".$langcode."_flag.png";
+		if (file_exists($lcl_icon_file)) {
+			$_code[$language] = "_".$langcode;
+		}
 ?>
 			<form action="login.php" method="post" id="newRequestForm">
 			<fieldset class="formLogin">
@@ -47,9 +53,9 @@ require_once('include/header.php');
 				<br/>
 				<input type="hidden" name="language" id="language" value="" />
 				<select id="language-select">
-					<option value="es" <?=($language=='es') ? 'selected="selected"' : ''?>data-imagesrc="img/mx_flag.png">Español</option>
+					<option value="es" <?=($language=='es') ? 'selected="selected"' : ''?>data-imagesrc="img/es<?=$_code['es']?>_flag.png">Español</option>
 					<option value="pt_BR" <?=($language=='pt_BR') ? 'selected="selected"' : ''?>data-imagesrc="img/br_flag.png">Português</option>
-					<option value="en" <?=($language=='en') ? 'selected="selected"' : ''?>data-imagesrc="img/en_flag.png">English</option>
+					<option value="en" <?=($language=='en') ? 'selected="selected"' : ''?>data-imagesrc="img/en<?=$_code['en']?>_flag.png">English</option>
 				</select>
 			    </div>
 			    <div><br/>
