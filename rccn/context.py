@@ -524,7 +524,9 @@ class Context:
 
     def _play_error(self, num):
         try:
-            self.subscriber.get(config['internal_prefix'] + num)
+            if len(num) == 5:
+                num = config['internal_prefix'] + num
+            sub = self.subscriber.get(num)
             log.info('Subscriber %s is not authorized', num)
             self.session.execute('playback', self.NOT_AUTH)
         except SubscriberException:
