@@ -563,24 +563,24 @@ class Context:
 
         if subscriber_number == None:
             return self.inbound_ivr()
-        else:
-            log.info('INBOUND call progressing to: %s', subscriber_number)
-            try:
-                if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
-                    log.info('Send call to internal subscriber %s', subscriber_number)
-                    self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
-                    self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
-                    if not self._check_inbound_roaming():
-                        self.bridge(subscriber_number)
-                        return True
-                else:
-                    log.error('DID assigned but subscriber %s does not exist or is not authorized', subscriber_number)
-                    self._play_error(subscriber_number)
-                    return False
-            except SubscriberException as _ex:
-                log.error(_ex)
-                self.session.execute('playback', self.WRONG_NUMBER)
-                self.session.hangup('UNALLOCATED_NUMBER')
+
+        log.info('INBOUND call progressing to: %s', subscriber_number)
+        try:
+            if self.subscriber.is_authorized(subscriber_number, 1) and len(subscriber_number) == 11:
+                log.info('Send call to internal subscriber %s', subscriber_number)
+                self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
+                self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
+                if not self._check_inbound_roaming():
+                    self.bridge(subscriber_number)
+                    return True
+            else:
+                log.error('DID assigned but subscriber %s does not exist or is not authorized', subscriber_number)
+                self._play_error(subscriber_number)
+                return False
+        except SubscriberException as _ex:
+            log.error(_ex)
+            self.session.execute('playback', self.WRONG_NUMBER)
+            self.session.hangup('UNALLOCATED_NUMBER')
         return -1
 
     def internal(self):
