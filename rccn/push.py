@@ -178,7 +178,11 @@ def osmo_ext2imsi(ext):
             return m.group(1)
         else: 
             return False
-    except:
+    except socket.error as err:
+        print sys.exc_info()[1][1]
+        print "Osmo VTY refused connection. Aborting.\n"
+        sys.exit(1)
+    except Exception as e:
         print sys.exc_info()[1]
         return False
 
