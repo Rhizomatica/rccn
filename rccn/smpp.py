@@ -20,7 +20,7 @@
 #
 ############################################################################
 '''
-SMPP Listener for Alert Notificaions 
+SMPP Listener for Alert Notificaions
 Reacts in real time to do best effort update of the d_hlr, taking into consideration
 we might be disconnected from the world at the time of the notification.
 
@@ -36,40 +36,40 @@ import smpplib.consts
 def _get_imsi(ext):
     try:
         cmd = 'show subscriber extension %s' % (ext)
-        ret = vty.command(cmd)        
-        m=re.compile('IMSI: ([0-9]*)').search(ret)
+        ret = vty.command(cmd)
+        m = re.compile('IMSI: ([0-9]*)').search(ret)
         if m:
             return m.group(1)
-        else: 
+        else:
             return False
     except:
         print sys.exc_info()[1]
         return False
 
 def rx_alert_notification(pdu):
-    
+
     #print pdu.source_addr_ton, pdu.source_addr_npi, pdu.source_addr, pdu.ms_availability_status
     # Sanity check that we got imsi/extension
     if pdu.source_addr_ton == 3 and pdu.source_addr_npi == 1:
-        mode='EXT'
+        mode = 'EXT'
     elif pdu.source_addr_ton == 4 and pdu.source_addr_npi == 6:
-        mode='IMSI'
+        mode = 'IMSI'
     else:
         return
 
     if pdu.ms_availability_status == 2:
         log.info('Received Detach Notification for %s: %s' % (mode, pdu.source_addr))
-        if mode=='EXT':
-            extension=pdu.source_addr
+        if mode == 'EXT':
+            extension = pdu.source_addr
             if len(extension) == 5: # Ignore these.
                 return
-            if extension[:6] != myprefix: 
+            if extension[:6] != myprefix:
                 log.info('Detach from foreign extension, send it home.')
-                imsi=_get_imsi(extension)
+                imsi = _get_imsi(extension)
                 try:
                     rk_hlr = riak_client.bucket('hlr')
                     subscriber = rk_hlr.get(str(imsi), timeout=config.RIAK_TIMEOUT)
-                    log.info('RIAK: pushing %s, was %s' % (subscriber.data['home_bts'],subscriber.data['current_bts']))
+                    log.info('RIAK: pushing %s, was %s' % (subscriber.data['home_bts'], subscriber.data['current_bts']))
                     subscriber.data['current_bts'] = subscriber.data['home_bts']
                     now = int(time.time())
                     subscriber.data['updated'] = now
@@ -90,19 +90,20 @@ def rx_alert_notification(pdu):
                         request.get_method = lambda: 'PUT'
                         res = opener.open(request).read()
                         if 'success' in res:
-                            log.info('Roaming Subscriber %s returned to %s' % (extension,current_bts))
+                            log.info('Roaming Subscriber %s returned to %s' % (extension, current_bts))
                         else:
-                            log.error('Error (%s) Returning Roaming Subscriber %s at %s' % (config.json.loads(res)['error'], extension, current_bts))
+                            log.error('Error (%s) Returning Roaming Subscriber %s at %s' %
+                                      (config.json.loads(res)['error'], extension, current_bts))
                     except IOError:
-                        log.error('Error connect to site %s to return subscriber %s' % (current_bts,extension) )
+                        log.error('Error connect to site %s to return subscriber %s' % (current_bts, extension))
 
     if pdu.ms_availability_status == 0:
         log.info('Received LUR/Attach Notification for %s: %s' % (mode, pdu.source_addr))
-        if mode=='EXT':
-            extension=pdu.source_addr
+        if mode == 'EXT':
+            extension = pdu.source_addr
             if len(extension) == 5:
                 # Ignore 5 digit extensions for the moment, let the RRC task bring them up.
-                # I'd like to react to them, but need the full hlr db with IMSIs 
+                # I'd like to react to them, but need the full hlr db with IMSIs
                 # locally at least.
                 return
             try:
@@ -113,9 +114,9 @@ def rx_alert_notification(pdu):
             if current_bts != myip:
                 # Our HLR doesn't expect this MS to be here.
                 # So either the hlr is out of date, or this is new here.
-                imsi=_get_imsi(pdu.source_addr)
+                imsi = _get_imsi(pdu.source_addr)
                 try:
-                    sub.update_location(imsi,extension,True)
+                    sub.update_location(imsi, extension, True)
                 except config.SubscriberException as ex:
                     log.debug('Subscriber error: %s', str(ex))
                     return
@@ -124,6 +125,7 @@ def rx_alert_notification(pdu):
                 # function would prevent the local PG update.
                 # this is usually overkill, to be sure, to be sure...
                 sub.update_location_local_hlr(extension, myip)
+
                 # Expire this on where I think it was last.
                 try:
                     values = '{"msisdn": "%s"}' % extension
@@ -133,27 +135,28 @@ def rx_alert_notification(pdu):
                     request.get_method = lambda: 'PUT'
                     res = opener.open(request).read()
                     if 'success' in res:
-                        log.info('Roaming Subscriber %s expired on %s' % (extension,current_bts))
+                        log.info('Roaming Subscriber %s expired on %s' % (extension, current_bts))
                     else:
-                        log.error('Error (%s) Expiring Roaming Subscriber %s at %s' % (config.json.loads(res)['error'], extension,current_bts))
+                        log.error('Error (%s) Expiring Roaming Subscriber %s at %s' %
+                                  (config.json.loads(res)['error'], extension, current_bts))
                 except IOError:
-                    log.error('Error connecting to site %s to expire subscriber %s' % (current_bts,extension) )
+                    log.error('Error connecting to site %s to expire subscriber %s' % (current_bts, extension))
 
         else:
             # Mode deliver-src-imsi (not used)
-            extension=sub.get_local_extension(pdu.source_addr)
+            extension = sub.get_local_extension(pdu.source_addr)
             if extension[:6] == myprefix:
                 print "That's mine"
-                bts=num.get_local_hlr_btsinfo(extension)
+                bts = num.get_local_hlr_btsinfo(extension)
                 print "My HLR says %s" % bts['current_bts']
             else:
         	    try:
-                    	bts=num.get_local_hlr_btsinfo(extension)
+                    	bts = num.get_local_hlr_btsinfo(extension)
         	    except config.NumberingException as ne:
         		print str(ne)
         		return
 
-            print "That is from %s last seen %s" % (bts['home_bts'],bts['current_bts'])
+            print "That is from %s last seen %s" % (bts['home_bts'], bts['current_bts'])
 
 def smpp_bind():
     client = smpplib.client.Client("127.0.0.1", 2775, 90)
@@ -163,15 +166,15 @@ def smpp_bind():
     client.listen()
 
 if __name__ == "__main__":
-    re=config.re
-    sys=config.sys
-    riak_client=config.riak_client
-    myprefix=config.config['internal_prefix']
-    myip=config.config['local_ip']
-    log=config.roaming_log
-    sub=config.Subscriber()
-    num=config.Numbering()
+    re = config.re
+    sys = config.sys
+    riak_client = config.riak_client
+    myprefix = config.config['internal_prefix']
+    myip = config.config['local_ip']
+    log = config.roaming_log
+    sub = config.Subscriber()
+    num = config.Numbering()
     #open a VTY console, don't bring up and down all the time.
     vty = obscvty.VTYInteract('OpenBSC', '127.0.0.1', 4242)
-    log.info('Starting up alert notification listener for %s on %s' % (myprefix,myip))
+    log.info('Starting up alert notification listener for %s on %s' % (myprefix, myip))
     smpp_bind()
