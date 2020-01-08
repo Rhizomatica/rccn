@@ -49,7 +49,7 @@ def parse_udh(data):
     udh['iei'] = ord(data[1])
     if udh['iei'] != smpplib.consts.SMPP_UDHIEIE_CONCATENATED:
         log.error('Unhandled IEI: %i', udh['iei'])
-    return False
+        return False
     udh['header_len'] = ord(data[2])
     udh['csms_ref'] = ord(data[3])
     udh['parts'] = ord(data[4])
@@ -97,10 +97,11 @@ def rx_deliver_sm(pdu):
         try:
             _udh_length = ord(pdu.short_message[:1])
             _start = _udh_length+1
-            udh = parse_udh(pdu.short_message[:_udh_length])
+            udh = parse_udh(pdu.short_message[:_udh_length+1])
             if udh is False:
                 log.warning('Accept and drop message.. %s', binascii.hexlify(pdu.short_message))
                 return smpplib.consts.SMPP_ESME_ROK
+            '''
             if udh['part_num'] == 1:
                 smpp_messages[udh['csms_ref']]=[]
             log.debug('Part %s of %s' % (udh['part_num'], udh['parts']))
@@ -110,6 +111,7 @@ def rx_deliver_sm(pdu):
                 smpp_messages[udh['csms_ref']] = None
                 log.debug("Full SMS Message: %s" % _final.decode(code2charset[pdu.data_coding]))
                 #local_submit_one('LOCAL_TEST', pdu.destination_addr, _final.decode(code2charset[pdu.data_coding]))
+            '''
         except Exception as ex:
             log.debug("UDHI: Other Exception: %s", str(ex))
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
