@@ -17,7 +17,7 @@ fi
 echo $trx > /tmp/trxOK
 
 for bts in $mybts ; do
-  eval _channels_$bts=`echo "show bts $bts" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\// {tch=substr($0,33,1)}; /SDCCH8/ {sdcch=substr($0,33,1)} END {print tch":"sdcch}'`
+  eval _channels_$bts=`echo "show bts $bts" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\// {gsub("\\\(|\\\)","",$3) split($3,a,"\\\/"); tch=a[1]}; /SDCCH8/ { gsub("\\\(|\\\)","",$3) split($3,a,"\\\/"); sdcch=a[1] } END {print tch":"sdcch}'`
 done
 rrdtool update $RHIZO_DIR/bts_channels60.rrd N:$_channels_0:$_channels_1:$_channels_2:$_channels_3:$_channels_4:$_channels_5
 
