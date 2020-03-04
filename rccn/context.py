@@ -160,6 +160,9 @@ class Context:
             endpoint = 'sofia/gateway/' + gw + '/' + str(callee)
             bridge_params = ',sip_cid_type=pid'
             endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+            if 'JB_out' in globals() and JB_out != '':
+                self.session.execute('export', 'rtp_jitter_buffer_during_bridge=true')
+                self.session.execute('export', 'nolocal:jitterbuffer_msec=' + JB_out)
 
         if _context == 'ROAMING_OUTBOUND':
             """
@@ -186,6 +189,10 @@ class Context:
             self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
             self.session.execute('set', 'ringback=${us-ring}')
+            if 'JB_in' in globals() and JB_in != '':
+                self.session.execute('export', 'rtp_jitter_buffer_during_bridge=true')
+                self.session.execute('export', 'jitterbuffer_msec=' + JB_in)
+
             #self.session.preAnswer()
             add_local_ep()
             if _context == "SUPPORT" and not self.numbering.is_number_local(self.destination_number):
