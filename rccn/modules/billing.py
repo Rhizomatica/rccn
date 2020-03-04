@@ -165,7 +165,10 @@ class Billing:
 
             # get rate
             rate = self.get_rate(destination_number)
-            call_cost = self.get_call_cost(duration, rate[3])
+            if 'charge_outbound_rate_type' in globals() and charge_outbound_rate_type == 'sec':
+                call_cost = (rate[3]/60)*duration
+            else:
+                call_cost = self.get_call_cost(duration, rate[3])
 
             # set destination_name and cost for the CDR
             session.setVariable('destination_name', rate[1])
