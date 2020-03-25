@@ -136,6 +136,26 @@ class Dialplan:
                 self.numbering.is_number_sip_connected(self.session, self.calling_number))
         return self.local_caller_check
 
+    def check_free_number(self):
+        if not (isinstance(free_numbers, list) and self.destination_number in free_numbers):
+            return False
+        if len(self.destination_number) == 10:
+            dest = self.numbering.detect_mx_short_dial(self.destination_number)
+        subscriber_number = self.session.getVariable('caller_id_number')
+        log.info('Call to %s is free and unrestricted.', dest)
+        self.session.setVariable('billing', '0')
+        self.session.setVariable('context', 'OUTBOUND')
+        self.context.destination_number = dest
+        try:
+            caller_id = self.numbering.get_callerid(subscriber_number, dest)
+        except NumberingException as ex:
+            log.error(ex)
+        if caller_id != None:
+            log.info('Set caller id to %s', caller_id)
+            self.session.setVariable('effective_caller_id_number', '%s' % caller_id)
+            self.session.setVariable('effective_caller_id_name', '%s' % caller_id)
+        return self.context.bridge(dest)
+
     def check_external(self):
         if len(self.destination_number) == 10:
             self.destination_number = self.numbering.detect_mx_short_dial(self.destination_number)
@@ -375,6 +395,11 @@ class Dialplan:
             self.destination_number == voip_did):
             if not self.check_chans(voip_did, voip_chans_max, voip_mod(voip_did)):
                 return False
+
+        if 'free_numbers' in globals():
+            ret = self.check_free_number()
+            if ret:
+                return ret
 
         ret = self.check_did()
         if ret:
