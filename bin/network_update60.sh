@@ -19,7 +19,7 @@ fi
 echo $trx > /tmp/trxOK
 
 ns=`ns | wc -l`
-echo $trx > /tmp/grps_ns
+echo $ns > /tmp/gprs_ns
 
 pdp=`pdpc`
 echo $pdp > /tmp/pdp_contexts
