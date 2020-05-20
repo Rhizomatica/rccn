@@ -58,6 +58,8 @@ class LiveStatistics:
         data['c']=self.get_fs_calls(fs_con)
         data['gw']=self.get_fs_status(fs_con)
         data['trx']=self.get_trxOK()
+        if 'dids' in globals():
+            data['dids']=dids
         fs_con.disconnect()
         return data
 
