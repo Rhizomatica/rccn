@@ -2,6 +2,17 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
+if [ ! -f $RHIZO_DIR/pdp_contexts.rrd ]; then
+rrdtool create $RHIZO_DIR/pdp_contexts.rrd --step 60 \
+DS:pdp_contexts:GAUGE:120:0:U \
+RRA:AVERAGE:0.5:1:10080 \
+RRA:MIN:0.5:1440:1 \
+RRA:MAX:0.5:1440:1 \
+RRA:MIN:0.5:10080:1 \
+RRA:MAX:0.5:10080:1
+fi
+
+
 if [ ! -f $RHIZO_DIR/bsc_channels.rrd ]; then
 rrdtool create $RHIZO_DIR/bsc_channels.rrd --step 300 \
 DS:tch:GAUGE:600:0:U \

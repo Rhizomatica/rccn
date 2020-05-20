@@ -24,7 +24,7 @@ require_once('include/menu.php');
 			<?php
 				$age = (isset($_GET['a'])) ? $_GET['a'] : '12h';
 
-				$graphs = array('fs_calls','calls','chanr','chans');
+				$graphs = array('fs_calls','calls','pdp_contexts','chanr','chans');
 				if (file_exists('/var/rhizomatica/rrd/mybts')) {
 				  $mybts=explode(' ',file_get_contents('/var/rhizomatica/rrd/mybts'));
 				} else {

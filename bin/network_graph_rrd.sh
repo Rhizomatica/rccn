@@ -38,6 +38,13 @@ rrdtool graph --start -$age -v 'Channels' -w 600 --slope-mode -t "Broken Channel
  GPRINT:brokenm:AVERAGE:"Average\:%6.0lf\t      "  \
  GPRINT:brokenm:MAX:" Maximum\:%6.0lf\n" \
 
+rrdtool graph --start -$age -v 'Contexts' -w 600 --slope-mode -t "Active PDP Contexts" $RHIZO_DIR/graphs/pdp_contexts-$age.png \
+ DEF:pdpm=$RHIZO_DIR/pdp_contexts.rrd:pdp_contexts:AVERAGE \
+ LINE1:pdpm#2AAAFF:"PDP Contexts            " \
+ GPRINT:pdpm:LAST:"Current\:%6.0lf\t       "  \
+ GPRINT:pdpm:AVERAGE:"Average\:%6.0lf\t      "  \
+ GPRINT:pdpm:MAX:" Maximum\:%6.0lf\n" \
+
 for bts in 0 1 2 3 4 5; do 
 
 _w=$(bname $bts)
