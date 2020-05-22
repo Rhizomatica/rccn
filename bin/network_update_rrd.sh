@@ -2,7 +2,7 @@
 
 RHIZO_DIR="/var/rhizomatica/rrd"
 
-channels=`echo "show network" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0} /TCH\/(H|F):/ {tch=$2}; /SDCCH8/ {sdcch=$2} ; {sub(/%/,"",tch); sub(/%/,"",sdcch)} END {print tch":"sdcch}'`
+channels=`echo "show network" | nc -q1 localhost 4242 | awk 'BEGIN {tch=0;sdcch=0;su=0;st=0} /TCH\/(H|F):/ {tch=$2}; /SDCCH/ {gsub("\\\(|\\\)", "", $3) split($3, a, "\\\/"); su+=a[1]; st+=a[2]; sdcch = (st>0) ? (su/st)*100 : 0;}; {sub(/%/,"",tch);}; END { print tch":"sdcch }'`
 rrdtool update $RHIZO_DIR/bsc_channels.rrd N:$channels
 
 broken=`echo "show lchan" | nc -q1 localhost 4242 | grep BROKEN | wc -l`
