@@ -233,7 +233,7 @@ class Context:
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_number'))
             self.session.execute('set', 'ringback=%(500,500,450,500);%(250,1000,450,500)')
             self.session.execute('set', 'instant_ringback=true')
-            self.session.execute('set', 'bridge_early_media=true')
+            #self.session.execute('set', 'bridge_early_media=true')
             self.session.execute('set', 'ignore_early_media=false')
 
             if _context == 'ROAMING_BOTH' or _context == 'ROAMING_INBOUND':
