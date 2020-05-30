@@ -299,6 +299,9 @@ class Dialplan:
                 return True
             self.context.inbound()
             return True
+        # Handle Transferred DID call from Other Community
+        if self.check_roaming_destination():
+            return True
 
     def check_local(self):
         try:
