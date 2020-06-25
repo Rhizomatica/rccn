@@ -146,20 +146,22 @@ class Context:
             '''
             codec = 'G729'
             try:
-                gw = self.numbering.get_gateway()
-                if gw is None:
-                    log.error('Error in getting the Gateway to use for the call')
+                gws = self.numbering.get_gateways(callee)
+                if len(gws) is 0:
+                    log.error('Error in getting a Gateway to use for the call')
                     self.session.execute('playback', '%s' % self.get_audio_file('INVALID_GATEWAY'))
                     self.session.hangup('INVALID_GATEWAY')
                     return
-                log.debug('Use gateway: %s', gw)
+                log.debug('Use gateway(s): %s', gws)
             except NumberingException as numex:
                 log.error(numex)
                 self.session.execute('playback', '%s' % self.get_audio_file('INVALID_GATEWAY'))
                 return False
-            endpoint = 'sofia/gateway/' + gw + '/' + str(callee)
-            bridge_params = ',sip_cid_type=pid'
-            endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+            for gw in gws:
+                endpoint = 'sofia/gateway/' + gw[1] + '/' + str(callee) + '|'
+                bridge_params = ',sip_cid_type=pid'
+                endpoints.append("[absolute_codec_string='^^:" + codec + "'" + bridge_params + "]" + endpoint)
+
             if 'JB_out' in globals() and JB_out != '':
                 self.session.execute('export', 'rtp_jitter_buffer_during_bridge=true')
                 self.session.execute('export', 'nolocal:jitterbuffer_msec=' + JB_out)
