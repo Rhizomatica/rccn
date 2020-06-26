@@ -412,6 +412,8 @@ class Context:
             "}|/[^0-9]*([0-9]+) total./|%1)}")
         count = self.session.getVariable('_internalcount')
         try:
+            if count is None:
+                return 999
             if count.decode().isnumeric():
                 return int(count)
         except ValueError:
