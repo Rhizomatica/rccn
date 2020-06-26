@@ -409,8 +409,13 @@ class Context:
     def get_local_chans(self):
         self.session.execute("set",
             "_internalcount=${regex(${show channels like "+ mncc_ip_address +
-            "}|/[^0-9]*([0-9])* total./|%1)}")
-        return self.session.getVariable('_internalcount')
+            "}|/[^0-9]*([0-9]+) total./|%1)}")
+        count = self.session.getVariable('_internalcount')
+        try:
+            if count.decode().isnumeric():
+                return int(count)
+        except ValueError:
+            return 999
 
     def local(self):
         """ Local context. Calls destined for our BSC """
@@ -442,7 +447,9 @@ class Context:
                 log.error(_ex)
 
         # Check if the call duration has to be limited
-        if not ('unlimit_chans_max' in globals() and int(self.get_local_chans()) < unlimit_chans_max):
+        local_chans = self.get_local_chans()
+        self.session.consoleLog("notice", "There are %s local channels in use" % local_chans)
+        if not ('unlimit_chans_max' in globals() and int(local_chans) < unlimit_chans_max):
             try:
                 limit = self.configuration.get_local_calls_limit()
                 if limit != False:
