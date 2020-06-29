@@ -451,7 +451,7 @@ class Context:
         # Check if the call duration has to be limited
         local_chans = self.get_local_chans()
         self.session.consoleLog("notice", "There are %s local channels in use" % local_chans)
-        if not ('unlimit_chans_max' in globals() and int(local_chans) < unlimit_chans_max):
+        if not ('unlimit_chans_max' in globals() and local_chans < unlimit_chans_max):
             try:
                 limit = self.configuration.get_local_calls_limit()
                 if limit != False:
