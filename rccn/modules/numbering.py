@@ -19,6 +19,12 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 sys.path.append("..")
 from config import *
@@ -273,7 +279,7 @@ class Numbering:
                    'AND EquipmentWatch.subscriber_id=Subscriber.id '
                    'AND Equipment.imei=? '
                    'ORDER BY Subscriber.updated DESC LIMIT 1;')
-            print sql
+            print(sql)
             sq_hlr_cursor.execute(sql, [(imei)])
             extensions = sq_hlr_cursor.fetchall()
             sq_hlr.close()
@@ -444,7 +450,7 @@ class Numbering:
                 return gw[0]
             else:
                 return None
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise NumberingException('Database error getting the Gateway: %s' % e)
 
     def is_number_mxcel(self, destination_number):
@@ -465,7 +471,7 @@ class Numbering:
                     log.debug('MX cel: %s->%s' % (destination_number, number))
                     return True
             return False
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             db_conn.rollback()
             raise NumberingException('PG_DB error getting prefix match: %s' % e)
 

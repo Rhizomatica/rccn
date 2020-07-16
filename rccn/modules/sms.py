@@ -23,11 +23,17 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 from config import *
 import urllib, obscvty, time
-from subscriber import Subscriber, SubscriberException
-from numbering import Numbering, NumberingException
+from modules.subscriber import Subscriber, SubscriberException
+from modules.numbering import Numbering, NumberingException
 from threading import Thread
 import ESL
 import binascii
@@ -513,7 +519,7 @@ class SMS:
             return '2'
         except Exception as ex:
             template = "exception of type {0}. Arguments:\n{1!r}"
-            print template.format(type(ex).__name__, ex.args)
+            print(template.format(type(ex).__name__, ex.args))
             sms_log.debug('Using GSM03.38 Spanish Shift not possible. %s' % sys.exc_info()[1])
             return '2'
 
@@ -654,4 +660,4 @@ if __name__ == '__main__':
         #sms.receive('68820132107','777','3010#68820135624#10','UTF-8',2)
         #sms.send_broadcasit('antani')
     except SMSException as e:
-        print "Error: %s" % e
+        print("Error: %s" % e)

@@ -20,6 +20,12 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys, ESL, code, yaml
 sys.path.append("..")
 from config import *
@@ -183,7 +189,7 @@ class LiveStatistics:
             else:
                 db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise StatisticException('PG_HLR error: %s' % e)
 
     def get_recent_sms_avg(self, per, ago):
@@ -200,7 +206,7 @@ class LiveStatistics:
             else:
                 db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise StatisticException('PG_HLR error: %s' % e)
 
     def get_common_recent_hup_cause(self):
@@ -214,11 +220,11 @@ class LiveStatistics:
             if cur.rowcount > 0:
                 sub = cur.fetchone()
                 db_conn.commit()
-                return sub[1],int(sub[2])
+                return sub[1], int(sub[2])
             else:
                 db_conn.commit()
                 return "NONE",100
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise StatisticException('PG_HLR error: %s' % e)
 
     def get_recent_call_count(self,ago):
@@ -233,7 +239,7 @@ class LiveStatistics:
             else:
                 db_conn.commit()
                 raise StatisticException('PG_HLR No rows found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise StatisticException('PG_HLR error: %s' % e)
 
     def get_uptime(self):
@@ -584,21 +590,21 @@ if __name__ == '__main__':
     try:
         #dataz = stat.get_calls_stats('7d')
         #print dataz
-        print stat.get_total_calls()
-        print stat.get_total_minutes()
-        print stat.get_average_call_duration()
-        print stat.get_total_calls_by_context('OUTBOUND')
+        print(stat.get_total_calls())
+        print(stat.get_total_minutes())
+        print(stat.get_average_call_duration())
+        print(stat.get_total_calls_by_context('OUTBOUND'))
 
     except StatisticException as e:
-        print "Error: %s" % e
+        print("Error: %s" % e)
 
     cost = CostsStatistics()
     try:
-        print cost.get_total_spent()
-        print cost.get_average_call_cost()
-        print cost.get_total_spent_credits()
-        print cost.get_top_destinations()
-        print cost.get_costs_stats('7d')
+        print(cost.get_total_spent())
+        print(cost.get_average_call_cost())
+        print(cost.get_total_spent_credits())
+        print(cost.get_top_destinations())
+        print(cost.get_costs_stats('7d'))
     except StatisticException as e:
-        print "Error: %s" % e
+        print("Error: %s" % e)
     

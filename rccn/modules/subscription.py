@@ -20,12 +20,18 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 sys.path.append("..")
 from config import *
 
-from subscriber import Subscriber, SubscriberException 
-from sms import SMS, SMSException
+from modules.subscriber  import Subscriber, SubscriberException
+from modules.sms import SMS, SMSException
 
 class SubscriptionException(Exception):
     pass
@@ -38,16 +44,16 @@ class Subscription:
     def subscription_info(self):
         sub = Subscriber()
         unpaid=self.get_unpaid_subscriptions()
-        print '---\n\n'
+        print('---\n\n')
         for number in unpaid:
-            print 'PostGres: '+number[0]+':'
+            print('PostGres: '+number[0]+':')
             info=sub.print_vty_hlr_info(number)
             if "No subscriber found for extension" in info:
-                print 'OsmoHLR: '+info
-                print "Checking for 5 digit extension"
+                print('OsmoHLR: '+info)
+                print("Checking for 5 digit extension")
                 info=sub.print_vty_hlr_info(number[0][-5:])
-            print 'OsmoHLR: '+ info
-            print '---\n\n'
+            print('OsmoHLR: '+ info)
+            print('---\n\n')
 
     def get_unpaid_subscriptions(self):
         # get all subscribers that haven't paid yet

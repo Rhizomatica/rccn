@@ -20,6 +20,12 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 from subprocess import Popen
 import sys
 sys.path.append("..")
@@ -46,7 +52,7 @@ class Maintenance:
                    '--file=%s ' %
                    (host, dbname, user, table, self.archive_dir + filename)
                   )
-        print command
+        print(command)
         try:
             self.check_archive_file(filename)
         except Exception as error:
@@ -64,7 +70,7 @@ class Maintenance:
             try:
                 os.mkdir(self.archive_dir)
             except OSError as error:
-                print error
+                print(error)
                 return False
         return True
 
@@ -119,7 +125,7 @@ class Maintenance:
             cur.close()
             db_conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
-            print error
+            print(error)
             return False
 
         sql = ("SELECT count(*) from %s_archive" % table)
@@ -133,7 +139,7 @@ class Maintenance:
             if rows is None or rows[0] != 0:
                 return False
         except (Exception, psycopg2.DatabaseError) as error:
-            print error
+            print(error)
             return False
 
         return True
@@ -149,7 +155,7 @@ class Maintenance:
         try:
             self.check_archive_file(filename)
         except Exception as error:
-            print error
+            print(error)
             return False
 
         if table == 'cdr':
@@ -166,44 +172,44 @@ class Maintenance:
         try:
             cur = db_conn.cursor()
             sql = ("INSERT INTO %s_archive SELECT * %s" % (table, s_from))
-            print sql
+            print(sql)
             cur.execute(sql)
             cur.close()
             db_conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             db_conn.rollback()
-            print error
+            print(error)
             return False
 
         # Table is now ready for export.
         try:
             self.dump('localhost', pgsql_db, pgsql_user, pgsql_pwd, table+'_archive', filename)
         except Exception as error:
-            print error
+            print(error)
             return False
 
         try:
             cur = db_conn.cursor()
             sql = ("DELETE %s" % s_from)
-            print sql
+            print(sql)
             cur.execute(sql)
             cur.close()
             db_conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             db_conn.rollback()
-            print error
+            print(error)
             return False
 
         try:
             cur = db_conn.cursor()
             sql = ("TRUNCATE table %s_archive" % table)
-            print sql
+            print(sql)
             cur.execute(sql)
             cur.close()
             db_conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             db_conn.rollback()
-            print error
+            print(error)
             return False
 
         return True

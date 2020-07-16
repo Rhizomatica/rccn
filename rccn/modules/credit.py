@@ -21,13 +21,19 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 sys.path.append("..")
 from config import *
 
-from reseller import Reseller, ResellerException
-from subscriber import Subscriber, SubscriberException 
-from sms import SMS, SMSException
+from modules.reseller import Reseller, ResellerException
+from modules.subscriber import Subscriber, SubscriberException
+from modules.sms import SMS, SMSException
 
 class CreditException(Exception):
     pass
@@ -202,4 +208,4 @@ if __name__ == '__main__':
         #print a
         #sub.delete('68820137511')
     except CreditException as e:
-        print "Error: %s" % e
+        print("Error: %s" % e)

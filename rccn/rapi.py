@@ -20,6 +20,12 @@
 #
 ############################################################################
 
+# Python3 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import json
 import binascii
 import datetime

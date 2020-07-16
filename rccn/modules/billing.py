@@ -20,12 +20,18 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys, re
 import math
 sys.path.append("..")
 from config import *
-from subscriber import Subscriber, SubscriberException
-from configuration import Configuration, ConfigurationException
+from modules.subscriber import Subscriber, SubscriberException
+from modules.configuration import Configuration, ConfigurationException
 
 class BillingException(Exception):
     pass
@@ -232,6 +238,6 @@ class Billing:
 
 if __name__ == '__main__':
     bill = Billing()
-    print bill.get_call_cost(139, 0.25)
+    print(bill.get_call_cost(139, 0.25))
     #bill.get_rate('0019728390082')
     #bill.get_rate('005219514404014')

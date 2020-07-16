@@ -19,6 +19,12 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 sys.path.append("..")
 from config import *
@@ -45,7 +51,7 @@ class Subscriber:
             else:
                 cur.close()
                 raise SubscriberException("Error in getting subscriber balance")
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             cur.close()
             raise SubscriberException('Database error in getting subscriber balance: %s' % e)
 
@@ -57,7 +63,7 @@ class Subscriber:
             cur = db_conn.cursor()
             cur.execute("UPDATE subscribers SET balance=%(balance)s WHERE msisdn=%(number)s", {'balance': Decimal(str(balance)), 'number': subscriber_number})
             db_conn.commit()
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             cur.close()
             raise SubscriberException('Database error updating balance: %s' % e)
 
@@ -79,7 +85,7 @@ class Subscriber:
                 return True
             else:
                 return False
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('Database error in checking subscriber authorization: %s' % e)
 
     def get_local_msisdn(self, imsi):
@@ -125,7 +131,7 @@ class Subscriber:
             else:
                 cur.close()
                 raise SubscriberException('PG_HLR No subscribers found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get_all_notpaid(self, location=False):
@@ -140,7 +146,7 @@ class Subscriber:
                 return sub
             else:
                 raise NoDataException('PG_HLR No subscribers found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get_all_authorized(self, location=False):
@@ -155,7 +161,7 @@ class Subscriber:
                 return sub
             else:
                 raise NoDataException('PG_HLR No subscribers found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get_all_unauthorized(self, location=False):
@@ -170,7 +176,7 @@ class Subscriber:
                 return sub
             else:
                 raise NoDataException('PG_HLR No subscribers found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get_all_5digits(self):
@@ -419,7 +425,7 @@ class Subscriber:
             cur.execute('SELECT count(*) FROM subscribers WHERE subscription_status=1')
             sub = cur.fetchone()
             return sub[0]
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get_unauthorized(self):
@@ -428,7 +434,7 @@ class Subscriber:
             cur.execute('SELECT count(*) FROM subscribers WHERE authorized=0')
             sub = cur.fetchone()
             return sub[0]
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
     def get(self, msisdn):
@@ -440,7 +446,7 @@ class Subscriber:
                 return sub
             else:
                 raise SubscriberException('PG_HLR No subscriber found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting subscriber: %s' % e)
 
     def set_lac(self, imsi, lac):
@@ -448,7 +454,7 @@ class Subscriber:
         try:
             sq_hlr = sqlite3.connect(sq_hlr_path)
             sq_hlr_cursor = sq_hlr.cursor()
-            print 'Update lac %s %s' % (imsi, lac)
+            print('Update lac %s %s' % (imsi, lac))
             sq_hlr_cursor.execute('UPDATE subscriber SET lac=? WHERE imsi=?', (lac, imsi) )
             sq_hlr.commit()
             sq_hlr.close()
@@ -657,7 +663,7 @@ class Subscriber:
             cmd = 'subscriber extension %s authorized %s' % (msisdn, auth)
             vty.command(cmd)
         except:
-            print "VTY Exception"
+            print("VTY Exception")
             pass
                 
         # disable/enable subscriber on PG Subscribers
@@ -748,7 +754,7 @@ class Subscriber:
             else:
                 db_conn.commit()
                 raise SubscriberException('PG_HLR No subscriber found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             cur.execute("rollback")
             raise SubscriberException('PG_HLR error updating subscriber data: %s' % e)
 
@@ -837,6 +843,6 @@ if __name__ == '__main__':
     sub = Subscriber()
     try:
         subs = sub.get_all_roaming()
-        print subs
+        print(subs)
     except SubscriberException as e:
-        print "Error: %s" % e
+        print("Error: %s" % e)

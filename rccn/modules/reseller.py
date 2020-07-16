@@ -19,10 +19,16 @@
 #
 ############################################################################
 
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 sys.path.append("..")
 from config import *
-from subscriber import Subscriber, SubscriberException
+from modules.subscriber import Subscriber, SubscriberException
 
 class ResellerException(Exception):
     pass
@@ -46,7 +52,7 @@ class Reseller:
                 return res
             else:
                 raise ResellerException('PG_HLR No resellers found')
-        except psycopg2.DatabaseError, e:
+        except psycopg2.DatabaseError as e:
             raise SubscriberException('PG_HLR error getting resellers: %s' % e)
 
     def get(self, msisdn):
@@ -200,7 +206,7 @@ class Reseller:
         res_log.info('Add %s to subscriber %s' % (amount, self.subscriber_msisdn))
         try:
             sub = Subscriber()
-            from credit import Credit, CreditException
+            from modules.credit import Credit, CreditException
             credit = Credit()
             res_log.debug('Get current subscriber balance')
             current_subscriber_balance = sub.get_balance(self.subscriber_msisdn)
