@@ -51,7 +51,7 @@ class SubscriberRESTService:
     # get all subscribers
     @route('/')
     def getAll(self, request):
-        api_log.info('%s - [GET] %s' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s', request.getHost().host, self.path)
         try:
             sub = Subscriber()
             data = json.dumps(sub.get_all(), cls=PGEncoder)
@@ -64,7 +64,7 @@ class SubscriberRESTService:
     # get subscriber
     @route('/<msisdn>')
     def get(self, request, msisdn):
-        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, msisdn))
+        api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path, msisdn)
         try:
             sub = Subscriber()
             if msisdn == 'all_connected':
@@ -100,7 +100,7 @@ class SubscriberRESTService:
     # get msisdn
     @route('/extension/<imsi>')
     def extension(self, request, imsi):
-        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, imsi))
+        api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path, imsi)
         try:
             sub =Subscriber()
             data = json.dumps(sub.get_local_extension(imsi), cls=PGEncoder)
@@ -112,7 +112,10 @@ class SubscriberRESTService:
     # add new subscriber
     @route('/', Http.POST)
     def post(self, request, msisdn, name, balance, location, equipment):
-        api_log.info('%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s equipment:"%s"' % (request.getHost().host, self.path, msisdn, name, balance, location, equipment))
+        api_log.info(
+            '%s - [POST] %s Data: msisdn:"%s" name:"%s" balance:"%s" location:"%s equipment:"%s"',
+            request.getHost().host, self.path, msisdn, name, balance, location, equipment
+        )
         try:
             sub = Subscriber()
             num = sub.add(msisdn, name, balance, location, equipment)
@@ -128,7 +131,7 @@ class SubscriberRESTService:
     # put subscriber offline
     @route('/offline', Http.PUT)
     def offline(self, request, msisdn='', local='no'):
-        api_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"' % (request.getClientIP(), self.path, msisdn))
+        api_log.info('%s - [PUT] %s/offline Data: msisdn: "%s"', request.getClientIP(), self.path, msisdn)
         try:
             sub = Subscriber()
             sub.expire_lu(msisdn)
@@ -162,9 +165,18 @@ class SubscriberRESTService:
         subscription_status='', location='', equipment='', roaming=''):
         api_log.info(
             '%s - [PUT] %s/%s Data: name:"%s" balance:"%s" authorized:"%s" ' 
-            'subscription_status:"%s" location:"%s" equipment:"%s" roaming:"%s"' 
-            % (request.getHost().host, self.path, msisdn, name, balance,
-                authorized, subscription_status, location, equipment, roaming))
+            'subscription_status:"%s" location:"%s" equipment:"%s" roaming:"%s"',
+            request.getHost().host,
+            self.path,
+            msisdn,
+            name,
+            balance,
+            authorized,
+            subscription_status,
+            location,
+            equipment,
+            roaming
+        )
         try:
             sub = Subscriber()
             if subscription_status != '':
@@ -182,7 +194,7 @@ class SubscriberRESTService:
     # delete subscriber
     @route('/<msisdn>', Http.DELETE)
     def delete(self, request, msisdn):
-        api_log.info('%s - [DELETE] %s/%s' % (request.getHost().host, self.path, msisdn))
+        api_log.info('%s - [DELETE] %s/%s', request.getHost().host, self.path, msisdn)
         try:
             sub = Subscriber()
             sub.delete(msisdn)
@@ -196,7 +208,7 @@ class SubscriberRESTService:
     # Get List of IMEI for autocomplete
     @route('/imei')
     def imei(self, request):
-        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, partial_imei))
+        api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path, partial_imei)
         try:
             num = Numbering()
             data = json.dumps(num.get_imei_autocomplete())
@@ -206,7 +218,7 @@ class SubscriberRESTService:
 
     @route('/imei/<partial_imei>')
     def imei(self, request, partial_imei):
-        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path, partial_imei))
+        api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path, partial_imei)
         try:
             num = Numbering()
             data = json.dumps(num.get_imei_autocomplete(partial_imei))
@@ -220,7 +232,7 @@ class ResellerRESTService:
     # get all resellers
     @route('/')
     def getAll(self, request):
-        api_log.info('%s - [GET] %s' % (request.getHost(). host, self.path))
+        api_log.info('%s - [GET] %s', request.getHost(). host, self.path)
         try:
             reseller = Subscriber()
             data = json.dumps(reseller.get_all(), cls=PGEncoder)
@@ -233,7 +245,7 @@ class ResellerRESTService:
     # get reseller
     @route('/<msisdn>')
     def get(self, request, msisdn):
-        api_log.info('%s - [GET] %s/%s' % (request.getHost().host, self.path , msisdn))
+        api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path , msisdn)
         try:
             reseller = Reseller()
             if msisdn == 'messages':
@@ -249,7 +261,10 @@ class ResellerRESTService:
     # add new reseller
     @route('/<msisdn>', Http.POST)
     def post(self, request, msisdn, pin, balance):
-        api_log.info('%s - [POST] %s Data: msisdn:"%s" pin:"%s" balance:"%s"' % (request.getHost().host, self.path, msisdn, pin, balance))
+        api_log.info(
+            '%s - [POST] %s Data: msisdn:"%s" pin:"%s" balance:"%s"',
+            request.getHost().host, self.path, msisdn, pin, balance
+        )
         try:
             reseller = Reseller()
             reseller.add(msisdn, pin, balance)
@@ -263,7 +278,10 @@ class ResellerRESTService:
     # edit reseller
     @route('/', Http.PUT)
     def put(self, request, msisdn='', pin='', balance=''):
-        api_log.info('%s - [PUT] %s Data: msisdn:"%s" pin:"%s" balance:"%s"' % (request.getHost().host, self.path, msisdn, pin, balance))
+        api_log.info(
+            '%s - [PUT] %s Data: msisdn:"%s" pin:"%s" balance:"%s"',
+            request.getHost().host, self.path, msisdn, pin, balance
+        )
         try:
             reseller = Reseller()
             if msisdn != '' and pin != '' or balance != '':
@@ -278,8 +296,10 @@ class ResellerRESTService:
     # edit reseller notification messages
     @route('/edit_messages', Http.PUT)
     def put(self, request, mess1, mess2, mess3, mess4, mess5, mess6):
-        api_log.info('%s - [PUT] %s/edit_messages Data: mess1:"%s" mess2:"%s" mess3:"%s" mess4:"%s" mess5:"%s" mess6:"%s"' % (request.getHost().host, self.path, 
-        mess1, mess2, mess3, mess4, mess5, mess6))
+        api_log.info(
+            '%s - [PUT] %s/edit_messages Data: mess1:"%s" mess2:"%s" mess3:"%s" mess4:"%s" mess5:"%s" mess6:"%s"',
+            request.getHost().host, self.path, mess1, mess2, mess3, mess4, mess5, mess6
+        )
         try:
             reseller = Reseller()
             reseller.edit_messages(mess1, mess2, mess3, mess4, mess5, mess6)
@@ -293,7 +313,7 @@ class ResellerRESTService:
     # delete reseller
     @route('/<msisdn>', Http.DELETE)
     def delete(self, request, msisdn):
-        api_log.info('%s - [DELETE] %s/%s' % (request.getHost().host, self.path, msisdn))
+        api_log.info('%s - [DELETE] %s/%s', request.getHost().host, self.path, msisdn)
         try:
             reseller = Reseller()
             reseller.delete(msisdn)
@@ -308,7 +328,7 @@ class CreditRESTService:
     path = '/credit'
     @route('/', Http.GET)
     def get(self, request):
-        api_log.info('%s - [GET] %s/' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/', request.getHost().host, self.path)
         try:
             credit = Credit()
             data = json.dumps(credit.get_all_credit_allocated(), cls=PGEncoder)
@@ -318,7 +338,7 @@ class CreditRESTService:
 
     @route('/records', Http.GET)
     def records(self, request, year):
-        api_log.info('%s - [GET] %s/records %s' % (request.getHost().host, self.path, year))
+        api_log.info('%s - [GET] %s/records %s', request.getHost().host, self.path, year)
         try:
             credit = Credit()
             data = json.dumps(credit.get_credit_records(year), cls=PGEncoder)
@@ -328,7 +348,7 @@ class CreditRESTService:
 
     @route('/month', Http.POST)
     def month(self, request, year, month):
-        api_log.info('%s - [POST] %s/month %s %s' % (request.getHost().host, self.path, year, month))
+        api_log.info('%s - [POST] %s/month %s %s', request.getHost().host, self.path, year, month)
         try:
             credit = Credit()
             data = json.dumps(credit.get_month_credit(year, month), cls=PGEncoder)
@@ -338,7 +358,10 @@ class CreditRESTService:
 
     @route('/', Http.POST)
     def post(self, request, msisdn, amount):
-        api_log.info('%s - [POST] %s/add Data: msisdn:"%s" amount:"%s"' % (request.getHost().host, self.path, msisdn, amount))
+        api_log.info(
+            '%s - [POST] %s/add Data: msisdn:"%s" amount:"%s"',
+            request.getHost().host, self.path, msisdn, amount
+        )
         try:
             credit = Credit()
             credit.add(msisdn, amount)
@@ -351,7 +374,10 @@ class CreditRESTService:
 
     @route('/reseller', Http.POST)
     def reseller(self, request, msisdn, amount):
-        api_log.info('%s - [POST] %s/reseller Data: msisdn:"%s" amount:"%s"' % (request.getHost().host, self.path, msisdn, amount))
+        api_log.info(
+            '%s - [POST] %s/reseller Data: msisdn:"%s" amount:"%s"',
+            request.getHost().host, self.path, msisdn, amount
+        )
         try:
             credit = Credit()
             credit.add_to_reseller(msisdn, amount)
@@ -372,12 +398,12 @@ class ChatRESTService:
             import threading
             thread = threading.Thread(target=sms.receive, args=(source, destination, text, charset, coding))
             thread.daemon = True
-            api_log.info( 'Starting thread for chat message to %s via %s' % (destination, request.getClientIP()) )
+            api_log.info('Starting thread for chat message to %s via %s', destination, request.getClientIP())
             thread.start()
             data = {'status': 'success', 'error': ''}
             return data
         except Exception as e:
-            print str(e)
+            api_log.error("Chat handler exception %s", e, exc_info=True)
 
 class SMSRESTService:
     path = '/sms'
@@ -389,10 +415,14 @@ class SMSRESTService:
             btext = text
         thex = binascii.hexlify(btext)
 
-        api_log.info('%s - [POST] %s Data: source:"%s" destination:"%s" charset:"%s"' %
-            (request.getHost().host, self.path, source, destination, charset))
-        api_log.debug('Data: source:"%s" destination:"%s" charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s' %
-            (source, destination, charset, coding, text.decode(charset,'replace'), thex, dr, dcs))
+        api_log.info(
+            '%s - [POST] %s Data: source:"%s" destination:"%s" charset:"%s"',
+            request.getHost().host, self.path, source, destination, charset
+        )
+        api_log.debug(
+            'Data: source:"%s" destination:"%s" charset:"%s" coding: "%s" content: %s HexofBin: %s DR: %s DCS: %s',
+            source, destination, charset, coding, text.decode(charset,'replace'), thex, dr, dcs
+        )
         sms = SMS()
         unicode_text = text.decode(charset,'replace')
         if use_kannel == 'yes':
@@ -403,9 +433,9 @@ class SMSRESTService:
                 try:
                     unicode_text = sms.check_decode0338(btext)
                     api_log.info('SMS Decoded from GSM 03.38')
-                    api_log.debug('Decoded text:"%s"' % unicode_text)
+                    api_log.debug('Decoded text:"%s"', unicode_text)
                 except Exception as ex:
-                    api_log.debug('Coding(%s), but: %s %s' % (coding, str(ex), sys.exc_info()[1]))
+                    api_log.debug('Coding(%s), but: %s', coding, str(ex), exc_info=True)
                     data = {'status': 'failed', 'error': str(ex)+' '+str(sys.exc_info()[1])}
                     # It's probably utf-8
                     unicode_text=btext.decode('utf-8','replace')
@@ -413,10 +443,9 @@ class SMSRESTService:
                 try:
                     unicode_text=btext.decode('utf-16be')
                     api_log.info('SMS decoded as UTF-16BE')
-                    api_log.debug('Decoded text: "%s"' % text)
-                except: # Catch Everything, try to not actually LOSE messages!
-                    e=sys.exc_info()[0]
-                    api_log.debug('Exception: %s %s' % (e, sys.exc_info()[1]))
+                    api_log.debug('Decoded text: "%s"', text)
+                except Exception as e: # Catch Everything, try to not actually LOSE messages!
+                    api_log.debug('Exception: %s', e, exc_info=True)
                     # Some phones are sending multi part messages with different charsets.
                     # Kannel concatenates and sends as UTF-16BE coding 2
                     try:
@@ -424,8 +453,8 @@ class SMSRESTService:
                         a=btext[:134]
                         b=btext[134:]
                         unicode_text=a.decode('utf-16be')+b.decode('utf8')
-                    except:
-                        api_log.debug('Exception: %s %s' % (e, sys.exc_info()[1]))
+                    except Exception as e:
+                        api_log.debug('Exception: %s', e, exc_info=True)
                         unicode_text=btext.decode('utf-16be','replace')
             else:
                 unicode_text=btext.decode('utf-8','replace')
@@ -439,14 +468,16 @@ class SMSRESTService:
 
     @route('/send', Http.POST)
     def send(self, request, source, destination, text):
-        api_log.info('%s - [POST] %s/send Data: source:"%s" destination:"%s text: %s"' % (request.getHost().host, self.path, source, destination, text))
+        api_log.info(
+            '%s - [POST] %s/send Data: source:"%s" destination:"%s text: %s"',
+            request.getHost().host, self.path, source, destination, text
+        )
         try:
             sms = SMS()
             sms.send(source, destination, text)
             data = {'status': 'success', 'error': ''}
-        except:
-            e=sys.exc_info()[0]
-            api_log.info('SMS Exception: %s %s' % (e, sys.exc_info()[1]))
+        except Exception as e:
+            api_log.info('SMS Exception: %s', e, exc_info=True)
             data = {'status': 'failed', 'error': str(e)+' '+str(sys.exc_info()[1])}
         
         api_log.info(data)
@@ -454,7 +485,10 @@ class SMSRESTService:
 
     @route('/send_broadcast', Http.POST)    
     def send_broadcast(self, request, text, btype, location):
-        api_log.info('%s - [POST] %s/send_broadcast Data: text:"%s" btype:[%s] location:"%s"' % (request.getHost().host, self.path, text, btype, location))
+        api_log.info(
+            '%s - [POST] %s/send_broadcast Data: text:"%s" btype:[%s] location:"%s"',
+             request.getHost().host, self.path, text, btype, location
+        )
         try:
             sms = SMS()
             sms.send_broadcast(text, btype, location)
@@ -469,7 +503,7 @@ class StatisticsRESTService:
 
     @route('/feed')
     def monitor_feed(self,request):
-        api_log.info('%s - [GET] %s/feed' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/feed', request.getHost().host, self.path)
         if request.getClientIP().find("10.23") > -1:
             request.setHeader('Access-Control-Allow-Origin','*')
         else:
@@ -484,7 +518,7 @@ class StatisticsRESTService:
 
     @route('/sms/stat')
     def get_sms_stat(self, request, year, month):
-        api_log.info('%s - [GET] %s/calls/obm' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/calls/obm', request.getHost().host, self.path)
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_sms_stat(year, month), cls=PGEncoder)
@@ -494,7 +528,7 @@ class StatisticsRESTService:
 
     @route('/calls/obm')
     def get_outbound_mins(self, request, year, month):
-        api_log.info('%s - [GET] %s/calls/obm' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/calls/obm', request.getHost().host, self.path)
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_outbound_minutes(year, month), cls=PGEncoder)
@@ -505,7 +539,7 @@ class StatisticsRESTService:
     # Calls statistics
     @route('/calls/total_calls')
     def total_calls(self, request):
-        api_log.info('%s - [GET] %s/calls/total_calls' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/calls/total_calls', request.getHost().host, self.path)
         try:
             stats = CallsStatistics()
             data = stats.get_total_calls()
@@ -516,7 +550,7 @@ class StatisticsRESTService:
 
     @route('/calls/total_minutes')
     def total_minutes(self, request):
-        api_log.info('%s - [GET] %s/calls/total_minutes' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/calls/total_minutes', request.getHost().host, self.path)
         try:
             stats = CallsStatistics()
             data = stats.get_total_minutes()
@@ -527,7 +561,7 @@ class StatisticsRESTService:
 
     @route('/calls/average_call_duration')
     def average_call_duration(self, request):
-        api_log.info('%s - [GET] %s/calls/average_call_duration' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/calls/average_call_duration', request.getHost().host, self.path)
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_average_call_duration(), cls=PGEncoder)
@@ -538,7 +572,10 @@ class StatisticsRESTService:
 
     @route('/calls/total_calls_by_context',Http.POST)
     def total_calls_by_context(self, request, context):
-        api_log.info('%s - [POST] %s/calls/total_calls_by_context Data: context:"%s"' % (request.getHost().host, self.path, context))
+        api_log.info(
+            '%s - [POST] %s/calls/total_calls_by_context Data: context:"%s"',
+            request.getHost().host, self.path, context
+        )
         try:
             stats = CallsStatistics()
             data = stats.get_total_calls_by_context(context)
@@ -549,7 +586,7 @@ class StatisticsRESTService:
 
     @route('/calls/calls',Http.POST)
     def calls(self, request, period):
-        api_log.info('%s - [POST] %s/calls/calls Data: period:"%s"' % (request.getHost().host, self.path, period))
+        api_log.info('%s - [POST] %s/calls/calls Data: period:"%s"', request.getHost().host, self.path, period)
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_calls_stats(period), cls=PGEncoder)
@@ -560,7 +597,7 @@ class StatisticsRESTService:
     
     @route('/calls/calls_minutes',Http.POST)
     def calls_minutes(self, request, period):
-        api_log.info('%s - [POST] %s/calls/calls_minutes Data: period:"%s"' % (request.getHost().host, self.path, period))
+        api_log.info('%s - [POST] %s/calls/calls_minutes Data: period:"%s"', request.getHost().host, self.path, period)
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_calls_minutes_stats(period), cls=PGEncoder)
@@ -571,7 +608,7 @@ class StatisticsRESTService:
     
     @route('/calls/calls_context',Http.POST)
     def calls_context(self, request, period):
-        api_log.info('%s - [POST] %s/calls/calls_context Data: period:"%s"' % (request.getHost().host, self.path, period))
+        api_log.info('%s - [POST] %s/calls/calls_context Data: period:"%s"', request.getHost().host, self.path, period)
         try:
             stats = CallsStatistics()
             data = json.dumps(stats.get_calls_context_stats(period), cls=PGEncoder)
@@ -583,7 +620,7 @@ class StatisticsRESTService:
     # Costs/Credits statistics
     @route('/costs/total_spent')
     def total_spent(self, request):
-        api_log.info('%s - [GET] %s/costs/total_spent' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/costs/total_spent', request.getHost().host, self.path)
         try:
             stats = CostsStatistics()
             data = json.dumps(stats.get_total_spent(), cls=PGEncoder)
@@ -594,7 +631,7 @@ class StatisticsRESTService:
     
     @route('/costs/average_call_cost')
     def average_call_cost(self, request):
-        api_log.info('%s - [GET] %s/costs/average_call_cost' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/costs/average_call_cost', request.getHost().host, self.path)
         try:
             stats = CostsStatistics()
             data = json.dumps(stats.get_average_call_cost(), cls=PGEncoder)
@@ -605,7 +642,7 @@ class StatisticsRESTService:
 
     @route('/costs/total_spent_credits')
     def total_spent_credits(self, request):
-        api_log.info('%s - [GET] %s/costs/total_spent_credits' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/costs/total_spent_credits', request.getHost().host, self.path)
         try:
             stats = CostsStatistics()
             data = json.dumps(stats.get_total_spent_credits(), cls=PGEncoder)
@@ -616,7 +653,7 @@ class StatisticsRESTService:
 
     @route('/costs/top_destinations')
     def top_destinations(self, request):
-        api_log.info('%s - [GET] %s/top_destinations' % (request.getHost().host, self.path))
+        api_log.info('%s - [GET] %s/top_destinations', request.getHost().host, self.path)
         try:
             stats = CostsStatistics()
             data = json.dumps(stats.get_top_destinations(), cls=PGEncoder)
@@ -627,7 +664,7 @@ class StatisticsRESTService:
 
     @route('/costs/costs_stats', Http.POST)
     def costs_stats(self, request, period):
-        api_log.info('%s - [POST] %s/costs/costs_stats Data: period:"%s"' % (request.getHost().host, self.path, period))
+        api_log.info('%s - [POST] %s/costs/costs_stats Data: period:"%s"', request.getHost().host, self.path, period)
         try:
             stats = CostsStatistics()
             data = json.dumps(stats.get_costs_stats(period), cls=PGEncoder)
@@ -638,7 +675,7 @@ class StatisticsRESTService:
 
     @route('/costs/credits_stats',Http.POST)
     def credits_stats(self, request, period):
-        api_log.info('%s - [POST] %s/costs/credits_stats Data: period:"%s"' % (request.getHost().host, self.path, period))
+        api_log.info('%s - [POST] %s/costs/credits_stats Data: period:"%s"', request.getHost().host, self.path, period)
         try:
             stats = CostsStatistics()
             data = json.dumps(stats.get_credits_stats(period), cls=PGEncoder)
@@ -652,7 +689,7 @@ class ConfigurationRESTService:
 
     @route('/site', Http.GET)
     def site(self, request):
-        api_log.debug('%s - [GET] %s/site' % (request.getHost().host, self.path))
+        api_log.debug('%s - [GET] %s/site', request.getHost().host, self.path)
         try:
             config = Configuration()
             data = json.dumps(config.get_site(), cls=PGEncoder)
@@ -664,7 +701,7 @@ class ConfigurationRESTService:
 
     @route('/locations', Http.GET)
     def locations(self, request):
-        api_log.debug('%s - [GET] %s/locations' % (request.getHost().host, self.path))
+        api_log.debug('%s - [GET] %s/locations', request.getHost().host, self.path)
         try:
             config = Configuration()
             data = json.dumps(config.get_locations(), cls=PGEncoder)
@@ -676,7 +713,7 @@ class ConfigurationRESTService:
     
     @route('/config', Http.GET)
     def config(self, request):
-        api_log.debug('%s - [GET] %s/config' % (request.getHost().host, self.path))
+        api_log.debug('%s - [GET] %s/config', request.getHost().host, self.path)
         try:
             config = Configuration()
             data = json.dumps(config.get_site_config(), cls=PGEncoder)
