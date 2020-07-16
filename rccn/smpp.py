@@ -150,11 +150,11 @@ def rx_alert_notification(pdu):
                 bts = num.get_local_hlr_btsinfo(extension)
                 print "My HLR says %s" % bts['current_bts']
             else:
-        	    try:
-                    	bts = num.get_local_hlr_btsinfo(extension)
-        	    except config.NumberingException as ne:
-        		print str(ne)
-        		return
+                try:
+                    bts = num.get_local_hlr_btsinfo(extension)
+                except config.NumberingException as ne:
+                    print str(ne)
+                    return
 
             print "That is from %s last seen %s" % (bts['home_bts'], bts['current_bts'])
 

@@ -12,7 +12,7 @@ db_revision = 0
 def cs(l, exit = 0):
     code.interact(local = dict(globals(), **l) )
     if exit == 1:
-      exit()
+        exit()
 
 def unpackSeptets(septets, numberOfSeptets=None, prevOctet=None, shift=7):
     """ Unpacks the specified septets into octets 
@@ -142,7 +142,7 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
             sql = sql + ' ORDER BY created DESC '
         if limit > 0:
             sql = sql + ' LIMIT ' + limit
-	log.debug(sql)
+        log.debug(sql)
         sq_hlr_cursor.execute(sql)
         _sms = sq_hlr_cursor.fetchall()
         sq_hlr.close()
@@ -205,8 +205,8 @@ def build_msgs(smsq):
           header = sms[17]
           text = sms[18]
         else:
-          print "Unknown DB Revision"
-          exit()
+            print "Unknown DB Revision"
+            exit()
 
         log.debug("Message ID: \033[93m" + str(sms[0]) + '\033[0m')
         log.debug("Is Report: " + str(is_report))
@@ -322,9 +322,9 @@ def build_msgs(smsq):
                     
                 except UnicodeDecodeError as e:
                     try:
-                      utext = unicode(dtext,'utf-16be')
+                        utext = unicode(dtext,'utf-16be')
                     except Exception as e:
-                      print e
+                        print e
                     charset = 'UTF-16BE'
                 log.debug ("Coding value is 4/8, Charset Determined %s", charset)
             else:

@@ -62,8 +62,8 @@ class Configuration:
             cur.close()
             if locations != None:
                 return locations
-	    else:
-		return ""
+            else:
+                return ""
         except psycopg2.DatabaseError as e:
             raise ConfigurationException('Database error getting locations: %s' % e)
     

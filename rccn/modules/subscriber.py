@@ -109,8 +109,8 @@ class Subscriber:
         except sqlite3.Error as e:
             sq_hlr.close()
             raise SubscriberException('SQ_HLR error: %s' % e.args[0])
-	except TypeError as e:
-	    sq_hlr.close()
+        except TypeError as e:
+            sq_hlr.close()
             raise SubscriberException('SQ_HLR error: number not found')
 
 
@@ -482,7 +482,7 @@ class Subscriber:
         else:
             imsi = self._get_imsi(msisdn)
 
-	subscriber_number = config['internal_prefix'] + msisdn
+        subscriber_number = config['internal_prefix'] + msisdn
         # check if subscriber already exists
         if self._check_subscriber_exists(msisdn):
             try:
@@ -608,7 +608,7 @@ class Subscriber:
             cmd = 'subscriber extension %s extension %s' % (msisdn, subscriber_number)
             vty.command(cmd)
         except:
-	    pass
+            pass
 
         # PG_HLR delete subscriber
         try:
@@ -620,7 +620,7 @@ class Subscriber:
             cur.close()
         except psycopg2.DatabaseError as e:
             cur.close()
-	    pass
+            pass
 
         self._delete_in_distributed_hlr(msisdn)
 
@@ -836,7 +836,7 @@ class Subscriber:
 if __name__ == '__main__':
     sub = Subscriber()
     try:
-	subs = sub.get_all_roaming()
-	print subs
+        subs = sub.get_all_roaming()
+        print subs
     except SubscriberException as e:
         print "Error: %s" % e

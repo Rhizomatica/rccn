@@ -54,7 +54,7 @@ def get_last_sync_time():
 def cleanup_hlrs():
     ''' Get all the MSISDNs that are in the local hlr with our prefix that no
     longer exist in the local subscribers table and delete them from riak and
-     from our copy of the HLR '''
+    from our copy of the HLR '''
     try:
         cur = db_conn.cursor()
         rk_hlr = riak_client.bucket('hlr')
