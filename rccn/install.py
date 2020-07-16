@@ -24,6 +24,13 @@
 """
 RCCN installation script.
 """
+
+# Python3/2 compatibility
+# TODO: Remove once python2 support no longer needed.
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import json
 import os
 import sys
@@ -47,26 +54,26 @@ def to_decimal(thing):
     return Decimal(str(thing))
 
 def db_init(debug):
-    print('Loading RCCN database schema... ').ljust(40),
+    print('Loading RCCN database schema... '.ljust(40))
 
     try:
         cur.execute(open(rhizomatica_dir + '/db/database.sql', 'r').read())
     except psycopg2.DatabaseError as e:
-        print 'Database error loading schema: %s' % e
+        print('Database error loading schema: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
-    print('Loading Rates... ').ljust(40),
+    print('Loading Rates... '.ljust(40))
 
     try:
         cur.execute(open(rhizomatica_dir + '/db/rates.sql', 'r').read())
     except psycopg2.DatabaseError as e:
-        print 'Database error loading rates: %s' % e
+        print('Database error loading rates: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
 def db_prefix(table):
-    print('Adding PREFIX table... ').ljust(40),
+    print('Adding PREFIX table... '.ljust(40))
     try:
         cur.execute(
             "CREATE TABLE " +  table + " ("
@@ -75,23 +82,23 @@ def db_prefix(table):
             "d DECIMAL NOT NULL)"
         )
     except psycopg2.DatabaseError as e:
-        print 'Database error creating prefix table: %s' % e
+        print('Database error creating prefix table: %s' % e)
         return False
     else:
-        print 'Done'
+        print('Done')
         return True
 
 def db_prefix_data(sql_file):
-    print('Loading prefix data... ').ljust(40),
+    print('Loading prefix data... '.ljust(40))
     try:
         cur.execute(open(rhizomatica_dir + '/db/' + sql_file + '.sql', 'r').read())
     except psycopg2.DatabaseError as e:
-        print 'Database error loading data: %s' % e
+        print('Database error loading data: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
 def db_site(debug):
-    print('Adding Site Info to PGSQL... ').ljust(40),
+    print('Adding Site Info to PGSQL... '.ljust(40))
     try:
         cur.execute("DELETE FROM site")
         cur.execute(
@@ -106,12 +113,12 @@ def db_site(debug):
              'ip_address': vpn_ip_address})
         db_conn.commit()
     except psycopg2.DatabaseError as e:
-        print 'Database error inserting site data: %s' % e
+        print('Database error inserting site data: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
 def db_voip(debug):
-    print('Adding VoIP configuration to PGSQL... ').ljust(40),
+    print('Adding VoIP configuration to PGSQL... '.ljust(40))
     try:
         cur.execute(
             "INSERT INTO providers"
@@ -126,9 +133,9 @@ def db_voip(debug):
              'proxy': voip_proxy})
         db_conn.commit()
     except psycopg2.DatabaseError as e:
-        print 'Database error adding VoIP provider configuration : %s' % e
+        print('Database error adding VoIP provider configuration : %s' % e)
     else:
-        print "Providers Done"
+        print("Providers Done")
 
     try:
         cur.execute(
@@ -141,12 +148,12 @@ def db_voip(debug):
              'proxy': voip_proxy})
         db_conn.commit()
     except psycopg2.DatabaseError as e:
-        print 'Database error adding VoIP DID configuration: %s' % e
+        print('Database error adding VoIP DID configuration: %s' % e)
     else:
-        print 'DIDs Done'
+        print('DIDs Done')
 
 
-    print('Adding Site configuration to PGSQL... ').ljust(40),
+    print('Adding Site configuration to PGSQL... '.ljust(40))
     try:
         sql = (
             "INSERT INTO configuration "
@@ -176,12 +183,12 @@ def db_voip(debug):
              'sms_destination_unauthorized': sms_destination_unauthorized})
         db_conn.commit()
     except psycopg2.DatabaseError as e:
-        print 'Database error adding Site configuration: %s' % e
+        print('Database error adding Site configuration: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
 def osmo_hlr(debug):
-    print('Creating SMSC shortcode on HLR').ljust(40),
+    print('Creating SMSC shortcode on HLR'.ljust(40))
     try:
         sq_hlr = sqlite3.connect(sq_hlr_path)
         sq_hlr_cursor = sq_hlr.cursor()
@@ -193,12 +200,12 @@ def osmo_hlr(debug):
         sq_hlr.commit()
         sq_hlr.close()
     except sqlite3.Error as e:
-        print 'Database error adding SMSC shortcode: %s' % e
+        print('Database error adding SMSC shortcode: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
 def admin_pw(debug):
-    print('Creating User for RAI ... Username: "%s", Password: "%s"\n' % (rai_admin_user, rai_admin_pwd)).ljust(40),
+    print('Creating User for RAI ... Username: "%s", Password: "%s"\n'.ljust(40) % (rai_admin_user, rai_admin_pwd))
     rai_pwd = subprocess.check_output(
         ['php', '-r echo password_hash("%s",PASSWORD_DEFAULT);'
          % rai_admin_pwd])
@@ -211,18 +218,18 @@ def admin_pw(debug):
             {'username': rai_admin_user, 'password': rai_pwd})
         db_conn.commit()
     except psycopg2.DatabaseError as e:
-        print 'Database error adding RAI admin: %s' % e
+        print('Database error adding RAI admin: %s' % e)
     else:
-        print 'Done'
+        print('Done')
 
 def rrd_date(debug):
-    print('Creating RRD data... ').ljust(40),
+    print('Creating RRD data... '.ljust(40))
     os.system("%s/bin/./network_create_rrd.sh" % rhizomatica_dir)
     os.system("%s/bin/./platform_create_rrd.sh" % rhizomatica_dir)
-    print 'Done'
+    print('Done')
 
 def riak_add():
-    print('Adding Site Info to Riak... ').ljust(40),
+    print('Adding Site Info to Riak... '.ljust(40))
 
     riak_config = {
         'site_name': site_name,
@@ -240,9 +247,9 @@ def riak_add():
             json.dumps(riak_config)))
 
     os.system(riak_add_cmd)
-    print 'Done'
+    print('Done')
 
-print 'RCCN Installation script\n'
+print('RCCN Installation script\n')
 
 if __name__ == '__main__':
     parser = OptionParser()
@@ -271,7 +278,7 @@ try:
     db_conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
     cur = db_conn.cursor()
 except psycopg2.DatabaseError as e:
-    print 'Database connection error %s' % e
+    print('Database connection error %s' % e)
     sys.exit(1)
 
 if options.full:
@@ -299,4 +306,4 @@ if options.prefix:
 if options.riak:
     riak_add()
 
-print '\nRCCN Installation completed'
+print('\nRCCN Installation completed')
