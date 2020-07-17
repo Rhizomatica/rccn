@@ -222,7 +222,7 @@ class Subscriber:
                     return _sip_connected
                 _sip_connected.append([vals[0]])
         except Exception as ex:
-            log.info('Exception: %s' % ex)
+            api_log.info('Exception: %s' % ex)
 
     def get_all_connected(self):
         try:
