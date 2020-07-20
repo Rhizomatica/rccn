@@ -24,7 +24,7 @@ RCCN ESME
 
 '''
 import config
-import obscvty, urllib2, time
+import urllib2, time
 import smpplib.client
 import smpplib.consts
 import smpplib.exceptions
@@ -335,8 +335,6 @@ if __name__ == "__main__":
     NumberingException = config.numbering.NumberingException
     sms = config.SMS()
     SMSException = config.sms.SMSException
-    #open a VTY console, don't bring up and down all the time.
-    #vty = obscvty.VTYInteract('OpenBSC', '127.0.0.1', 4242)
     log.info('Starting up ESME...')
     # host, port, timeout, sequence_generator
     client = smpplib.client.Client("127.0.0.1", 2775, 90)
