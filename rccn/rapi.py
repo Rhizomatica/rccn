@@ -213,7 +213,7 @@ class SubscriberRESTService:
     # Get List of IMEI for autocomplete
     @route('/imei')
     def imei(self, request):
-        api_log.info('%s - [GET] %s/%s', request.getHost().host, self.path, partial_imei)
+        api_log.info('%s - [GET] %s', request.getHost().host, self.path)
         try:
             sub = Subscriber()
             data = json.dumps(sub.get_imei_autocomplete())
