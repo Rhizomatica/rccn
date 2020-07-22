@@ -70,7 +70,7 @@ class Subscriber:
 
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute("SELECT balance FROM subscribers WHERE msisdn=%(number)s AND authorized=1", {'number': subscriber_number})
+            cur.execute("SELECT balance FROM subscribers WHERE msisdn = %(number)s AND authorized=1", {'number': subscriber_number})
             balance = cur.fetchone()
             if balance != None:
                 cur.close()
@@ -88,7 +88,7 @@ class Subscriber:
             subscriber_number = config['internal_prefix']+subscriber_number
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute("UPDATE subscribers SET balance=%(balance)s WHERE msisdn=%(number)s", {'balance': Decimal(str(balance)), 'number': subscriber_number})
+            cur.execute("UPDATE subscribers SET balance = %(balance)s WHERE msisdn = %(number)s", {'balance': Decimal(str(balance)), 'number': subscriber_number})
             self._local_db_conn.commit()
         except psycopg2.DatabaseError as e:
             cur.close()
@@ -106,7 +106,7 @@ class Subscriber:
                 if len(subscriber_number) == 5:
                     subscriber_number = config['internal_prefix']+subscriber_number
 
-            cur.execute("SELECT msisdn FROM subscribers WHERE msisdn=%(number)s AND authorized=1", {'number': subscriber_number})
+            cur.execute("SELECT msisdn FROM subscribers WHERE msisdn = %(number)s AND authorized=1", {'number': subscriber_number})
             sub = cur.fetchone()
             if sub != None:
                 return True
@@ -509,7 +509,7 @@ class Subscriber:
     def get(self, msisdn):
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute('SELECT * FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            cur.execute('SELECT * FROM subscribers WHERE msisdn = %(msisdn)s', {'msisdn': msisdn})
             if cur.rowcount > 0:
                 sub = cur.fetchone()
                 return sub
@@ -648,26 +648,34 @@ class Subscriber:
         try:
             cur = self._local_db_conn.cursor()
             update_date = datetime.datetime.fromtimestamp(subscriber.data['updated'])
-            cur.execute('UPDATE hlr SET msisdn=%(msisdn)s, home_bts=%(home_bts)s, current_bts=%(current_bts)s, '
-                        'authorized=%(authorized)s, updated=%(updated)s WHERE msisdn=%(msisdn)s',
-            {'msisdn': subscriber.data['msisdn'], 'home_bts': subscriber.data['home_bts'],
-            'current_bts': subscriber.data['current_bts'],
-            'authorized': subscriber.data['authorized'], 'updated': update_date})
+            cur.execute(
+                'UPDATE hlr SET msisdn = %(msisdn)s, home_bts = %(home_bts)s, current_bts = %(current_bts)s, '
+                'authorized = %(authorized)s, updated = %(updated)s WHERE msisdn=%(msisdn)s',
+                {
+                    'msisdn': subscriber.data['msisdn'],
+                    'home_bts': subscriber.data['home_bts'],
+                    'current_bts': subscriber.data['current_bts'],
+                    'authorized': subscriber.data['authorized'],
+                    'updated': update_date
+                }
+            )
             self._local_db_conn.commit()
         except psycopg2.DatabaseError as e:
             raise SubscriberException('Database error: %s' % e)
 
-    def update_location_local_hlr(self, extension, current_bts = False):
+    def update_location_local_hlr(self, extension, current_bts=False):
         try:
             cur = self._local_db_conn.cursor()
             if current_bts is False:
-                cur.execute('UPDATE hlr SET current_bts=home_bts,'
-                ' updated=%(updated)s WHERE msisdn=%(msisdn)s',
-                {'msisdn': extension, 'updated': "now()"})
+                cur.execute(
+                    'UPDATE hlr SET current_bts = home_bts, updated = %(updated)s WHERE msisdn = %(msisdn)s',
+                    {'msisdn': extension, 'updated': "now()"}
+                )
             else:
-                cur.execute('UPDATE hlr SET current_bts=%(current_bts)s,'
-                ' updated=%(updated)s WHERE msisdn=%(msisdn)s',
-                {'msisdn': extension, 'current_bts': current_bts, 'updated': "now()"})
+                cur.execute(
+                    'UPDATE hlr SET current_bts = %(current_bts)s, updated = %(updated)s WHERE msisdn = %(msisdn)s',
+                    {'msisdn': extension, 'current_bts': current_bts, 'updated': "now()"}
+                )
             self._local_db_conn.commit()
         except psycopg2.DatabaseError as e:
             raise SubscriberException('Database error: %s' % e)
@@ -688,8 +696,16 @@ class Subscriber:
         # PG_HLR delete subscriber
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute('DELETE FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
-            cur.execute('DELETE FROM hlr WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            cur.execute(
+                'DELETE FROM subscribers WHERE msisdn = %(msisdn)s',
+                {'msisdn': msisdn}
+            )
+            cur.execute(
+                'DELETE FROM hlr WHERE msisdn=%(msisdn)s',
+                {'msisdn': msisdn}
+            )
+
+            # TODO(matt9j) This might leak a transaction if the subscriber is not in the hlr
             if cur.rowcount > 0:
                self._local_db_conn.commit()
             cur.close()
@@ -738,7 +754,10 @@ class Subscriber:
         # disable/enable subscriber on PG Subscribers
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute('UPDATE subscribers SET authorized=%(auth)s WHERE msisdn=%(msisdn)s', {'auth': auth, 'msisdn': msisdn})
+            cur.execute(
+                'UPDATE subscribers SET authorized = %(auth)s WHERE msisdn = %(msisdn)s',
+                {'auth': auth, 'msisdn': msisdn}
+            )
             if cur.rowcount > 0:
                 self._local_db_conn.commit()
             else:
@@ -771,18 +790,25 @@ class Subscriber:
         # status 1 - subscription paid
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute('SELECT subscription_status FROM subscribers WHERE msisdn=%(msisdn)s', {'msisdn': msisdn})
+            cur.execute(
+                'SELECT subscription_status FROM subscribers WHERE msisdn = %(msisdn)s',
+                {'msisdn': msisdn}
+            )
             if cur.rowcount > 0:
                 prev_status = cur.fetchone()
             else:
                 self._local_db_conn.commit()
                 raise SubscriberException('PG_HLR Subscriber not found')
             if prev_status[0] == 0 and status == 1:
-                cur.execute('UPDATE subscribers SET subscription_status=%(status)s,subscription_date = NOW() WHERE msisdn=%(msisdn)s',
-                            {'status': status, 'msisdn': msisdn})
+                cur.execute(
+                    'UPDATE subscribers SET subscription_status = %(status)s, subscription_date = NOW() WHERE msisdn = %(msisdn)s',
+                    {'status': status, 'msisdn': msisdn}
+                )
             else:
-                cur.execute('UPDATE subscribers SET subscription_status=%(status)s WHERE msisdn=%(msisdn)s',
-                            {'status': status, 'msisdn': msisdn})
+                cur.execute(
+                    'UPDATE subscribers SET subscription_status = %(status)s WHERE msisdn=%(msisdn)s',
+                    {'status': status, 'msisdn': msisdn}
+                )
             if cur.rowcount > 0:
                 self._local_db_conn.commit()
             else:
@@ -865,10 +891,22 @@ class Subscriber:
                 'INSERT INTO subscribers(msisdn,name,authorized,balance,subscription_status, '
                 'location, equipment) '
                 'VALUES(%(msisdn)s,%(name)s,1,%(balance)s,1,%(location)s,%(equipment)s)',
-                { 'msisdn': msisdn, 'name': unidecode(name), 'balance': Decimal(str(balance)),
-                  'location': location, 'equipment': equipment })
-            cur.execute('INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
-            {'msisdn': msisdn, 'home_bts': config['local_ip'], 'current_bts': config['local_ip']})
+                {
+                    'msisdn': msisdn,
+                    'name': unidecode(name),
+                    'balance': Decimal(str(balance)),
+                    'location': location,
+                    'equipment': equipment
+                }
+            )
+            cur.execute(
+                'INSERT INTO hlr(msisdn, home_bts, current_bts, authorized, updated) VALUES(%(msisdn)s, %(home_bts)s, %(current_bts)s, 1, now())',
+                {
+                    'msisdn': msisdn,
+                    'home_bts': config['local_ip'],
+                    'current_bts': config['local_ip']
+                }
+            )
             self._local_db_conn.commit()
         except psycopg2.DatabaseError as e:
             self._local_db_conn.rollback()
