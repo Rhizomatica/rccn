@@ -61,24 +61,24 @@ class Subscriber
 		}
 	}
 
-        public function get_extension($imsi) {
-                try {
-                        $response = \Httpful\Request::get($this->path."/extension/$imsi")->expectsJson()->send();
-                        $data = $response->body;
-                } catch (Httpful\Exception\ConnectionErrorException $e) {
-                        throw new SubscriberException($e->getMessage());
-                }
+	public function get_extension($imsi) {
+		try {
+			$response = \Httpful\Request::get($this->path."/extension/$imsi")->expectsJson()->send();
+			$data = $response->body;
+		} catch (Httpful\Exception\ConnectionErrorException $e) {
+			throw new SubscriberException($e->getMessage());
+		}
 
-                if (!is_array($data)) {
-                        if ($data->status == 'failed') {
-                                throw new SubscriberException($data->error);
-                        } else {
-                                return $data;
-                        }
-                } else {
+		if (!is_array($data)) {
+			if ($data->status == 'failed') {
+				throw new SubscriberException($data->error);
+			} else {
+				return $data;
+			}
+		} else {
 			return $data[0];
 		}
-        }
+	}
 
 
 	public function getAllConnected($type='gsm') {
@@ -101,26 +101,28 @@ class Subscriber
 			
 		if (!is_array($data)) {
 			if ($data->status == 'failed') {
-			        if ($data->error  == 'No connected subscribers found') {
-			                return array();
-			        } else {
-				        throw new SubscriberException($data->error);
-                                }
+				if ($data->error  == 'No connected subscribers found') {
+					return array();
+				} else {
+					throw new SubscriberException($data->error);
+				}
 			}
 		}
-	        $entries = array();
-	        foreach ($data as $entry) {
-        	        array_push($entries, $entry[0]);
-	        }
+
+		$entries = array();
+		foreach ($data as $entry) {
+			array_push($entries, $entry[0]);
+		}
+
 		return $entries;
 	}
 		
 
 	public function create() {
 		$subscriber = array(
-				"msisdn" => $this->msisdn, "name" => $this->name,
-				"balance" => $this->balance, "location" => $this->location,
-				"equipment" => $this->equipment);
+			"msisdn" => $this->msisdn, "name" => $this->name,
+			"balance" => $this->balance, "location" => $this->location,
+			"equipment" => $this->equipment);
 		try {
 			$response = \Httpful\Request::post($this->path)->body($subscriber)->sendsJson()->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
@@ -157,12 +159,13 @@ class Subscriber
 		try {
 			$response = \Httpful\Request::delete($this->path."/".$this->msisdn)->send();
 		} catch (Httpful\Exception\ConnectionErrorException $e) {
-                        throw new SubscriberException($e->getMessage());
-                }
+			throw new SubscriberException($e->getMessage());
+		}
+
 		$data = $response->body;
-                if ($data->status == 'failed') {
-                        throw new SubscriberException($data->error);
-                }
+		if ($data->status == 'failed') {
+			throw new SubscriberException($data->error);
+		}
 	}
 
 }
