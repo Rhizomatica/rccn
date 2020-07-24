@@ -99,6 +99,8 @@ class SubscriberRESTService:
 
         if msisdn != 'all_connected':
             api_log.info(data)
+        else:
+            api_log.debug(data)
 
         return data
 
@@ -111,6 +113,8 @@ class SubscriberRESTService:
             data = json.dumps(sub.get_local_extension(imsi), cls=PGEncoder)
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
+
+        api_log.debug(data)
         return data
 
  
@@ -219,6 +223,8 @@ class SubscriberRESTService:
             data = json.dumps(sub.get_imei_autocomplete())
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
+
+        api_log.debug(data)
         return data
 
     @route('/imei/<partial_imei>')
@@ -229,6 +235,8 @@ class SubscriberRESTService:
             data = json.dumps(sub.get_imei_autocomplete(partial_imei))
         except SubscriberException as e:
             data = {'status': 'failed', 'error': str(e)}
+
+        api_log.debug(data)
         return data
 
 class ResellerRESTService:
@@ -339,6 +347,7 @@ class CreditRESTService:
             data = json.dumps(credit.get_all_credit_allocated(), cls=PGEncoder)
         except CreditException as e:
             data = {'status': 'failed', 'error': str(e)}
+        api_log.debug(data)
         return data
 
     @route('/records', Http.GET)
@@ -349,6 +358,7 @@ class CreditRESTService:
             data = json.dumps(credit.get_credit_records(year), cls=PGEncoder)
         except CreditException as e:
             data = {'status': 'failed', 'error': str(e)}
+        api_log.debug(data)
         return data
 
     @route('/month', Http.POST)
@@ -359,6 +369,8 @@ class CreditRESTService:
             data = json.dumps(credit.get_month_credit(year, month), cls=PGEncoder)
         except CreditException as e:
             data = {'status': 'failed', 'error': str(e)}
+
+        api_log.debug(data)
         return data
 
     @route('/', Http.POST)
@@ -406,6 +418,7 @@ class ChatRESTService:
             api_log.info('Starting thread for chat message to %s via %s', destination, request.getClientIP())
             thread.start()
             data = {'status': 'success', 'error': ''}
+            api_log.debug(data)
             return data
         except Exception as e:
             api_log.error("Chat handler exception %s", e, exc_info=True)
@@ -529,6 +542,7 @@ class StatisticsRESTService:
             data = json.dumps(stats.get_sms_stat(year, month), cls=PGEncoder)
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
+        api_log.debug(data)
         return str(data)
 
     @route('/calls/obm')
@@ -539,6 +553,7 @@ class StatisticsRESTService:
             data = json.dumps(stats.get_outbound_minutes(year, month), cls=PGEncoder)
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
+        api_log.debug(data)
         return str(data)
 
     # Calls statistics
