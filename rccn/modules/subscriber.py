@@ -757,9 +757,10 @@ class Subscriber:
                 {'msisdn': msisdn}
             )
 
-            # TODO(matt9j) This might leak a transaction if the subscriber is not in the hlr
             if cur.rowcount > 0:
                 self._local_db_conn.commit()
+            else:
+                self._local_db_conn.rollback()
         except psycopg2.DatabaseError:
             pass
         finally:
