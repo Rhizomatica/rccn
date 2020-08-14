@@ -128,10 +128,28 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
-    def get_all_notpaid(self):
+    def get_all_notpaid(self, location=False):
         try:
             cur = db_conn.cursor()
-            cur.execute('SELECT * FROM subscribers WHERE subscription_status = 0')
+            if location:
+                cur.execute('SELECT * FROM subscribers WHERE subscription_status = 0 and location = %s', (location, ))
+            else:
+                cur.execute('SELECT * FROM subscribers WHERE subscription_status = 0')
+            if cur.rowcount > 0:
+                sub = cur.fetchall()
+                return sub
+            else:
+                raise NoDataException('PG_HLR No subscribers found')
+        except psycopg2.DatabaseError, e:
+            raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
+
+    def get_all_authorized(self, location=False):
+        try:
+            cur = db_conn.cursor()
+            if location:
+                cur.execute('SELECT * FROM subscribers WHERE authorized = 1 and location = %s', (location, ))
+            else:
+                cur.execute('SELECT * FROM subscribers WHERE authorized = 1')
             if cur.rowcount > 0:
                 sub = cur.fetchall()
                 return sub
@@ -140,10 +158,13 @@ class Subscriber:
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
-    def get_all_unauthorized(self):
+    def get_all_unauthorized(self, location=False):
         try:
             cur = db_conn.cursor()
-            cur.execute('SELECT * FROM subscribers WHERE authorized = 0')
+            if location:
+                cur.execute('SELECT * FROM subscribers WHERE authorized = 0 and location = %s', (location, ))
+            else:
+                cur.execute('SELECT * FROM subscribers WHERE authorized = 0')
             if cur.rowcount > 0:
                 sub = cur.fetchall()
                 return sub
