@@ -434,11 +434,11 @@ class SMSRESTService:
         return data
 
     @route('/send_broadcast', Http.POST)    
-    def send_broadcast(self, request, text, btype):
-        api_log.info('%s - [POST] %s/send_broadcast Data: text:"%s" btype:"%s"' % (request.getHost().host, self.path, text, btype))
+    def send_broadcast(self, request, text, btype, location):
+        api_log.info('%s - [POST] %s/send_broadcast Data: text:"%s" btype:[%s] location:"%s"' % (request.getHost().host, self.path, text, btype, location))
         try:
             sms = SMS()
-            sms.send_broadcast(text, btype)
+            sms.send_broadcast(text, btype, location)
             data = {'status': 'success', 'error': ''}
         except SMSException as e:
             data = {'status': 'failed', 'error': str(e)}

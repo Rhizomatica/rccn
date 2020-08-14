@@ -603,26 +603,39 @@ class SMS:
         cmd = 'subscriber extension %s sms sender extension %s send %s' % (num, config['smsc'], text)
         vty.command(cmd)
 
-    def broadcast_to_all_subscribers(self, text, btype):
+    def broadcast_to_all_subscribers(self, text, btype, location):
+        sms_log.debug('Broadcast message to [%s], Location:%s' % (btype, location))
+        if location == "all":
+            location = False
         sub = Subscriber()
-        if btype == 'all':
-            subscribers_list = sub.get_all()
-        elif btype == 'notpaid':
-            subscribers_list = sub.get_all_notpaid()
-        elif btype == 'unauthorized':
-            subscribers_list = sub.get_all_unauthorized()
-        elif btype == 'extension':
-            subscribers_list = sub.get_all_5digits()
+        try:
+            if btype == 'authorized':
+                subscribers_list = sub.get_all_authorized(location)
+            elif btype == 'unauthorized':
+                subscribers_list = sub.get_all_unauthorized(location)
+            elif btype == 'notpaid':
+                subscribers_list = sub.get_all_notpaid(location)
+            elif btype == 'extension':
+                subscribers_list = sub.get_all_5digits()
+            else:
+                subscribers_list = []
+        except NoDataException as ex:
+            return False
 
         for mysub in subscribers_list:
             self.send(config['smsc'], mysub[1], text)
-            sms_log.debug('Broadcast message sent to %s' % mysub[1])
             time.sleep(1)
+            sms_log.debug('Broadcast message sent to [%s] %s' % (btype, mysub[1]))
 
-    def send_broadcast(self, text, btype):
+    def send_broadcast(self, text, btype, location):
         sms_log.info('Send broadcast SMS to all subscribers. text: %s' % text)
-        t = Thread(target=self.broadcast_to_all_subscribers, args=(text, btype, ))
-        t.start()
+        if type(btype) is list:
+            t = {}
+            for bt in btype:
+                t[bt] = Thread(target=self.broadcast_to_all_subscribers, args=(text, bt, location))
+                t[bt].start()
+            return
+        sms_log.error('Bulk Message had no destinations')
 
     def _t_urlopen(self, url, data):
         try:
