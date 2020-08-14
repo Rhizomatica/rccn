@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-11 16:58-0300\n"
+"POT-Creation-Date: 2020-08-13 20:02+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,9 +105,9 @@ msgid "Add Credit"
 msgstr ""
 
 #: credit.php:38 credit.php:39 credit.php:43 credit.php:72 credit.php:75
-#: credit_history.php:33 credit_history.php:48 provisioning.php:72
-#: provisioning.php:215 subscriber_edit.php:49 subscriber_edit.php:50
-#: subscriber_edit.php:132
+#: credit_history.php:33 credit_history.php:48 provisioning.php:74
+#: provisioning.php:230 subscriber_edit.php:51 subscriber_edit.php:52
+#: subscriber_edit.php:148
 msgid "Subscriber number"
 msgstr ""
 
@@ -123,7 +123,7 @@ msgstr ""
 msgid "Amount to add"
 msgstr ""
 
-#: credit.php:53 provisioning.php:92 provisioning.php:125
+#: credit.php:53 provisioning.php:100 provisioning.php:137
 #: resellers_credit.php:42 resellers_provisioning.php:43
 msgid "Add"
 msgstr ""
@@ -148,12 +148,12 @@ msgstr ""
 msgid "pesos successfully added to subscriber"
 msgstr ""
 
-#: credit.php:94 credit.php:98 provisioning.php:217 provisioning.php:222
+#: credit.php:94 credit.php:98 provisioning.php:232 provisioning.php:237
 #: resellers_configuration.php:23 resellers_configuration.php:103
 #: resellers_configuration.php:107 resellers_credit.php:83
 #: resellers_credit.php:87 resellers_provisioning.php:85
-#: resellers_provisioning.php:89 send_sms.php:84 send_sms.php:95
-#: send_sms.php:99 send_sms.php:107 send_sms.php:111
+#: resellers_provisioning.php:89 send_sms.php:113 send_sms.php:124
+#: send_sms.php:128 send_sms.php:136 send_sms.php:140
 msgid "Go Back"
 msgstr ""
 
@@ -305,7 +305,7 @@ msgstr ""
 msgid "SMSs"
 msgstr ""
 
-#: include/menu.php:71 send_sms.php:25 send_sms.php:50
+#: include/menu.php:71 send_sms.php:32 send_sms.php:79
 msgid "Send SMS"
 msgstr ""
 
@@ -325,93 +325,102 @@ msgstr ""
 msgid "Only Calls with Cost"
 msgstr ""
 
-#: login.php:39
+#: login.php:45
 msgid "Username:"
 msgstr ""
 
-#: login.php:43
+#: login.php:49
 msgid "Password:"
 msgstr ""
 
-#: login.php:56
+#: login.php:63
 msgid "Login"
 msgstr ""
 
-#: login.php:70
+#: login.php:77
 msgid "Username is empty"
 msgstr ""
 
-#: login.php:73
+#: login.php:80
 msgid "Password is empty"
 msgstr ""
 
-#: login.php:76
+#: login.php:83
 msgid "Login Incorrect"
 msgstr ""
 
-#: provisioning.php:29
+#: provisioning.php:31
 msgid "Provision a new subscriber"
 msgstr ""
 
-#: provisioning.php:66 provisioning.php:100 subscriber_edit.php:43
+#: provisioning.php:68 provisioning.php:108 subscriber_edit.php:45
 #: subscribers.php:156 subscribers.php:174
 msgid "Name"
 msgstr ""
 
-#: provisioning.php:67 provisioning.php:101 subscriber_edit.php:44
+#: provisioning.php:69 provisioning.php:109 subscriber_edit.php:46
 msgid "Subscriber Name"
 msgstr ""
 
-#: provisioning.php:71
+#: provisioning.php:73
 msgid "Subscriber number or IMSI"
 msgstr ""
 
-#: provisioning.php:79 provisioning.php:112 subscriber_edit.php:57
-#: subscribers.php:158 subscribers.php:176
+#: provisioning.php:77 provisioning.php:117 subscriber_edit.php:55
+msgid "Equipment"
+msgstr ""
+
+#: provisioning.php:78 provisioning.php:118
+msgid "a short description of the phone and model - iPhone5/Galaxy 7/etc"
+msgstr ""
+
+#: provisioning.php:87 provisioning.php:124 send_sms.php:50
+#: subscriber_edit.php:64 subscribers.php:158 subscribers.php:176
 msgid "Location"
 msgstr ""
 
-#: provisioning.php:80 provisioning.php:113 subscriber_edit.php:58
+#: provisioning.php:88 provisioning.php:125 send_sms.php:51
+#: subscriber_edit.php:65
 msgid "Subscriber location"
 msgstr ""
 
-#: provisioning.php:106
+#: provisioning.php:114
 msgid "The phone must be connected or have recently attempted to connect"
 msgstr ""
 
-#: provisioning.php:155 provisioning.php:183 subscriber_edit.php:105
+#: provisioning.php:167 provisioning.php:197 subscriber_edit.php:119
 msgid "Name is empty"
 msgstr ""
 
-#: provisioning.php:166
+#: provisioning.php:179
 msgid "Subscriber already exists:"
 msgstr ""
 
-#: provisioning.php:168
+#: provisioning.php:181
 msgid "Subscriber not found"
 msgstr ""
 
-#: provisioning.php:171
+#: provisioning.php:184
 msgid "Invalid IMEI"
 msgstr ""
 
-#: provisioning.php:186
+#: provisioning.php:200
 msgid "Subscriber number is empty"
 msgstr ""
 
-#: provisioning.php:188
+#: provisioning.php:202
 msgid "Invalid number"
 msgstr ""
 
-#: provisioning.php:213
+#: provisioning.php:228
 msgid "Subscriber already exists! New subscriber number"
 msgstr ""
 
-#: provisioning.php:213 provisioning.php:215 resellers_provisioning.php:84
+#: provisioning.php:228 provisioning.php:230 resellers_provisioning.php:84
 msgid "Successfully provisioned with an initial balance of"
 msgstr ""
 
-#: provisioning.php:220
+#: provisioning.php:235
 msgid "ERROR PROVISIONING SUBSCRIBER!"
 msgstr ""
 
@@ -425,7 +434,7 @@ msgstr ""
 
 #: reseller_delete.php:17 reseller_delete.php:49 reseller_delete.php:53
 #: subscriber_delete.php:17 subscriber_delete.php:48 subscriber_delete.php:52
-#: subscriber_edit.php:133 subscriber_edit.php:137
+#: subscriber_edit.php:149 subscriber_edit.php:153
 msgid "Close"
 msgstr ""
 
@@ -519,7 +528,7 @@ msgstr ""
 msgid "General error notice message"
 msgstr ""
 
-#: resellers_configuration.php:73 subscriber_edit.php:88
+#: resellers_configuration.php:73 subscriber_edit.php:100
 msgid "Save"
 msgstr ""
 
@@ -594,59 +603,67 @@ msgstr ""
 msgid "Subscriber Number"
 msgstr ""
 
-#: send_sms.php:28
+#: send_sms.php:35
 msgid "Message"
 msgstr ""
 
-#: send_sms.php:29
+#: send_sms.php:36
 msgid "Text of the SMS message"
 msgstr ""
 
-#: send_sms.php:33 subscribers.php:155 subscribers.php:173
+#: send_sms.php:40 subscribers.php:155 subscribers.php:173
 msgid "Number"
 msgstr ""
 
-#: send_sms.php:34
+#: send_sms.php:41
 msgid "Recipient of the SMS message"
 msgstr ""
 
-#: send_sms.php:38
-msgid "All registered"
+#: send_sms.php:45
+msgid "Bulk SMS"
 msgstr ""
 
-#: send_sms.php:41
-msgid "All not registered (5 digits)"
+#: send_sms.php:55
+msgid "All Locations"
 msgstr ""
 
-#: send_sms.php:44
-msgid "All subscription not paid"
+#: send_sms.php:67
+msgid "All Authorized"
 msgstr ""
 
-#: send_sms.php:47
+#: send_sms.php:70
 msgid "All not authorized"
 msgstr ""
 
-#: send_sms.php:66
+#: send_sms.php:73
+msgid "All subscription not paid"
+msgstr ""
+
+#: send_sms.php:76
+msgid "All not registered (5 digits)"
+msgstr ""
+
+#: send_sms.php:95
 msgid "SMS text is empty"
 msgstr ""
 
-#: send_sms.php:69
+#: send_sms.php:98
 msgid "SMS number is empty"
 msgstr ""
 
-#: send_sms.php:83 send_sms.php:110
+#: send_sms.php:112 send_sms.php:139
 msgid "ERROR SENDING SMS!"
 msgstr ""
 
-#: send_sms.php:94
+#: send_sms.php:123
 msgid "BROADCAST MESSAGE IS BEING SENT!"
 msgstr ""
 
-#: send_sms.php:98
+#: send_sms.php:127
 msgid "ERROR SENDING MASS SMS!"
 msgstr ""
 
-#: send_sms.php:106
+#: send_sms.php:135
 msgid "MESSAGE SENT!"
 msgstr ""
 
@@ -742,7 +759,7 @@ msgstr ""
 msgid "Total Monthly Minutes"
 msgstr ""
 
-#: subscriber_delete.php:16 subscriber_edit.php:23
+#: subscriber_delete.php:16 subscriber_edit.php:24
 msgid "ERROR GETTING SUBSCRIBER INFO!"
 msgstr ""
 
@@ -758,31 +775,39 @@ msgstr ""
 msgid "ERROR DELETING SUBSCRIBER!"
 msgstr ""
 
-#: subscriber_edit.php:39
+#: subscriber_edit.php:40
 msgid "Edit Subscriber"
 msgstr ""
 
-#: subscriber_edit.php:75
+#: subscriber_edit.php:56
+msgid "a short description of the phone and model"
+msgstr ""
+
+#: subscriber_edit.php:81
 msgid "Subscription Paid"
 msgstr ""
 
-#: subscriber_edit.php:76 subscriber_edit.php:82
+#: subscriber_edit.php:82 subscriber_edit.php:88 subscriber_edit.php:94
 msgid "Check for yes uncheck for no"
 msgstr ""
 
-#: subscriber_edit.php:81 subscribers.php:154 subscribers.php:172
+#: subscriber_edit.php:87 subscribers.php:154 subscribers.php:172
 msgid "Authorized"
 msgstr ""
 
-#: subscriber_edit.php:108
+#: subscriber_edit.php:93 subscribers.php:137
+msgid "Roaming"
+msgstr ""
+
+#: subscriber_edit.php:122
 msgid "Subscriber number is invalid"
 msgstr ""
 
-#: subscriber_edit.php:132
+#: subscriber_edit.php:148
 msgid "successfully modified"
 msgstr ""
 
-#: subscriber_edit.php:136
+#: subscriber_edit.php:152
 msgid "ERROR SAVING SUBSCRIBER!"
 msgstr ""
 
@@ -806,10 +831,6 @@ msgstr ""
 msgid "Online"
 msgstr ""
 
-#: subscribers.php:137
-msgid "Roaming"
-msgstr ""
-
 #: subscribers.php:138
 msgid "Offline"
 msgstr ""
@@ -830,34 +851,34 @@ msgstr ""
 msgid "Subscription Status"
 msgstr ""
 
-#: subscribers_processing.php:178
+#: subscribers_processing.php:179
 msgid "Roaming User"
 msgstr ""
 
-#: subscribers_processing.php:262
+#: subscribers_processing.php:265
 msgid "Roaming from"
 msgstr ""
 
-#: subscribers_processing.php:265
+#: subscribers_processing.php:268
 msgid "Tagged as roaming on"
 msgstr ""
 
-#: subscribers_processing.php:267
+#: subscribers_processing.php:270
 msgid "Roaming on"
 msgstr ""
 
-#: subscribers_processing.php:275
+#: subscribers_processing.php:279
 msgid "Not authorized on HLR!"
 msgstr ""
 
-#: subscribers_processing.php:276
+#: subscribers_processing.php:280
 msgid "Authorized on HLR!"
 msgstr ""
 
-#: subscribers_processing.php:286
+#: subscribers_processing.php:290
 msgid "NOT_PAID"
 msgstr ""
 
-#: subscribers_processing.php:286
+#: subscribers_processing.php:290
 msgid "PAID"
 msgstr ""

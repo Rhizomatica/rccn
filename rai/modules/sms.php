@@ -25,8 +25,8 @@ class SMS
     }
 	}
 
-        public function send_broadcast($text, $btype) {
-                $data = array("text" => $text, "btype" => $btype);
+        public function send_broadcast($text, $btype, $location) {
+                $data = array("text" => $text, "btype" => $btype, "location" => $location);
                 try {
                         $response = \Httpful\Request::post($this->path."/send_broadcast")->body($data)->sendsJson()->send();
                 } catch (Httpful\Exception\ConnectionErrorException $e) {
@@ -36,6 +36,9 @@ class SMS
                 $data = $response->body;
                 if ($data->status == 'failed') {
                         throw new SMSException($data->error);
+                }
+                if ($data->status != 'success') {
+                        throw new SMSException($data);
                 }
         }
 
