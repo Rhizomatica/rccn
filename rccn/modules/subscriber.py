@@ -154,7 +154,7 @@ class Subscriber:
                 sub = cur.fetchall()
                 return sub
             else:
-                raise SubscriberException('PG_HLR No subscribers found')
+                raise NoDataException('PG_HLR No subscribers found')
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
@@ -169,7 +169,7 @@ class Subscriber:
                 sub = cur.fetchall()
                 return sub
             else:
-                raise SubscriberException('PG_HLR No subscribers found')
+                raise NoDataException('PG_HLR No subscribers found')
         except psycopg2.DatabaseError, e:
             raise SubscriberException('PG_HLR error getting subscribers: %s' % e)
 
@@ -180,7 +180,7 @@ class Subscriber:
             sq_hlr_cursor.execute("SELECT id, extension FROM subscriber WHERE length(extension) = 5 AND extension != ?", [(config['smsc'])])
             extensions = sq_hlr_cursor.fetchall()
             if extensions == []:
-                raise SubscriberException('No extensions found')
+                raise NoDataException('No extensions found')
             else:
                 sq_hlr.close()
                 return extensions

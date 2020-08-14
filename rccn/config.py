@@ -117,6 +117,9 @@ hlrsync_log.addHandler(hlrsynclog)
 hlrsync_log.setLevel(default_log_level)
 
 
+class NoDataException(Exception):
+    pass
+
 # Extensions
 class ExtensionException(Exception):
     pass
