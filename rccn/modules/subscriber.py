@@ -42,6 +42,14 @@ class SubscriberException(Exception):
     pass
 
 class Subscriber:
+    """Module encapsulating access to subscriber specific data.
+    Args:
+        local_db_conn: The connection used for local datastore queries, defaults to the global db_conn
+        hlr_db_path: The path of the sqlite3 database of the hlr, defaults to global config
+        vty: The provider of a vty connection to the operational HLR, defaults to obscvty
+        riak_client: The riak distributed hlr client, defaults to no riak connection
+        riak_timeout: The wait timeout for riak operations
+    """
 
     def __init__(
             self,
