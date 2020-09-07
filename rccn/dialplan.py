@@ -164,6 +164,8 @@ class Dialplan:
         if self.numbering.is_number_intl(self.destination_number):
             log.debug('Called number is an external number '
                       'send call to OUTBOUND context')
+            if self.destination_number[:2] == '+1':
+                self.destination_number = '001' + self.destination_number[2:]
             self.auth_context('outbound')
             return True
 
