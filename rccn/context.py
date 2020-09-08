@@ -192,6 +192,7 @@ class Context:
                 _cid = self.numbering.prefixplus(self.session.getVariable('caller_id_number'))
             else:
                 _cid = self.session.getVariable('caller_id_number')
+            self.session.setVariable('effective_caller_id_number', '%s' % _cid)
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
             self.session.execute('set', 'ringback=${us-ring}')
             if 'JB_in' in globals() and JB_in != '':
