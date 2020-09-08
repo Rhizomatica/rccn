@@ -188,7 +188,8 @@ class Context:
                 if _context == 'LOCAL' or _context == "ROAMING_LOCAL":
                     self.session.setVariable('bypass_media_after_bridge', 'true')
 
-            self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
+            self.session.setVariable('effective_caller_id_number', '%s' %
+                                     self.numbering.prefixplus(self.session.getVariable('caller_id_number')))
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_name'))
             self.session.execute('set', 'ringback=${us-ring}')
             if 'JB_in' in globals() and JB_in != '':
@@ -231,7 +232,8 @@ class Context:
                 self.session.hangup('UNALLOCATED_NUMBER')
                 return
 
-            self.session.setVariable('effective_caller_id_number', '%s' % self.session.getVariable('caller_id_number'))
+            self.session.setVariable('effective_caller_id_number', '%s' %
+                                     self.numbering.prefixplus(self.session.getVariable('caller_id_number')))
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_number'))
             self.session.execute('set', 'ringback=%(500,500,450,500);%(250,1000,450,500)')
             self.session.execute('set', 'instant_ringback=true')

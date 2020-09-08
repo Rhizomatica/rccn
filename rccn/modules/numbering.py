@@ -61,6 +61,24 @@ class Numbering:
         except Exception as ex:
             log.info('Exception: %s' % ex)
 
+    def prefixplus(self, callerid):
+        ''' If the caller id looks like an international number
+            prefix it with a + if that is not already the case.
+        '''
+        if not len(callerid):
+            return ''
+        if (callerid[:1] == '+' or callerid[:2] == '00'):
+            return callerid
+        log.info('Caller ID has no INTL prefix: %s', callerid)
+        # TODO: Make this a lookup on valid country codes and lengths?
+        # All Mexican numbbers are 10 digits long. and NANP. (?)
+        if (len(callerid) == 11 and callerid[:1] == '1' or
+            len(callerid) == 12 and callerid[:2] == '52' or
+            callerid[:2] == '57'):
+            return '+' + callerid
+        # Otherwise?
+        return callerid
+
     def is_number_intl(self, destination_number):
         if (destination_number[0] == '+' or
                 destination_number[:2] == '00'):
