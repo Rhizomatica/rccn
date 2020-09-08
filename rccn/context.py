@@ -231,9 +231,11 @@ class Context:
                 self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
                 self.session.hangup('UNALLOCATED_NUMBER')
                 return
-
-            self.session.setVariable('effective_caller_id_number', '%s' %
-                                     self.numbering.prefixplus(self.session.getVariable('caller_id_number')))
+            if _context == "ROAMING_INBOUND":
+                _cid = self.numbering.prefixplus(self.session.getVariable('caller_id_number'))
+            else:
+                _cid = self.session.getVariable('caller_id_number')
+            self.session.setVariable('effective_caller_id_number', '%s' % _cid)
             self.session.setVariable('effective_caller_id_name', '%s' % self.session.getVariable('caller_id_number'))
             self.session.execute('set', 'ringback=%(500,500,450,500);%(250,1000,450,500)')
             self.session.execute('set', 'instant_ringback=true')
