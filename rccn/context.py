@@ -231,6 +231,7 @@ class Context:
                 self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
                 self.session.hangup('UNALLOCATED_NUMBER')
                 return
+            self.session.setVariable('destination_name', site_ip)
             if _context == "ROAMING_INBOUND":
                 _cid = self.numbering.prefixplus(self.session.getVariable('caller_id_number'))
             else:
@@ -378,6 +379,8 @@ class Context:
             self.session.setVariable('billing', '1')
             rate = self.billing.get_rate(self.destination_number)
             total_call_duration = self.billing.get_call_duration(current_subscriber_balance, rate[3])
+            # Set destination_name here for CDR.
+            self.session.setVariable('destination_name', rate[1])
             log.info('Total duration for the call before balance end is set to %d sec', total_call_duration)
             mid_announcement = total_call_duration - 30
             self.session.execute('set', 'execute_on_answer_1=sched_hangup +%s normal_clearing both' %
