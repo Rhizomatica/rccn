@@ -332,3 +332,10 @@ nav ul {
 	overflow-x: hidden;
 }
 	
+.inbound_thru {
+	border-style: outset;
+	border-width: 1px;
+	border-radius: 3px;
+	padding: 2px;
+	padding-right: 5px;
+}

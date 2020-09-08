@@ -15,7 +15,8 @@
     /* Array of database columns which should be read and sent back to DataTables. Use a space where
      * you want to insert a non-database field (for example a counter or static image)
      */
-    $aColumns = array( 'id', 'start_stamp', 'caller_id_number', 'destination_number', 'context', 'billsec', 'hangup_cause', 'destination_name', 'cost' );
+    $aColumns = array( 'id', 'start_stamp', 'caller_id_number', 'destination_number',
+                       'context', 'billsec', 'hangup_cause', 'destination_name', 'cost', 'accountcode' );
      
     /* Indexed column (used for fast and accurate table cardinality) */
     $sIndexColumn = "id";
@@ -190,18 +191,23 @@
         $row = array();
         for ( $i=0 ; $i<count($aColumns) ; $i++ )
         {
-            if ( $aColumns[$i] == "version" )
-            {
-		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
+            if ( $aColumns[$i] == "version" ) {
+		      $row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
             }
-	    if ( $aColumns[$i] == "billsec") {
-		$row[] = gmdate("H:i:s", $aRow[ $aColumns[$i] ]);
-	    }
-	    else if ( $aColumns[$i] == "start_stamp" ) {
-		$row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
-	    }
-            else if ( $aColumns[$i] != ' ' )
-            {
+
+            if ( $aColumns[$i] == "billsec") {
+                $row[] = gmdate("H:i:s", $aRow[ $aColumns[$i] ]);
+            } else if ( $aColumns[$i] == "start_stamp" ) {
+                $row[] =  date('d-m-Y H:i:s', strtotime($aRow[$aColumns[$i]]));
+            } else if ( $aColumns[$i] == "destination_number" ) {
+                if ($aRow["accountcode"] != null) {
+                    $row[] = '<span class="inbound_thru" title="'.$aRow["accountcode"].'">'.$aRow["destination_number"] . '</span>';
+                } else {
+                    $row[] = $aRow[ $aColumns[$i] ];
+                }
+            } else if ( $aColumns[$i] == "accountcode" ) {
+                // Skip
+            } else if ( $aColumns[$i] != ' ' ) {
                 /* General output */
                 $row[] = $aRow[ $aColumns[$i] ];
             }
