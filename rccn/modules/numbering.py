@@ -72,8 +72,8 @@ class Numbering:
         log.info('Caller ID has no INTL prefix: %s', callerid)
         # TODO: Make this a lookup on valid country codes and lengths?
         # All Mexican numbbers are 10 digits long. and NANP. (?)
-        if (len(callerid) == 11 and callerid[:1] == '1' or
-            len(callerid) == 12 and callerid[:2] == '52' or
+        if ((len(callerid) == 11 and callerid[:1] == '1') or
+            (len(callerid) == 12 and callerid[:2] == '52') or
             callerid[:2] == '57'):
             return '+' + callerid
         # Otherwise?
