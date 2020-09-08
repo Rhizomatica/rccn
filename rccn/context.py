@@ -40,7 +40,7 @@ class Context:
         """
         self.session = session
         self.destination_number = self.session.getVariable('destination_number')
-        self.calling_number = self.session.getVariable('calling_id_number')
+        self.calling_number = self.session.getVariable('caller_id_number')
         self.calling_host = self.session.getVariable("sip_network_ip")
 
         self.subscriber = modules[0]
