@@ -3459,7 +3459,7 @@ class GanttBar extends GanttPlotObject {
                 // Take away the length of the progress that is not visible (before the start date)
                 $len -= ($xt-$xtp);
 
-                // Is the the progress bar visible after the start date?
+                // Is the progress bar visible after the start date?
                 if( $xtp < $xt )
                 $xtp = $xt;
 

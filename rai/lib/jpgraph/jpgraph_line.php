@@ -579,7 +579,7 @@ class AccLinePlot extends Plot {
 
     // Replace all '-' with an interpolated value. We use straightforward
     // linear interpolation. If the data starts with one or several '-' they
-    // will be replaced by the the first valid data point
+    // will be replaced by the first valid data point
     function LineInterpolate(&$aData) {
 
         $n=count($aData);
@@ -628,7 +628,7 @@ class AccLinePlot extends Plot {
                 }
                 else {
                     // There are no valid end point. The '-' goes all the way to the end
-                    // In that case we just set all the remaining values the the same as the
+                    // In that case we just set all the remaining values the same as the
                     // last valid data point.
                     for( $j=$pstart+1; $j < $n; ++$j )
                     if( $this->iStartEndZero ) {

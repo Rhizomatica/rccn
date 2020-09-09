@@ -83,7 +83,7 @@ class Contour {
      * Flip the plot around the Y-coordinate. This has the same affect as flipping the input
      * data matrice
      *
-     * @param $aFlg If true the the vertice in input data matrice position (0,0) corresponds to the top left
+     * @param $aFlg If true the vertice in input data matrice position (0,0) corresponds to the top left
      * corner of teh plot otherwise it will correspond to the bottom left corner (a horizontal flip)
      */
     function SetInvert($aFlg=true) {

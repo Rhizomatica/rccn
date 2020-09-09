@@ -5453,7 +5453,7 @@ class Plot {
         return true;
     }
 
-    // Virtual function to the the concrete plot class to make any changes to the graph
+    // Virtual function to the concrete plot class to make any changes to the graph
     // and scale before the stroke process begins
     function PreScaleSetup($aGraph) {
         // Empty
