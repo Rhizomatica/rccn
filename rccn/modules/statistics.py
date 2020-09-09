@@ -58,6 +58,7 @@ class LiveStatistics:
         data['c']=self.get_fs_calls(fs_con)
         data['gw']=self.get_fs_status(fs_con)
         data['trx']=self.get_trxOK()
+        data['etrx']=self.get_configured_trx()
         data['ns']=self.get_gprs_ns()
         data['pdp']=self.get_pdp_contexts()
         if 'dids' in globals():
@@ -239,6 +240,16 @@ class LiveStatistics:
                 return f.readline()
         except IOError:
             return ''
+
+    def get_configured_trx(self):
+        if 'bts_defs' in globals():
+            try:
+                with open(bts_defs) as j:
+                    defs = json.load(j)
+                    return len(defs)
+            except IOError:
+                return -1
+        return 0
 
     def get_trxOK(self):
         try:
