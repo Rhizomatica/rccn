@@ -110,6 +110,9 @@ class LiveStatistics:
                     continue
                 for i,val in enumerate(values):
                     if i > len(keys)-1:
+                        log.debug("FS data error: [%s] (%s) was out of range", i, val)
+                        log.debug("offending line %s", line)
+                        log.debug("KEYS: %s", keys)
                         continue
                     call[keys[i]]=val
                 calls.append(call)
