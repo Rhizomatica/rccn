@@ -220,16 +220,16 @@ class Context:
             ROAMING_BOTH:       A-leg: Call from a roaming user (here) B-leg: callee is roaming here.
             ROAMING_INBOUND:    A-leg: Call from VoIP provider to a (local) roaming user.   B-leg: local,sip,remote
             """
-
+            site_ip = False
             try:
-                if callee[-5:-1] == '0000':
-                    site_ip = self.numbering.get_site_ip(callee)
-                else:
-                    site_ip = self.numbering.get_current_bts(callee)
-                    if site_ip == config['local_ip']:
-                        site_ip = self.numbering.get_site_ip(callee)
+                site_ip = self.numbering.get_current_bts(callee)
             except NumberingException as ne:
                 # FIXME: Again, we don't know if not exists or other error :(
+                log.error(ne)
+            try:
+                if (not site_ip or site_ip == config['local_ip']):
+                    site_ip = self.numbering.get_site_ip(callee)
+            except NumberingException as ne:
                 log.error(ne)
                 self.session.execute('playback', '%s' % self.get_audio_file('UNALLOCATED_NUMBER'))
                 self.session.hangup('UNALLOCATED_NUMBER')
