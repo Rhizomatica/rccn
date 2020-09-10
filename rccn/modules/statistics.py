@@ -127,8 +127,6 @@ class LiveStatistics:
                 c['state']=call['callstate']
                 c['callee']=call['callee_num']
                 c['created']=call['created_epoch']
-                c['uuid']=call['uuid']
-                c['cuuid']=call['call_uuid']
             except KeyError as ex:
                 continue
             to_send.append(c)

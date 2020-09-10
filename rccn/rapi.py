@@ -460,7 +460,7 @@ class StatisticsRESTService:
             data = json.dumps(stats.monitor_feed(), cls=PGEncoder)
         except StatisticException as e:
             data = {'status': 'failed', 'error': str(e)}
-        api_log.info(data)
+        api_log.debug(data)
         return data
 
     @route('/sms/stat')
