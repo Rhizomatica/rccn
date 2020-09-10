@@ -91,34 +91,46 @@ class LiveStatistics:
 
     def get_fs_calls(self,fs_con):
 
-        fs_calls=e.getBody()
         calls=[]
+        keys=[]
+
         e = fs_con.api("show channels as delim ~")
+        fs_calls=e.getBody()
+
         lines=fs_calls.split('\n')
+
         for line in lines:
+            call={}
             if line != '' and line.find(' total.') == -1:
                 values=line.split('~')
                 if values[0]=='uuid':
                     keys=values
                     continue
-                call={}
+                if (len(keys) == 0 or len(values) == 0):
+                    continue
                 for i,val in enumerate(values):
+                    if i > len(keys)-1:
+                        continue
                     call[keys[i]]=val
                 calls.append(call)
+
         to_send=[]
         for call in calls:
             c={}
-            c['sip']=call['name']
-            c['direction']=call['direction']
-            c['cid']=call['cid_num']
-            c['dest']=call['dest']
-            c['ip_addr']=call['ip_addr']
-            c['codec']=call['read_codec']
-            c['state']=call['callstate']
-            c['callee']=call['callee_num']
-            c['created']=call['created_epoch']
-            c['uuid']=call['uuid']
-            c['cuuid']=call['call_uuid']
+            try:
+                c['sip']=call['name']
+                c['direction']=call['direction']
+                c['cid']=call['cid_num']
+                c['dest']=call['dest']
+                c['ip_addr']=call['ip_addr']
+                c['codec']=call['read_codec']
+                c['state']=call['callstate']
+                c['callee']=call['callee_num']
+                c['created']=call['created_epoch']
+                c['uuid']=call['uuid']
+                c['cuuid']=call['call_uuid']
+            except KeyError as ex:
+                continue
             to_send.append(c)
         return to_send
 
