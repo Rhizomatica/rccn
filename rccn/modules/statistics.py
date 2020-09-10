@@ -91,13 +91,13 @@ class LiveStatistics:
 
     def get_fs_calls(self,fs_con):
 
-        e = fs_con.api("show channels as delim |")
         fs_calls=e.getBody()
         calls=[]
+        e = fs_con.api("show channels as delim ~")
         lines=fs_calls.split('\n')
         for line in lines:
             if line != '' and line.find(' total.') == -1:
-                values=line.split('|')
+                values=line.split('~')
                 if values[0]=='uuid':
                     keys=values
                     continue
