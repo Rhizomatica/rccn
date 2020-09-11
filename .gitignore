@@ -2,6 +2,8 @@ rai/include/database.php
 rai/graphs
 rccn/config_values.py
 bin/get_account_balance.sh
+bin/active_subscribers.csv
+bin/check_account_balance.sh
 rccn/log/*
 rrd/*
 rrd/graphs/*
@@ -9,3 +11,4 @@ rrd/graphs/*
 *.log
 *.swp
 rai/js/localnet.json
+bts_defs.json
