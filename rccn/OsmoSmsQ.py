@@ -103,12 +103,12 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
                both=None, negate = False, limit = 0, order = False, nosys = False):
     global db_revision
     try:
-        sq_hlr = sqlite3.connect(sq_hlr_path)
-        sq_hlr_cursor = sq_hlr.cursor()
-        sq_hlr.text_factory = str
+        smsc_db_conn = sqlite3.connect(sms_db)
+        smsc_db_cursor = smsc_db_conn.cursor()
+        smsc_db_conn.text_factory = str
         sql = "SELECT value FROM Meta WHERE key='revision'"
-        sq_hlr_cursor.execute(sql)
-        _revision = sq_hlr_cursor.fetchone()
+        smsc_db_cursor.execute(sql)
+        _revision = smsc_db_cursor.fetchone()
         db_revision = _revision[0]
         sql = 'SELECT * from SMS WHERE id > 0 '
         if not (sent and unsent):
@@ -143,12 +143,12 @@ def read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', des
         if limit > 0:
             sql = sql + ' LIMIT ' + limit
         log.debug(sql)
-        sq_hlr_cursor.execute(sql)
-        _sms = sq_hlr_cursor.fetchall()
-        sq_hlr.close()
+        smsc_db_cursor.execute(sql)
+        _sms = smsc_db_cursor.fetchall()
+        smsc_db_conn.close()
         return _sms
     except sqlite3.Error as sqlerror:
-        sq_hlr.close()
+        smsc_db_conn.close()
         raise Exception('Oops. SQL error: %s, %s' % (sqlerror.args[0], sql))
 
 def build_msgs(smsq):
@@ -441,8 +441,8 @@ if __name__ == '__main__':
     parser = OptionParser()
     unsent =  False
     sent = False  
-    parser.add_option("-p", "--sql-path", dest="sq_hlr_path",
-        help="Specify SQLITE hlr path (default is /var/lib/osmocom/hlr.sqlite3)")
+    parser.add_option("-p", "--sms-db", dest="sms_db",
+        help="Specify SMS database (default is /var/lib/osmocom/hlr.sqlite3)")
     parser.add_option("-q", "--show-queue", dest="showq", action="store_true",
         help="Display Summary Information about the Osmo SMS Queue")
     parser.add_option("-i", "--id", dest="msgid",
@@ -481,10 +481,10 @@ if __name__ == '__main__':
         help="Stop and Shell with msg")        
     (options, args) = parser.parse_args()
 
-    if options.sq_hlr_path:
-        sq_hlr_path = options.sq_hlr_path
+    if options.sms_db:
+        sms_db = options.sms_db
     else:
-        sq_hlr_path = '/var/lib/osmocom/hlr.sqlite3'
+        sms_db = '/var/lib/osmocom/hlr.sqlite3'
 
     logging.basicConfig(stream=sys.stderr)
     if options.debug:

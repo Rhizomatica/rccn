@@ -143,38 +143,38 @@ class LiveStatistics:
 
     def get_sms_pending(self):
         try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("select count(*) from SMS where sent isnull")
-            pending = sq_hlr_cursor.fetchone()
-            sq_hlr.close()
+            smsc_db_conn = sqlite3.connect(sms_db)
+            smsc_db_cursor = smsc_db_conn.cursor()
+            smsc_db_cursor.execute("select count(*) from SMS where sent isnull")
+            pending = smsc_db_cursor.fetchone()
+            smsc_db_conn.close()
             return pending[0]
         except sqlite3.Error as e:
-            sq_hlr.close()
+            smsc_db_conn.close()
             raise StatisticException('SQ_HLR error: %s' % e.args[0])
 
     def get_sms_pending_five(self):
         try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT count(*) FROM SMS WHERE length(dest_addr) = 5 AND sent isnull")
-            pending = sq_hlr_cursor.fetchone()
-            sq_hlr.close()
+            smsc_db_conn = sqlite3.connect(sms_db)
+            smsc_db_cursor = smsc_db_conn.cursor()
+            smsc_db_cursor.execute("SELECT count(*) FROM SMS WHERE length(dest_addr) = 5 AND sent isnull")
+            pending = smsc_db_cursor.fetchone()
+            smsc_db_conn.close()
             return pending[0]
         except sqlite3.Error as e:
-            sq_hlr.close()
+            smsc_db_conn.close()
             raise StatisticException('SQ_HLR error: %s' % e.args[0])
 
     def get_sms_pending_not_local(self):
         try:
-            sq_hlr = sqlite3.connect(sq_hlr_path)
-            sq_hlr_cursor = sq_hlr.cursor()
-            sq_hlr_cursor.execute("SELECT count(*) from SMS WHERE length(dest_addr) = 11 AND dest_addr not like ? AND sent isnull", ([config['internal_prefix']+'%']) )
-            pending = sq_hlr_cursor.fetchone()
-            sq_hlr.close()
+            smsc_db_conn = sqlite3.connect(sms_db)
+            smsc_db_cursor = smsc_db_conn.cursor()
+            smsc_db_cursor.execute("SELECT count(*) from SMS WHERE length(dest_addr) = 11 AND dest_addr not like ? AND sent isnull", ([config['internal_prefix']+'%']) )
+            pending = smsc_db_cursor.fetchone()
+            smsc_db_conn.close()
             return pending[0]
         except sqlite3.Error as e:
-            sq_hlr.close()
+            smsc_db_conn.close()
             raise StatisticException('SQ_HLR error: %s' % e.args[0])
 
     def get_recent_sms_count(self,ago):

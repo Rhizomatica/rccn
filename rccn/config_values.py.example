@@ -11,6 +11,7 @@ pgsql_user = 'rhizomatica'
 pgsql_pwd = 'yourpwd'
 pgsql_host = 'localhost'
 db_revision = '12'
+sms_db = '/var/lib/osmocom/sms.db'
 
 # SITE
 site_name = "Test"

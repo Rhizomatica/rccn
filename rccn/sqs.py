@@ -44,7 +44,7 @@ parser.add_option("-d", "--debug", dest="debug", action="store_true",
 
 (options, args) = parser.parse_args()
 
-OsmoSmsQ.sq_hlr_path = cn.sq_hlr_path
+OsmoSmsQ.sms_db = cn.sms_db
 OsmoSmsQ.log = cn.sms_log
 sms_log = cn.sms_log
 numbering = cn.Numbering()
@@ -112,13 +112,13 @@ def rccn_submit(src, dest, utext, bts):
 def mark_local(mid):
     # NOTE: In RCCN mode, There's no way to know for sure if the remote actually got the message,
     # In fact, the remote RAPI thread will drop it on failure, but we've already returned :/
-    sq_hlr = cn.sqlite3.connect(cn.sq_hlr_path, timeout=5)
-    sq_hlr_cursor = sq_hlr.cursor()
+    smsc_db_conn = cn.sqlite3.connect(cn.sms_db, timeout=5)
+    smsc_db_cursor = smsc_db_conn.cursor()
     for i in mid.split(','):
         sms_log.debug("UPDATE SMS SET valid_until=9990999, sent=CURRENT_TIMESTAMP WHERE id=%s" % i)
-        sq_hlr_cursor.execute("UPDATE SMS SET valid_until=9990999,sent=CURRENT_TIMESTAMP WHERE id=?", [(i)])
-    sq_hlr.commit()
-    sq_hlr.close()
+        smsc_db_cursor.execute("UPDATE SMS SET valid_until=9990999,sent=CURRENT_TIMESTAMP WHERE id=?", [(i)])
+    smsc_db_conn.commit()
+    smsc_db_conn.close()
 
 try:
     # read_queue(q_id = 0, unsent = False, sent = False, where = '', src = '', dest = '', both = '', negate = False)
