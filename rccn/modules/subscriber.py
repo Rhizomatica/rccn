@@ -818,10 +818,14 @@ class Subscriber:
             raise SubscriberException('PG_HLR error changing subscriber subscription status: %s' % e)
 
     def edit(self, msisdn, name, balance, location, equipment, roaming):
-        params = locals()
-        updating = [k for k, v in params.items() if v != ""]
-        updating.remove('self')
-        updating.remove('msisdn')
+        parameter_set = {
+            "name": name,
+            "balance": balance,
+            "location": location,
+            "equipment": equipment,
+            "roaming": roaming
+        }
+        _set = {col: value for col, value in parameter_set.items() if value != ""}
         # edit subscriber data in the Osmo
         try:
             appstring = 'OpenBSC'
@@ -836,9 +840,6 @@ class Subscriber:
         
         # PG_HLR update subscriber data
         try:
-            _set = {}
-            for i in updating:
-                _set[i] = params[i]
             cur = self._local_db_conn.cursor()
             sql_template = "UPDATE subscribers SET ({}) = %s WHERE msisdn = '{}'"
             sql = sql_template.format(', '.join(_set.keys()), msisdn)
