@@ -32,9 +32,11 @@ import socket
 import time
 from unidecode import unidecode
 
-from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, riak_client, RIAK_TIMEOUT, NoDataException)
+from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, riak_client, RIAK_TIMEOUT, NoDataException, use_nitb_osmo_stack)
 from decimal import Decimal
-from modules.osmonitb import (OsmoNitb, OsmoHlrError, OsmoMscError)
+from modules.osmohlr import (OsmoHlr, OsmoHlrError)
+from modules.osmomsc import (OsmoMsc, OsmoMscError)
+from modules.osmonitb import (OsmoNitb)
 from ESL import ESLconnection
 
 class SubscriberException(Exception):
@@ -69,11 +71,14 @@ class Subscriber:
             riak_timeout=RIAK_TIMEOUT
     ):
         self._local_db_conn = local_db_conn
-        # Use the legacy osmocom-nitb adaptor in place of the msc and hlr
-        nitb_adaptor_instance = OsmoNitb(hlr_ip, 4242, hlr_db_path)
-        self._osmo_hlr = nitb_adaptor_instance
-        self._osmo_msc = nitb_adaptor_instance
-
+        if use_nitb_osmo_stack:
+            # Use the legacy osmocom-nitb adaptor in place of the msc and hlr
+            nitb_adaptor_instance = OsmoNitb(hlr_ip, 4242, hlr_db_path)
+            self._osmo_hlr = nitb_adaptor_instance
+            self._osmo_msc = nitb_adaptor_instance
+        else:
+            self._osmo_hlr = OsmoHlr(hlr_ip, hlr_ctrl_port, hlr_vty_port, hlr_db_path)
+            self._osmo_msc = OsmoMsc(msc_ip, msc_ctrl_port, msc_vty_port)
         self._riak_client = riak_client
         self._riak_timeout = riak_timeout
 

@@ -30,20 +30,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from modules.osmohlr import OsmoHlrError
+from modules.osmomsc import OsmoMscError
 from config import NoDataException
 from osmopy import obscvty
 import logging
 import sqlite3
 
 log = logging.getLogger(__name__)
-
-
-class OsmoHlrError(Exception):
-    pass
-
-
-class OsmoMscError(Exception):
-    pass
 
 
 class OsmoNitb(object):
