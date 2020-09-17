@@ -55,6 +55,8 @@ class OsmoHlr(object):
         self._ip = ip_address
         self._vty_port = vty_port
         self._vty = obscvty
+        # Do not access directly, use the _get_vty_connection(self) method
+        self._cached_vty = None
 
     def get_msisdn_from_imsi(self, imsi):
         sq_hlr = _open_sqlite_connection(self.hlr_db_path)
@@ -235,20 +237,20 @@ class OsmoHlr(object):
             sq_hlr.close()
 
     def show_by_msisdn(self, msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber msisdn {} show'.format(msisdn)
         subscriber_data = vty.command(cmd, close=True)
         return subscriber_data
 
     def update_msisdn(self, current_msisdn, new_msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber msisdn {} update msisdn {}'.format(
             current_msisdn, new_msisdn
         )
         vty.enabled_command(cmd, close=True)
 
     def delete_by_msisdn(self, msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber msisdn {} delete'.format(msisdn)
         vty.enabled_command(cmd, close=True)
 
@@ -259,11 +261,16 @@ class OsmoHlr(object):
         self._set_access_by_msisdn(msisdn, "none")
 
     def _set_access_by_msisdn(self, msisdn, access_string):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber msisdn {} update network-access-mode {}'.format(
             msisdn, access_string
         )
         vty.enabled_command(cmd, close=True)
+
+    def _get_vty_connection(self):
+        if self._cached_vty is None:
+            self._cached_vty = obscvty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        return self._cached_vty
 
 
 def _open_sqlite_connection(path):

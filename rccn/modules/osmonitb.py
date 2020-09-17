@@ -56,6 +56,8 @@ class OsmoNitb(object):
         self._ip = ip_address
         self._vty_port = vty_port
         self._vty = obscvty
+        # Do not access directly, use the _get_vty_connection(self) method
+        self._cached_vty = None
 
     def get_msisdn_from_imsi(self, imsi):
         try:
@@ -243,30 +245,30 @@ class OsmoNitb(object):
             raise OsmoHlrError('SQ_HLR error: %s' % e.args[0])
 
     def show_by_msisdn(self, msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'show subscriber extension {}'.format(msisdn)
         subscriber_data = vty.command(cmd, close=True)
         return subscriber_data
 
     def update_msisdn(self, current_msisdn, new_msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber extension {} extension {}'.format(
             current_msisdn, new_msisdn
         )
         vty.enabled_command(cmd, close=True)
 
     def delete_by_msisdn(self, msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber extension {} delete'.format(msisdn)
         vty.enabled_command(cmd, close=True)
 
     def enable_access_by_msisdn(self, msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber extension {} authorized 1'.format(msisdn)
         vty.enabled_command(cmd, close=True)
 
     def disable_access_by_msisdn(self, msisdn):
-        vty = self._vty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        vty = self._get_vty_connection()
         cmd = 'subscriber extension {} authorized 0'.format(msisdn)
         vty.enabled_command(cmd, close=True)
 
@@ -289,13 +291,18 @@ class OsmoNitb(object):
 
     def expire_subscriber_by_msisdn(self, msisdn):
         try:
-            vty = obscvty.VTYInteract(self._appstring, self._ip, self._vty_port)
+            vty = self._get_vty_connection()
             cmd = "subscriber extension {} expire".format(msisdn)
             return_text = vty.enabled_command(cmd, close=True)
             if return_text:
                 raise OsmoMscError("VTY cmd: `{}` returned: `{}`".format(cmd, return_text))
         except IOError:
             log.debug('Exception in expire_lu!', exc_info=True)
+
+    def _get_vty_connection(self):
+        if self._cached_vty is None:
+            self._cached_vty = obscvty.VTYInteract(self._appstring, self._ip, self._vty_port)
+        return self._cached_vty
 
 
 def _open_sqlite_connection(path):
