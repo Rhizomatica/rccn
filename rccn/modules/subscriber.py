@@ -34,7 +34,7 @@ import sqlite3
 import time
 from unidecode import unidecode
 
-from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, RIAK_TIMEOUT, NoDataException)
+from config import (db_conn, sq_hlr_path, config, api_log, roaming_log, riak_client, RIAK_TIMEOUT, NoDataException)
 from decimal import Decimal
 from ESL import ESLconnection
 
@@ -55,7 +55,10 @@ class Subscriber:
             self,
             local_db_conn=db_conn,
             hlr_db_path=sq_hlr_path,
-            riak_client=None,
+            msc_ip="127.0.0.1",
+            msc_ctrl_port=4255,
+            msc_vty_port=4254,
+            riak_client=riak_client,
             riak_timeout=RIAK_TIMEOUT
     ):
         self._local_db_conn = local_db_conn
