@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#                                                                          #
+# Note that currently osmo-msc does internal cleaning of the SMS database. #
+# So for a split stack we probably do not want to run this script.         #
+#                                                                          #
+
 LOGFILE="/var/log/sms_cleanup.log"
 SMS_DB="/var/lib/osmocom/hlr.sqlite3"
 SMS_DB_BKP="/home/rhizomatica/sms/hlr_`date '+%d%m%Y'`.sqlite3"

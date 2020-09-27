@@ -5,6 +5,7 @@ import sqlite3
 import binascii
 import gsm0338
 import code
+from config_values import sms_db, use_nitb_osmo_stack
 from optparse import OptionParser
 
 db_revision = 0
@@ -441,8 +442,9 @@ if __name__ == '__main__':
     parser = OptionParser()
     unsent =  False
     sent = False  
+    default_db = '/var/lib/osmocom/hlr.sqlite3' if use_nitb_osmo_stack else sms_db
     parser.add_option("-p", "--sms-db", dest="sms_db",
-        help="Specify SMS database (default is /var/lib/osmocom/hlr.sqlite3)")
+        help="Specify SMS database (default is "+default_db+")")
     parser.add_option("-q", "--show-queue", dest="showq", action="store_true",
         help="Display Summary Information about the Osmo SMS Queue")
     parser.add_option("-i", "--id", dest="msgid",
@@ -484,7 +486,7 @@ if __name__ == '__main__':
     if options.sms_db:
         sms_db = options.sms_db
     else:
-        sms_db = '/var/lib/osmocom/hlr.sqlite3'
+        sms_db = default_db
 
     logging.basicConfig(stream=sys.stderr)
     if options.debug:
