@@ -273,15 +273,23 @@ class Subscriber:
             # Reformat to msisdn list for API compatibility
             msisdns = []
             for connected_sub in connected_subs:
-                # The RAI PhP code expects a doubly nested array. See
-                # rai/modules/subscriber.php:113
-                msisdns.append([connected_sub["msisdn"]])
+                if (connected_sub["msisdn"][:6] == config['internal_prefix']):
+                    # The RAI PhP code expects a doubly nested array. See
+                    # rai/modules/subscriber.php:113
+                    msisdns.append([connected_sub["msisdn"]])
 
             return msisdns
         except OsmoMscError as e:
             raise SubscriberException('MSC error: %s' % e.args[0])
 
     def get_all_disconnected(self):
+        """
+        This function used to do a SELECT on the osmo subscriber table with
+        WHERE conditions for matching the local_prefix and lac = 0.
+        This reimplementation for split stack is not /quite/ the same thing. Now we get
+        the list of registered subs on the postgres and remove the MSCs idea of what is
+        connected. All the same, the function appears to be unused.
+        """
         try:
             cur = self._local_db_conn.cursor()
             cur.execute('SELECT msisdn FROM subscribers')
@@ -314,7 +322,7 @@ class Subscriber:
             msisdns = []
             for connected_sub in connected_subs:
                 if len(connected_sub["msisdn"]) == 5:
-                    msisdns.append(connected_sub["msisdn"])
+                    msisdns.append([connected_sub["msisdn"], connected_sub["imsi"]])
 
             return msisdns
         except OsmoMscError as e:
@@ -325,14 +333,12 @@ class Subscriber:
             connected_subs = self._osmo_msc.get_active_subscribers()
 
             # Reformat to msisdn list and only include 11 digit numbers with
-            # noninternal prefixes for API compatibility. An automatically
-            # assigned 5 digit msisdn signals that the subscriber is
-            # unregistered.
+            # noninternal prefixes for API compatibility.
             msisdns = []
             for connected_sub in connected_subs:
                 if ((len(connected_sub["msisdn"]) == 11) and
-                        (not connected_sub["msisdn"].startswith(config['internal_prefix']))):
-                    msisdns.append(connected_sub["msisdn"])
+                    (not connected_sub["msisdn"][:6] == config['internal_prefix'])):
+                    msisdns.append([connected_sub["msisdn"], connected_sub["imsi"]])
 
             return msisdns
         except OsmoMscError as e:
@@ -355,13 +361,22 @@ class Subscriber:
             raise SubscriberException('HLR error: %s' % e.args[0])
 
     def get_all_inactive_roaming(self):
+        """
+        This function is not in use.
+        """
         try:
             inactive_msisdns = self._osmo_hlr.get_all_inactive_roaming_msisdns(config['internal_prefix'])
         except OsmoHlrError as e:
             raise SubscriberException('HLR error: %s' % e.args[0])
 
         # The existing code explicitly checked that the subscribers were not
-        # attached, which may not be necessary for nonzero time since inactive.
+        # attached, by inclusion of a WHERE condition lac=0 in the SQL.
+        # The OsmoHlr version of the called function above knows nothing
+        # about "inactive", where as for nitb we still have lac = 0 so the following
+        # code is not needed.
+        # Anyway, this function is unused, but see the _since() version below
+        # which will be retired along with riak roaming, which will not be used
+        # with Split Stack. Long story short, most of this will be removed.
         try:
             connected_subs = self._osmo_msc.get_active_subscribers()
         except OsmoMscError as e:
@@ -478,9 +493,7 @@ class Subscriber:
         # be in progress while the count is computed.
         try:
             cur = self._local_db_conn.cursor()
-            cur.execute(
-                'SELECT count(*) FROM subscribers WHERE length(msisdn) = 11'
-            )
+            cur.execute('SELECT count(*) FROM subscribers')
             if cur.rowcount > 0:
                 total_subscriber_count = cur.fetchone()[0]
                 cur.close()
@@ -502,7 +515,7 @@ class Subscriber:
 
         count = 0
         for sub in active_subs:
-            if len(sub["msisdn"]) == 11 and not sub["msisdn"].startswith(config['internal_prefix']):
+            if len(sub["msisdn"]) == 11 and sub["msisdn"][:6] != config['internal_prefix']:
                 count += 1
 
         return count
